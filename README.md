@@ -1,7 +1,7 @@
 # Quiver
 
 
-# Features!
+### Features!
 
   - Complete abstraction of the game from the engine! (a single engine build can be used on many, many games)
   - A whole lot more..
@@ -27,7 +27,7 @@ quiver.exe +game cstrike
 ```
 
 
-#### Building
+### Building
 For any changes to the source, the corresponding modules must be built. As a safety (to prevent hair-ripping oversights) feature, use the 'Build all' option in Visual Studio where able.
 
 
