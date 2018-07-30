@@ -16,6 +16,8 @@ QUIVER is a raycasting video game, and being such a ancient and magical techniqu
 
 ### Getting Started
 
+#####Quiver requires SFML.Net, so go ahead and copy the binaries into the lib/ folder.
+
 Provided in this source are a number of Visual Studio solutions. Find engine.sln and build all.
 
 Make any changes to the game module project (denoted as 'game'), and before compiling, change the output directory to a new subdirectory of your naming. Compile and copy any/all assets from the quiver directory.
