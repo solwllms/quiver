@@ -1,7 +1,7 @@
 # Quiver Engine
 
 
-![alt text](./screenshots/1.png  =1280
+![alt text](/screenshots/1.png)
 
 ### Features!
 
