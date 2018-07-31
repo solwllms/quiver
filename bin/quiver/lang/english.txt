@@ -1,0 +1,63 @@
+' main menu
+$menu.newgame=new game
+$menu.loadgame=load game
+$menu.savegame=save game
+$menu.options=options
+$menu.credits=credits
+$menu.quit=quit
+
+$menu.unsavedprog=progress will be lost!
+
+' quit dialog
+$quit.mess1=back to boring?
+$quit.mess2=too scary?
+$quit.mess3=too intense?
+
+' options
+$options.game=game
+$options.display=display
+$options.audio=audio
+$options.controls=controls
+
+' game options
+$options.difficulty=controls
+$options.easy=easy
+$options.normal=normal
+$options.hard=difficult
+$options.hell=hell
+$options.language=language
+$options.showfps=show fps
+$options.hidefps=hide fps
+$options.erasesaves=delete all saves
+$options.allsavesdel=all saves deleted
+
+' video options
+$options.device=device
+$options.windowed=windowed
+$options.fullscreen=fullscreen
+
+' audio options
+$options.disablesound=disable sound
+$options.enablesound=enable sound
+$options.volume=volume
+$options.mastervol=master
+$options.musicvol=music
+
+' keys options
+$options.editkeys=edit keys
+
+' save game
+$save.entername=enter filename
+$save.newsave=new save
+$save.overwritesave=overwrite save?
+$save.deletesave=delete save?
+$save.nosaves=no saved games
+
+' gameplay
+$game.use=use
+$game.reload=reload
+
+' general
+$general.cantundo=this cant be undone
+$general.success=success
+$general.anykey=press any key

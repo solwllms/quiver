@@ -1,0 +1,175 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{F91FE20A-32B0-4D45-BAE3-DF7212F1E018}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>engine</RootNamespace>
+    <AssemblyName>quiver</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\bin</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\bin_release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>
+    </StartupObject>
+  </PropertyGroup>
+  <PropertyGroup>
+    <NoWin32Manifest>true</NoWin32Manifest>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="display\d_transitions.cs" />
+    <Compile Include="display\w_animation.cs" />
+    <Compile Include="game\gmbase.cs" />
+    <Compile Include="game\map.cs" />
+    <Compile Include="game\types\monster.cs" />
+    <Compile Include="game\types\dirsprite.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="states\options\OptionButton.cs" />
+    <Compile Include="states\options\OptionGap.cs" />
+    <Compile Include="states\options\OptionHeader.cs" />
+    <Compile Include="states\options\OptionListing.cs" />
+    <Compile Include="states\options\OptionMulti.cs" />
+    <Compile Include="states\options\OptionSlider.cs" />
+    <Compile Include="states\options\OptionText.cs" />
+    <Compile Include="system\discordrpc.cs" />
+    <Compile Include="progs\p_dll.cs" />
+    <Compile Include="game\types\weapon.cs" />
+    <Compile Include="states\game.cs" />
+    <Compile Include="game\types\mapcell.cs" />
+    <Compile Include="game\types\projectile.cs" />
+    <Compile Include="game\types\sprite.cs" />
+    <Compile Include="system\s_hardware.cs" />
+    <Compile Include="system\s_keys.cs" />
+    <Compile Include="system\s_lvl.cs" />
+    <Compile Include="system\s_lang.cs" />
+    <Compile Include="system\s_saves.cs" />
+    <Compile Include="system\s_vector.cs" />
+    <Compile Include="game\types\entity.cs" />
+    <Compile Include="game\world.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="states\prompt.cs" />
+    <Compile Include="system\s_cache.cs" />
+    <Compile Include="system\s_audio.cs" />
+    <Compile Include="system\s_cmd.cs" />
+    <Compile Include="states\console.cs" />
+    <Compile Include="system\s_engine.cs" />
+    <Compile Include="system\s_langext.cs" />
+    <Compile Include="system\s_filesystem.cs" />
+    <Compile Include="display\d_gui.cs" />
+    <Compile Include="progs\p_progs.cs" />
+    <Compile Include="system\s_cmd_gen.cs" />
+    <Compile Include="system\s_input.cs" />
+    <Compile Include="game\player.cs" />
+    <Compile Include="display\d_renderer.cs" />
+    <Compile Include="display\d_screen.cs" />
+    <Compile Include="system\s_log.cs" />
+    <Compile Include="system\s_astarpath.cs" />
+    <Compile Include="system\s_pqueue.cs" />
+    <Compile Include="system\s_state.cs" />
+    <Compile Include="display\d_texture.cs" />
+    <Compile Include="system\s_vis.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="sfmlnet-audio-2">
+      <HintPath>..\lib\sfmlnet-audio-2.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="sfmlnet-graphics-2">
+      <HintPath>..\lib\sfmlnet-graphics-2.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="sfmlnet-system-2">
+      <HintPath>..\..\blocks\lib\sfmlnet-system-2.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="sfmlnet-window-2">
+      <HintPath>..\lib\sfmlnet-window-2.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="resources\error.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="resources\App.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.6.1">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.6.1 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

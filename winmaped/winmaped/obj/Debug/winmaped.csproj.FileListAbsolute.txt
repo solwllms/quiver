@@ -1,0 +1,10 @@
+C:\Source\_collegeproj\winmaped\winmaped\bin\Debug\winmaped.exe.config
+C:\Source\_collegeproj\winmaped\winmaped\bin\Debug\winmaped.exe
+C:\Source\_collegeproj\winmaped\winmaped\bin\Debug\winmaped.pdb
+C:\Source\_collegeproj\winmaped\winmaped\obj\Debug\winmaped.csprojResolveAssemblyReference.cache
+C:\Source\_collegeproj\winmaped\winmaped\obj\Debug\winmaped.Properties.Resources.resources
+C:\Source\_collegeproj\winmaped\winmaped\obj\Debug\winmaped.csproj.GenerateResource.Cache
+C:\Source\_collegeproj\winmaped\winmaped\obj\Debug\winmaped.csproj.CoreCompileInputs.cache
+C:\Source\_collegeproj\winmaped\winmaped\obj\Debug\winmaped.exe
+C:\Source\_collegeproj\winmaped\winmaped\obj\Debug\winmaped.pdb
+C:\Source\_collegeproj\winmaped\winmaped\obj\Debug\winmaped.MainWindow.resources

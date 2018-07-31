@@ -1,0 +1,64 @@
+<dataset>
+  <settings>
+  </settings>
+  <cells>
+    <cell id="default">
+      <wall>false</wall>
+      <solid>false</solid>
+      <floortex>textures/floor</floortex>
+      <ceiltex>textures/ceil</ceiltex>
+    </cell>
+    <cell id="1">
+      <wall>true</wall>
+      <solid>true</solid>
+      <walltex>textures/rust1</walltex>
+    </cell>
+    <cell id="2">
+      <wall>true</wall>
+      <solid>true</solid>
+      <interactable>true</interactable>
+      <walltex>textures/exit</walltex>
+      <oninteract>nextlevel</oninteract>
+    </cell>
+    <cell id="5">
+      <wall>true</wall>
+      <solid>true</solid>
+      <walltex>textures/brick1</walltex>
+    </cell>
+    <cell id="4">
+      <wall>true</wall>
+      <solid>true</solid>
+      <walltex>sprites/chainlink</walltex>
+    </cell>
+    <cell id="9">
+      <wall>true</wall>
+      <solid>true</solid>
+      <walltex>textures/rust1_graf</walltex>
+    </cell>
+    <cell id="10">
+      <wall>true</wall>
+      <solid>true</solid>
+      <walltex>sprites/chainlink_hole</walltex>
+    </cell>
+  </cells>
+  <ents>
+    <!-- <sprite id="4">
+      <texture>sprites/chainlink</texture>
+      <offset>0.5 0.5</offset>
+      <isstatic>true</isstatic>
+      <solid>true</solid>
+    </sprite> -->
+    <sprite id="6">
+      <texture>sprites/bag</texture>
+      <offset>0.5 0.5</offset>
+      <isstatic>true</isstatic>
+      <solid>true</solid>
+    </sprite>
+    <sprite id="8">
+      <texture>sprites/barrel</texture>
+      <offset>0.5 0.5</offset>
+      <isstatic>true</isstatic>
+      <solid>true</solid>
+    </sprite>
+  </ents>
+</dataset>

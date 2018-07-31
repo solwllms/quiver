@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{CF941192-8DF2-4B77-90F1-6C1649630675}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>game</RootNamespace>
+    <AssemblyName>game</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\bin\quiver\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="sfmlnet-audio-2">
+      <HintPath>..\lib\sfmlnet-audio-2.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="sfmlnet-graphics-2">
+      <HintPath>..\lib\sfmlnet-graphics-2.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="sfmlnet-system-2">
+      <HintPath>..\lib\sfmlnet-system-2.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="sfmlnet-window-2">
+      <HintPath>..\lib\sfmlnet-window-2.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="entities\m_robo.cs" />
+    <Compile Include="entities\m_eye.cs" />
+    <Compile Include="entities\p_lazer.cs" />
+    <Compile Include="entities\p_guts.cs" />
+    <Compile Include="GameDLL.cs" />
+    <Compile Include="gamemode.cs" />
+    <Compile Include="states\controls.cs" />
+    <Compile Include="states\credits.cs" />
+    <Compile Include="states\gameover.cs" />
+    <Compile Include="states\splash.cs" />
+    <Compile Include="states\options.cs" />
+    <Compile Include="states\controls_keys.cs" />
+    <Compile Include="states\savegame.cs" />
+    <Compile Include="states\loadgame.cs" />
+    <Compile Include="states\menu.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="weapons\w_revolver.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\engine\desktop.csproj">
+      <Project>{f91fe20a-32b0-4d45-bae3-df7212f1e018}</Project>
+      <Name>desktop</Name>
+      <Private>False</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

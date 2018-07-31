@@ -1,0 +1,61 @@
+<dataset>
+  <settings>
+  </settings>
+  <cells>
+    <cell id="default">
+      <wall>false</wall>
+      <solid>false</solid>
+      <floortex>textures/floor_interior</floortex>
+      <ceiltex>textures/ceil_interior</ceiltex>
+    </cell>
+    <cell id="1">
+      <wall>true</wall>
+      <solid>true</solid>
+      <walltex>textures/wall_interior</walltex>
+    </cell>
+    <cell id="2">
+      <wall>true</wall>
+      <solid>true</solid>
+      <interactable>true</interactable>
+      <walltex>textures/exit</walltex>
+      <oninteract>prevlevel</oninteract>
+    </cell>
+    <cell id="3">
+      <wall>true</wall>
+      <solid>true</solid>
+      <walltex>textures/brick1</walltex>
+    </cell>
+    <cell id="5">
+      <wall>true</wall>
+      <solid>true</solid>
+      <walltex>textures/wall_interior_glass_endl</walltex>
+    </cell>
+    <cell id="6">
+      <wall>true</wall>
+      <solid>true</solid>
+      <walltex>textures/wall_interior_glass_centre</walltex>
+      <onshot>glassshot</onshot>
+    </cell>
+    <cell id="7">
+      <wall>true</wall>
+      <solid>true</solid>
+      <walltex>textures/wall_interior_glass_endr</walltex>
+    </cell>
+    <cell id="8">
+      <wall>true</wall>
+      <solid>true</solid>
+      <walltex>textures/wall_interior_console</walltex>
+    </cell>
+  </cells>
+  <ents>
+    <sprite id="4">
+      <texture>sprites/plant</texture>
+      <offset>0.5 0.5</offset>
+      <isstatic>true</isstatic>
+      <solid>true</solid>
+    </sprite>
+    <entity id="16" prog="1">
+      <offset>0.5 0.5</offset>
+    </entity>
+  </ents>
+</dataset>
