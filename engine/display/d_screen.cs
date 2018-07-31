@@ -58,7 +58,10 @@ namespace engine.display
 
         public static void WriteScreenshot()
         {
-            var name = "screenshots/" + DateTime.Now.Ticks + ".png";
+            var dir = Filesystem.GetBaseDirectory() + "screenshots/";
+            var name = dir + DateTime.Now.Ticks + ".png";
+            if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+
             Log.WriteLine("screenshot " + name + " taken.");
             _texture.CopyToImage().SaveToFile(name);
         }

@@ -14,6 +14,11 @@ namespace engine.system
             Directories.Add(path);
         }
 
+        public static string GetBaseDirectory()
+        {
+            return Directories[0];
+        }
+
         public static string GetPath(string filename, bool create = false)
         {
             foreach (var dir in Directories)

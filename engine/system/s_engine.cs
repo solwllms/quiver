@@ -91,8 +91,8 @@ namespace engine.system
             Cmd.ParseArgs(args);
 
             /* initialise filesystem and register default directories */
-            Filesystem.AddDirectory(Directory.GetCurrentDirectory());
             Filesystem.AddDirectory(Directory.GetCurrentDirectory() + "/" + Cmd.GetValue("dir") + "/");
+            Filesystem.AddDirectory(Directory.GetCurrentDirectory());
 
             /* load game components (MUST AFTER FILESYS!) */
             Gui.Init();
