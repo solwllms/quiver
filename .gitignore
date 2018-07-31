@@ -1,0 +1,8 @@
+
+bin/log.txt
+*.exe
+*.pdb
+*.dll
+*.so*
+*.deb
+*/obj/*

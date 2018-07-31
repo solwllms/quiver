@@ -1,0 +1,63 @@
+' main menu
+$menu.newgame=neues spiel
+$menu.loadgame=spiel laden
+$menu.savegame=speichern
+$menu.options=optionen
+$menu.credits=credits
+$menu.quit=lassen
+
+$menu.unsavedprog=fortschritte gehen verloren!
+
+' quit dialog
+$quit.mess1=zurück zu langweilig?
+$quit.mess2=zu gruselig?
+$quit.mess3=zu intensiv?
+
+' options
+$options.game=spiel
+$options.display=anzeigen
+$options.audio=audio
+$options.controls=kontrollen
+
+' game options
+$options.difficulty=kontrollen
+$options.easy=einfach
+$options.normal=normal
+$options.hard=schwierig
+$options.hell=die hölle
+$options.language=sprache
+$options.showfps=show fps
+$options.hidefps=ausblenden fps
+$options.erasesaves=löschen sie alle spart
+$options.allsavesdel=alle saves gelöscht
+
+' video options
+$options.device=gerät
+$options.windowed=fenstermodus
+$options.fullscreen=fullscreen
+
+' audio options
+$options.disablesound=deaktivieren von sound
+$options.enablesound=sound aktivieren
+$options.volume=volumen
+$options.mastervol=master
+$options.musicvol=musik
+
+' keys options
+$options.editkeys=bearbeiten von keys
+
+' save game
+$save.entername=dateiname eingeben
+$save.newsave=neu speichern
+$save.overwritesave=überschreiben speichern?
+$save.deletesave=löschen speichern?
+$save.nosaves=keine gespeicherten spiele
+
+' gameplay
+$game.use=verwenden
+$game.reload=neu laden
+
+' general
+$general.cantundo=diese überhöhung rückgängig gemacht werden
+$general.success=erfolg
+$general.anykey=drücken sie eine beliebige taste

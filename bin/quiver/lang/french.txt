@@ -1,0 +1,63 @@
+' main menu
+$menu.newgame=nouveau jeu
+$menu.loadgame=chargement de jeu
+$menu.savegame=enregistrer
+$menu.options=options
+$menu.credits=crédits
+$menu.quit=laisser
+
+$menu.unsavedprog=les progrès seront perdues!
+
+' quit dialog
+$quit.mess1=de retour à l'agréable?
+$quit.mess2=trop effrayant?
+$quit.mess3=trop intense?
+
+' options
+$options.game=jeu
+$options.display=affichage
+$options.audio=audio
+$options.controls=les contrôles
+
+' game options
+$options.difficulty=les contrôles
+$options.easy=facile
+$options.normal=normal
+$options.hard=difficile
+$options.hell=l'enfer
+$options.language=langue
+$options.showfps=afficher les fps
+$options.hidefps=masquer les fps
+$options.erasesaves=supprimer toutes les sauvegardes
+$options.allsavesdel=tous les enregistrements supprimés
+
+' video options
+$options.device=appareil
+$options.windowed=en mode fenêtré
+$options.fullscreen=plein écran
+
+' audio options
+$options.disablesound=désactiver le son
+$options.enablesound=activer le son
+$options.volume=volume
+$options.mastervol=maître
+$options.musicvol=musique
+
+' keys options
+$options.editkeys=modifier les clés de
+
+' save game
+$save.entername=entrez le nom de fichier
+$save.newsave=nouveau enregistrer
+$save.overwritesave=ecraser enregistrer?
+$save.deletesave=supprimer enregistrer?
+$save.nosaves=pas de sauvegardes de jeux
+
+' gameplay
+$game.use=utilisation
+$game.reload=recharger
+
+' general
+$general.cantundo=ce ne peut pas être annulée
+$general.success=succès
+$general.anykey=appuyez sur n'importe quelle touche

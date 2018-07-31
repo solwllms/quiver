@@ -1,0 +1,6 @@
+[2018-07-25 22:47:19] using log file /media/sf_Source/_collegeproj/bin/lib/log.txt
+[2018-07-25 22:47:19] initializing video..
+[2018-07-25 22:47:20] initializing audio..
+[2018-07-25 22:47:20] audio ok!
+[2018-07-25 22:47:20] ERROR: failed to find file: "gui/font.png"
+[2018-07-25 22:47:20] ..registered ent "Player"

@@ -1,0 +1,63 @@
+' main menu
+$menu.newgame=nuevo juego
+$menu.loadgame=cargar juego
+$menu.savegame=guardar
+$menu.options=opciones
+$menu.credits=créditos
+$menu.quit=dejar
+
+$menu.unsavedprog=progreso se perderá!
+
+' quit dialog
+$quit.mess1=volver a aburrido?
+$quit.mess2=demasiado aterrador?
+$quit.mess3=demasiado intenso?
+
+' options
+$options.game=juego
+$options.display=monitor
+$options.audio=audio
+$options.controls=controles
+
+' game options
+$options.difficulty=controles
+$options.easy=fácil
+$options.normal=normal
+$options.hard=difícil
+$options.hell=infierno
+$options.language=idioma
+$options.showfps=mostrar fps
+$options.hidefps=ocultar fps
+$options.erasesaves=eliminar todo guarda
+$options.allsavesdel=todos los guardados eliminados
+
+' video options
+$options.device=dispositivo
+$options.windowed=ventana
+$options.fullscreen=a toda pantalla
+
+' audio options
+$options.disablesound=desactivar sonido
+$options.enablesound=activar sonido
+$options.volume=volumen
+$options.mastervol=principal
+$options.musicvol=música
+
+' keys options
+$options.editkeys=editar claves
+
+' save game
+$save.entername=ingrese su nombre
+$save.newsave=nuevo guardar
+$save.overwritesave=sobrescribir guardar?
+$save.deletesave=eliminar guardar?
+$save.nosaves=sin juegos guardados
+
+' gameplay
+$game.use=uso
+$game.reload=recargarse
+
+' general
+$general.cantundo=no puedes deshacer
+$general.success=éxito
+$general.anykey=pulse cualquier tecla
