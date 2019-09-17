@@ -1,5 +1,6 @@
 # Quiver Engine
 
+Quiver was written as apart of my 2019 A-Level computer science coursework. It features a pseudo-3d raycasting game engine with complete scripting modularity, as well as pre-computed lighting, rgb perhiperal lighting and much more.
 
 ![alt text](/screenshots/1.png)
 
