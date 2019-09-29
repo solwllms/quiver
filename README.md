@@ -20,7 +20,7 @@ QUIVER is a raycasting video game, and being such a ancient and magical techniqu
 ### Getting Started
 
 ``
-Quiver requires SFML.Net, so go ahead and copy the binaries into the lib/ folder.
+Quiver requires OpenTK and OpenAL (and RGB.NET if you fancy), so go ahead and copy the binaries into the lib/ folder.
 ``
 
 Provided in this source are a number of Visual Studio solutions. Find games.sln and build all.
