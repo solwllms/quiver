@@ -1,27 +1,31 @@
-﻿using System.Collections.Generic;
-using engine.display;
-using engine.system;
-using SFML.Graphics;
-using SFML.Window;
+﻿#region
 
-namespace engine.states
+using System.Collections.Generic;
+using System.Drawing;
+using Quiver.display;
+using Quiver.system;
+using OpenTK.Input;
+
+#endregion
+
+namespace Quiver.states
 {
-    internal struct Linedata
+    internal struct linedata
     {
         public string line;
         public Color col;
     }
 
-    public class Console : IState
+    public class console : IState
     {
-        private const uint FIN_HEIGHT = system.Engine.SCREEN_HEIGHT / 2;
+        private const uint FIN_HEIGHT = engine.SCREEN_HEIGHT / 2;
         private const int MAX_CHARSX = 36;
         private const int SPLIT_CHARSX = 34;
 
         private const int LOG_SIZE = 128;
         private const int LOG_DISPLAY = 6;
 
-        private static readonly Queue<Linedata> Log = new Queue<Linedata>(LOG_SIZE);
+        private static readonly Queue<linedata> Log = new Queue<linedata>(LOG_SIZE);
         private uint _h;
 
         private string _inputbuffer;
@@ -35,11 +39,15 @@ namespace engine.states
             _h = 0;
         }
 
+        void IState.Focus()
+        {
+        }
+
         void IState.Render()
         {
-            for (uint x = 0; x < Screen.width; x++)
+            for (uint x = 0; x < screen.width; x++)
             for (uint y = 0; y < _h; y++)
-                Screen.SetPixel(x, y, Color.Black);
+                screen.SetPixel(x, y, Color.Black);
 
             var logq = Log.ToArray();
             for (var i = 0; i < LOG_DISPLAY && i + _scroll < logq.Length; i++)
@@ -51,7 +59,7 @@ namespace engine.states
             Writeline("> " + _inputbuffer + (_ticker ? "_" : ""), 2, 8);
 
 
-            if (system.Engine.frame % 10 == 0)
+            if (engine.frame % 10 == 0)
                 _ticker = !_ticker;
             _h = (_h + 3).Clamp((uint) 0, FIN_HEIGHT);
         }
@@ -59,24 +67,24 @@ namespace engine.states
         void IState.Update()
         {
             if (_inputbuffer.Length < MAX_CHARSX)
-                _inputbuffer += Input.inputstring;
+                _inputbuffer += input.inputstring;
 
-            if (Input.IsKeyPressed(Keyboard.Key.Up) && _scroll + LOG_DISPLAY < LOG_SIZE)
+            if (input.IsKeyPressed(Key.Up) && _scroll + LOG_DISPLAY < LOG_SIZE)
                 _scroll++;
-            if (Input.IsKeyPressed(Keyboard.Key.Down) && _scroll >= 1)
+            if (input.IsKeyPressed(Key.Down) && _scroll >= 1)
                 _scroll--;
 
-            if (Input.IsKeyPressed(Keyboard.Key.Return) && _inputbuffer.Length > 0)
+            if (input.IsKeyPressed(Key.Enter) && _inputbuffer.Length > 0)
             {
-                global::engine.system.Log.WriteLine("> " + _inputbuffer);
-                Cmd.Exec(_inputbuffer, true);
+                system.log.WriteLine("> " + _inputbuffer);
+                cmd.Exec(_inputbuffer, true);
                 _inputbuffer = "";
             }
 
-            if (Input.IsKeyPressed(Keyboard.Key.BackSpace) && _inputbuffer.Length > 0)
+            if (input.IsKeyPressed(Key.BackSpace) && _inputbuffer.Length > 0)
                 _inputbuffer = _inputbuffer.Remove(_inputbuffer.Length - 1);
-            if (Input.IsKeyPressed(Keyboard.Key.Escape) || Input.IsKeyPressed(Cmd.Getbind("toggleconsole")))
-                Cmd.Exec("toggleconsole", false);
+            if (input.IsKeyPressed(Key.Escape) || input.IsKeyPressed(cmd.Getbind("toggleconsole")))
+                cmd.Exec("toggleconsole", false);
         }
 
         public void Dispose()
@@ -95,7 +103,7 @@ namespace engine.states
 
             var sy = _h - y;
 
-            Gui.Write(s, x, sy, col);
+            gui.Write(s, x, sy, col);
         }
 
         public static void Print(string s)
@@ -123,7 +131,7 @@ namespace engine.states
                         var subs = words[w].SplitEvery(SPLIT_CHARSX);
                         foreach (var ss in subs)
                         {
-                            Log.Enqueue(new Linedata {line = ss, col = color});
+                            Log.Enqueue(new linedata {line = ss, col = color});
                             charc = 0;
                         }
 
@@ -137,7 +145,7 @@ namespace engine.states
 
                 var l = "";
                 for (var i = prev; i <= w; i++) l += words[i] + " ";
-                Log.Enqueue(new Linedata {line = l, col = color});
+                Log.Enqueue(new linedata {line = l, col = color});
                 prev = w + 1;
                 charc = 0;
             }

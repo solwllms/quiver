@@ -1,119 +1,126 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.IO;
-using engine.display;
-using engine.game.types;
-using engine.progs;
-using engine.system;
-using SFML.System;
-using SFML.Window;
-// ReSharper disable ObjectCreationAsStatement
+using Quiver.Audio;
+using Quiver.display;
+using Quiver.game.types;
+using Quiver.system;
+using OpenTK.Input;
 
-namespace engine.game
+#endregion
+
+namespace Quiver.game
 {
-    public class Player : Ent
+    public class player : ent
     {
-        private float _move;
+        public static cvar cvarFov = new cvar("fov", "66", false, cheat: true);
+        public static cvar cvarMovespeed = new cvar("movspeed", "0.05", false, cheat: true);
+        public static cvar cvarRotspeed = new cvar("rotspeed", "0.05", false, cheat: true);
+        //public static cvar cvarNofollow = new cvar("nofollow", "0", false, cheat: true, toggle: true);
 
+        public weapon weapon;
+
+        private float _move;
         private float _turn;
 
-        public Weapon weapon;
-
-        public Player(Vector pos) : base(pos)
+        public player(vector pos) : base(pos)
         {
             health = 100;
             collisionerror = 0;
 
-            weapon = progs.Progs.CreateWeapon(0);
+            try
+            {
+                weapon = progs.CreateWeapon(0);
+            }
+            catch
+            {
+                weapon = new weapon(null, 0, 0, 0, 0, 0, "", "", "");
+            }
         }
 
         public static void Initcmds()
         {
-            Cmd.Register("+forward", new Command(delegate
+            cmd.Register("+forward", new command(delegate
             {
-                World.Player?.Move(Cmd.GetValuef("movspeed"));
+                world.Player?.Move(cvarMovespeed.Valuef());
                 return true;
             }, record: true));
-            Cmd.Register("-forward", new Command(delegate
+            cmd.Register("-forward", new command(delegate
             {
-                World.Player?.Move(0);
+                world.Player?.Move(0);
                 return true;
             }, record: true));
-            Cmd.Bind(Keyboard.Key.Up, "+forward");
+            cmd.Bind(Key.Up, "+forward");
 
-            Cmd.Register("+back", new Command(delegate
+            cmd.Register("+back", new command(delegate
             {
-                World.Player?.Move(-Cmd.GetValuef("movspeed"));
+                world.Player?.Move(-cvarMovespeed.Valuef());
                 return true;
             }, record: true));
-            Cmd.Register("-back", new Command(delegate
+            cmd.Register("-back", new command(delegate
             {
-                World.Player?.Move(0);
+                world.Player?.Move(0);
                 return true;
             }, record: true));
-            Cmd.Bind(Keyboard.Key.Down, "+back");
+            cmd.Bind(Key.Down, "+back");
 
-            Cmd.Register("+left", new Command(delegate
+            cmd.Register("+left", new command(delegate
             {
-                World.Player?.Turn(Cmd.GetValuef("movspeed"));
+                world.Player?.Turn(cvarRotspeed.Valuef());
                 return true;
             }, record: true));
-            Cmd.Register("-left", new Command(delegate
+            cmd.Register("-left", new command(delegate
             {
-                World.Player?.Turn(0);
+                world.Player?.Turn(0);
                 return true;
             }, record: true));
-            Cmd.Bind(Keyboard.Key.Left, "+left");
+            cmd.Bind(Key.Left, "+left");
 
-            Cmd.Register("+right", new Command(delegate
+            cmd.Register("+right", new command(delegate
             {
-                World.Player?.Turn(-Cmd.GetValuef("movspeed"));
+                world.Player?.Turn(-cvarRotspeed.Valuef());
                 return true;
             }, record: true));
-            Cmd.Register("-right", new Command(delegate
+            cmd.Register("-right", new command(delegate
             {
-                World.Player?.Turn(0);
+                world.Player?.Turn(0);
                 return true;
             }, record: true));
-            Cmd.Bind(Keyboard.Key.Right, "+right");
+            cmd.Bind(Key.Right, "+right");
 
-            Cmd.Register("use", new Command(delegate
+            cmd.Register("use", new command(delegate
             {
-                World.Player?.Use();
+                world.Player?.Use();
                 return true;
             }, record: true));
-            Cmd.Bind(Keyboard.Key.E, "use");
+            cmd.Bind(Key.E, "use");
 
-            Cmd.Register("fire", new Command(delegate
+            cmd.Register("fire", new command(delegate
             {
-                World.Player?.Fire();
+                world.Player?.Fire();
                 return true;
             }, record: true));
-            Cmd.Bind(Keyboard.Key.Space, "fire");
+            cmd.Bind(Key.Space, "fire");
 
-            Cmd.Register("reload", new Command(delegate
+            cmd.Register("reload", new command(delegate
             {
-                World.Player?.Reload();
+                world.Player?.Reload();
                 return true;
             }, record: true));
-            Cmd.Bind(Keyboard.Key.R, "reload");
+            cmd.Bind(Key.R, "reload");
 
-            Cmd.Register("kill", new Command(delegate
+            cmd.Register("kill", new command(delegate
             {
-                World.Player.health = 0;
+                world.Player.health = 0;
                 return true;
             }, record: true));
 
-            Cmd.Register("refresh", new Command(delegate
+            cmd.Register("refresh", new command(delegate
             {
-                Cache.ClearAll();
+                cache.ClearAll();
                 return true;
             }));
-
-
-            new Cvar("movspeed", "0.05", false, cheat: true);
-            new Cvar("rotspeed", "1", false, cheat: true);
-
-            new Cvar("nofollow", "0", false, cheat: true, toggle: true);
         }
 
         public override void Tick()
@@ -126,32 +133,34 @@ namespace engine.game
             Movetick();
             Turntick();
 
-            if (_move != 0 && Engine.frame % 20 == 0)
-                Audio.PlaySound2D("sound/player/step" + system.Engine.random.Next(1, 4));
+            if (_move != 0 && engine.frame % 20 == 0)
+                audio.PlaySound("sound/player/step" + engine.random.Next(1, 4));
         }
 
         public void Turntick()
         {
             angle += _turn;
-            Renderer.dirX = Math.Cos(angle);
-            Renderer.dirY = Math.Sin(angle);
-            Renderer.planeX = Renderer.dirY * (0.66f * 1.33f);
-            Renderer.planeY = -Renderer.dirX * (0.66f * 1.33f);
+            renderer.camDir.x = (float) Math.Cos(angle);
+            renderer.camDir.y = (float) Math.Sin(angle);
+
+            float fov = cvarFov.Valuef() / 100;
+            renderer.camPlane.x = renderer.camDir.y * (fov * 1.33f);
+            renderer.camPlane.y = -renderer.camDir.x * (fov * 1.33f);
         }
 
         public void Movetick()
         {
-            if (!World.map[(int) (pos.x + Renderer.dirX * _move), (int) pos.y].solid)
-                pos.x += (float) Renderer.dirX * _move;
-            if (!World.map[(int) pos.x, (int) (pos.y + Renderer.dirY * _move)].solid)
-                pos.y += (float) Renderer.dirY * _move;
+            if (!world.map[(int) (pos.x + renderer.camDir.x * _move), (int) pos.y].solid)
+                pos.x += renderer.camDir.x * _move;
+            if (!world.map[(int) pos.x, (int) (pos.y + renderer.camDir.y * _move)].solid)
+                pos.y += renderer.camDir.y * _move;
         }
 
         public override void DoDamage(byte damage)
         {
             base.DoDamage(damage);
 
-            Audio.PlaySound2D("sound/player/hurt");
+            audio.PlaySound("sound/player/hurt");
         }
 
         public void Turn(float speed)
@@ -166,8 +175,8 @@ namespace engine.game
 
         public void Use()
         {
-            if (Renderer.GetLookedAt().interactable && Renderer.centercell.dist < 1.5f)
-                Progs.CallMapEvent(Renderer.GetLookedAt().onInteract, Renderer.GetLookedAt());
+            if (renderer.GetCenterMapCell().interactable && renderer.GetCenterCell().dist < 1.5f)
+                progs.CallMapEvent(renderer.GetCenterMapCell().onInteract, renderer.GetCenterMapCell());
         }
 
         public void Fire()
@@ -180,26 +189,24 @@ namespace engine.game
             weapon.Reload();
         }
 
-        public Ent GetLookatEntity()
+        public ent GetLookatEntity()
         {
-            if (Renderer.centersprite.dist != -1 && Renderer.centersprite.index < World.sprites.Length)
-                return World.sprites[Renderer.centersprite.index];
+            if (renderer.GetCenterSprite().dist != -1 && renderer.GetCenterSprite().index < world.sprites.Length)
+                return world.sprites[renderer.GetCenterSprite().index];
             return null;
         }
 
         public override void DoParseSave(ref BinaryWriter w)
         {
             base.DoParseSave(ref w);
-            Time.FromSeconds(90);
-            new Clock();
-            w.Write((int) World.clock.ElapsedTime.AsSeconds());
+            w.Write((int) world.clock.Elapsed.TotalSeconds);
             weapon.DoParseSave(ref w);
         }
 
         public override void DoParseLoad(ref BinaryReader r)
         {
             base.DoParseLoad(ref r);
-            World.startingSec = r.ReadInt32();
+            world.startingSec = r.ReadInt32();
             weapon.DoParseLoad(ref r);
         }
     }

@@ -1,47 +1,56 @@
-﻿using System.Collections.Generic;
+﻿#region
+
+using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
-using engine.display;
-using engine.states;
-using engine.system;
-using SFML.Graphics;
-using SFML.Window;
+using Quiver;
+using Quiver.Audio;
+using Quiver.display;
+using Quiver.states;
+using Quiver.system;
+using OpenTK.Input;
+
+#endregion
 
 namespace game.states
 {
-    internal class Savegame : IState
+    internal class savegame : IState
     {
         private static int _cursor;
-        private int _f = 0;
-        private List<Saveload.Savelisting> _listings;
 
         private readonly uint _mx = 23;
         private readonly uint _my = 20;
+        private List<saveload.savelisting> _listings;
 
-        public Savegame()
+        public savegame()
         {
-            _listings = new List<Saveload.Savelisting>();
+            _listings = new List<saveload.savelisting>();
         }
 
         void IState.Init()
         {
-            Saveload.RefreshListings(ref _listings, ref _cursor, true);
+        }
+
+        void IState.Focus()
+        {
+            saveload.RefreshListings(ref _listings, ref _cursor, true);
         }
 
         void IState.Render()
         {
-            ((Menu) Statemanager.history.Peek()).RenderBase();
+            ((menu) statemanager.history.Peek()).RenderBase();
 
-            Gui.Write(Lang.Get("$menu.savegame"), _mx, 9, Color.Black);
-            Gui.Write(Lang.Get("$menu.savegame"), _mx, 8);
+            gui.Write(lang.Get("$menu.savegame"), _mx, 9, Color.Black);
+            gui.Write(lang.Get("$menu.savegame"), _mx, 8);
             uint n = 0;
 
             var ls = (_cursor - 1).Clamp(0, _listings.Count);
             var le = (_cursor + 3).Clamp(0, _listings.Count);
 
             if (_cursor > 1)
-                Cache.GetTexture("gui/arrows").Draw(147, 23, 0, 0, 5, 3);
+                cache.GetTexture("gui/arrows").Draw(147, 23, 0, 0, 5, 3);
             if (_cursor < _listings.Count - 2)
-                Cache.GetTexture("gui/arrows").Draw(147, 76, 0, 4, 5, 3);
+                cache.GetTexture("gui/arrows").Draw(147, 76, 0, 4, 5, 3);
 
             for (var i = (uint) ls; i < le; i++)
             {
@@ -52,57 +61,57 @@ namespace game.states
 
         void IState.Update()
         {
-            Cmd.Checkbinds();
+            cmd.Checkbinds();
 
-            if (Input.IsKeyPressed(Keyboard.Key.Down))
+            if (input.IsKeyPressed(Key.Down))
             {
                 var pc = _cursor;
                 _cursor = (_cursor + 1).Clamp(0, _listings.Count - 1);
                 if (pc != _cursor)
-                    Audio.PlaySound2D("sound/ui/hover");
+                    audio.PlaySound("sound/ui/hover");
             }
 
-            if (Input.IsKeyPressed(Keyboard.Key.Up))
+            if (input.IsKeyPressed(Key.Up))
             {
                 var pc = _cursor;
                 _cursor = (_cursor - 1).Clamp(0, _listings.Count - 1);
                 if (pc != _cursor)
-                    Audio.PlaySound2D("sound/ui/hover");
+                    audio.PlaySound("sound/ui/hover");
             }
 
-            if (Input.IsKeyPressed(Keyboard.Key.Delete))
+            if (input.IsKeyPressed(Key.Delete))
                 if (_listings[_cursor].savefile != ".")
-                    Saveload.DeleteSavePrompt(_listings[_cursor].savefile);
+                    saveload.DeleteSavePrompt(_listings[_cursor].savefile);
 
-            if (Input.IsKeyPressed(Keyboard.Key.Return))
+            if (input.IsKeyPressed(Key.Enter))
             {
                 if (_listings[_cursor].savefile == ".")
-                    Statemanager.SetState(new Prompt(Lang.Get("$save.entername"), "", delegate(string s)
+                    statemanager.SetState(new prompt(lang.Get("$save.entername"), "", delegate(string s)
                         {
-                            if (File.Exists(Saveload.ConstructSavPath(s + ".sav")))
+                            if (File.Exists(saveload.ConstructSavPath(s + ".sav")))
                             {
-                                Statemanager.GoBack();
-                                Statemanager.current.Render();
-                                Saveload.OverwriteSavePrompt(s);
+                                statemanager.GoBack();
+                                statemanager.current.Render();
+                                saveload.OverwriteSavePrompt(s);
                             }
                             else
                             {
-                                Saveload.SaveGame(s);
-                                Statemanager.GoBack();
+                                saveload.SaveGame(s);
+                                statemanager.GoBack();
                             }
 
-                            Saveload.RefreshListings(ref _listings, ref _cursor, true);
+                            saveload.RefreshListings(ref _listings, ref _cursor, true);
                         })
                         {cursor = true});
                 else
-                    Saveload.OverwriteSavePrompt(_listings[_cursor].name);
+                    saveload.OverwriteSavePrompt(_listings[_cursor].name);
             }
 
-            if (Input.IsKeyPressed(Keyboard.Key.Escape))
-                if (Statemanager.history.Peek() != null)
+            if (input.IsKeyPressed(Key.Escape))
+                if (statemanager.history.Peek() != null)
                 {
-                    Input.mouselock = true;
-                    Statemanager.GoBack();
+                    input.mouselock = true;
+                    statemanager.GoBack();
                 }
         }
 
@@ -111,17 +120,17 @@ namespace game.states
             _listings.Clear();
         }
 
-        public void DrawListing(uint n, uint i, Saveload.Savelisting listing)
+        public void DrawListing(uint n, uint i, saveload.savelisting listing)
         {
             var y = _my + n * 22;
-            if (y >= Screen.height - 22)
+            if (y >= screen.height - 22)
                 return;
 
-            if (_cursor == i) Gui.Draw(_mx - 2, y - 2, 119, 22, Gui.darker);
+            if (_cursor == i) gui.Draw(_mx - 2, y - 2, 119, 22, gui.darker);
 
             listing.texture.Draw(_mx, y);
-            Gui.Write(listing.name, _mx + 34, y);
-            Gui.Write(listing.datetime, _mx + 34, y + 7, _cursor == i ? Gui.lighter : Gui.darker);
+            gui.Write(listing.name, _mx + 34, y);
+            gui.Write(listing.datetime, _mx + 34, y + 7, _cursor == i ? gui.lighter : gui.darker);
         }
     }
 }

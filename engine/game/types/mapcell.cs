@@ -1,60 +1,62 @@
-﻿using engine.display;
-using engine.progs;
-using engine.system;
-using SFML.Graphics;
+﻿#region
 
-namespace engine.game.types
+using Quiver.system;
+using System.Drawing;
+
+#endregion
+
+namespace Quiver.game.types
 {
-    public delegate void MapEvent(Mapcell cell);
+    public delegate void mapEvent(mapcell cell);
 
-    public class Mapcell
+    public class mapcell
     {
         public byte ceiltex;
-        public Color color;
+
+        //public Color color;
+        public Color emission = Color.Black;
         public byte floortex;
         public bool interactable;
 
         public string onInteract;
+        public string onShot;
         public string onTouch;
         public string onWalk;
-        public string onShot;
 
-        public Vector pos;
+        public vector pos;
+
+        public string shootex;
         public bool solid;
 
         public bool wall;
-
-        public string shootex;
         public byte walltex;
 
-        public Mapcell(Vector position) : this(position, "textures/floor", "textures/floor", "textures/floor")
+        public mapcell(vector position) : this(position, "textures/floor", "textures/floor", "textures/floor")
         {
         }
 
-        public Mapcell(Vector position, string walltex, string floortex, string ceiltex)
+        public mapcell(vector position, string walltex, string floortex, string ceiltex)
         {
             pos = position;
 
             SetWalltex(walltex);
             SetFloortex(floortex);
             SetCeiltex(ceiltex);
-
-            color = Color.White;
         }
 
         public void SetWalltex(string t)
         {
-            walltex = World.GetTextureId(t);
+            walltex = world.GetTextureId(t);
         }
 
         public void SetFloortex(string t)
         {
-            floortex = World.GetTextureId(t);
+            floortex = world.GetTextureId(t);
         }
 
         public void SetCeiltex(string t)
         {
-            ceiltex = World.GetTextureId(t);
+            ceiltex = world.GetTextureId(t);
         }
 
         public void OnShot()
@@ -63,7 +65,7 @@ namespace engine.game.types
                 SetWalltex(shootex);
 
             if (!string.IsNullOrEmpty(onShot))
-                Progs.CallMapEvent(onShot, this);
+                progs.CallMapEvent(onShot, this);
         }
     }
 }

@@ -1,22 +1,27 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
 using System.IO;
-using SFML.Window;
+using Quiver.system;
+using OpenTK.Input;
 
-namespace engine.system
+#endregion
+
+namespace Quiver
 {
-    public delegate bool Cmdhandler(string[] param);
+    public delegate bool cmdhandler(string[] param);
 
-    public delegate void Cvarcallback(string value);
+    public delegate void cvarcallback(string value);
 
-    public class Command
+    public class command
     {
-        public Cmdhandler action;
+        public cmdhandler action;
         public string help;
         public bool record;
         public bool save;
 
-        public Command(Cmdhandler action, string help = "", bool save = false, bool record = false)
+        public command(cmdhandler action, string help = "", bool save = false, bool record = false)
         {
             this.action = action;
             this.help = help;
@@ -25,30 +30,32 @@ namespace engine.system
         }
     }
 
-    public class Cvar
+    public class cvar
     {
-        public readonly bool isToggle;
-        public readonly bool cheat;
-        public readonly bool readOnly;
+        private readonly string defaultVal;
         private string _value;
 
-        public Cvarcallback callback;
-        private readonly string _defaultv;
+        public readonly bool cheat;
+        public readonly bool isToggle;
+        public readonly bool readOnly;
 
-        public Cvar(string name, string value, bool persistent = false, bool toggle = false, bool readOnly = false,
-            bool cheat = false, Cvarcallback callback = null)
+        public cvarcallback callback;
+
+        public cvar(string name, string defaultVal, bool isPersistent = false, bool isToggle = false, bool readOnly = false,
+            bool cheat = false, cvarcallback callback = null)
         {
-            _defaultv = value;
-            _value = value;
-            Persistent = persistent;
-            isToggle = toggle;
+            _value = defaultVal;
+            this.defaultVal = defaultVal;
+            this.isPersistent = isPersistent;
+            this.isToggle = isToggle;
             this.readOnly = readOnly;
             this.cheat = cheat;
             this.callback = callback;
-            Cmd.Register(name, this);
+
+            cmd.Register(name, this);
         }
 
-        public bool Persistent { get; }
+        public bool isPersistent { get; }
 
         public void Toggle()
         {
@@ -61,7 +68,7 @@ namespace engine.system
 
         public string Defvalue()
         {
-            return _defaultv;
+            return defaultVal;
         }
 
         public string Value()
@@ -75,7 +82,7 @@ namespace engine.system
             if (float.TryParse(_value, out o))
                 return o;
 
-            return float.Parse(_defaultv);
+            return float.Parse(defaultVal);
         }
 
         public bool Valueb()
@@ -83,50 +90,43 @@ namespace engine.system
             if (Value() == "1" || Value() == "0")
                 return Value() == "1";
 
-            return _defaultv == "1";
+            return defaultVal == "1";
         }
 
         public void Set(string value)
         {
             _value = value;
             callback?.Invoke(_value);
-            if(Persistent) Cmd.SaveConfig();
+            if (isPersistent) cmd.SaveConfig();
         }
 
         public void Reset(string value)
         {
-            _value = _defaultv;
+            _value = defaultVal;
         }
     }
 
-    public partial class Cmd
+    public partial class cmd
     {
-        public static Dictionary<string, Keyboard.Key> binds;
+        public static Dictionary<string, Key> binds = new Dictionary<string, Key>();
 
-        private static Dictionary<string, Command> _cmds;
-        private static Dictionary<string, Cvar> _cvars;
+        private static Dictionary<string, command> _cmds = new Dictionary<string, command>();
+        private static Dictionary<string, cvar> _cvars = new Dictionary<string, cvar>();
 
-        public static string cfgpath = "cfg/config.cfg";
-        public static bool recdemo = false;
+        public static string cfgpath = "cfg/config.cfg";        
 
-        private static uint _frames;
-
-        public static void Init()
+        internal static void Init()
         {
-            _cmds = new Dictionary<string, Command>();
-            _cvars = new Dictionary<string, Cvar>();
-
-            binds = new Dictionary<string, Keyboard.Key>();
-            Setupcommands();
+            SetupCMDs();
         }
 
-        public static void Register(string alias, Command cmd)
+        public static void Register(string alias, command cmd)
         {
             if (!_cmds.ContainsKey(alias))
                 _cmds.Add(alias, cmd);
         }
 
-        public static void Register(string alias, Cvar var)
+        public static void Register(string alias, cvar var)
         {
             if (!_cvars.ContainsKey(alias))
                 _cvars.Add(alias, var);
@@ -140,7 +140,7 @@ namespace engine.system
                     continue;
 
                 var cmd = _cmds[c];
-                Log.WriteLine(c + (string.IsNullOrWhiteSpace(cmd.help) ? "" : " : " + cmd.help));
+                log.WriteLine(c + (string.IsNullOrWhiteSpace(cmd.help) ? "" : " : " + cmd.help));
             }
 
             return true;
@@ -154,43 +154,43 @@ namespace engine.system
             return true;
         }
 
-        public static void Bind(Keyboard.Key key, string cmd)
+        public static void Bind(Key key, string cmd)
         {
             if (cmd[0] == '+') binds[cmd.Replace('+', '-')] = key;
 
-            if (Getbind(cmd) != Keyboard.Key.Unknown)
+            if (Getbind(cmd) != Key.Unknown)
                 binds.Remove(cmd);
             binds[cmd] = key;
         }
 
         public static void Bind(string key, string command)
         {
-            Keyboard.Key k;
-            if (Input.FindKey(key, out k))
+            Key k;
+            if (input.FindKey(key, out k))
                 Bind(k, command);
             else
-                Log.WriteLine("unknown key identifier");
+                log.WriteLine("unknown key identifier");
         }
 
-        public static Keyboard.Key Getbind(string command)
+        public static Key Getbind(string command)
         {
             if (binds.ContainsKey(command))
                 return binds[command];
 
-            return Keyboard.Key.Unknown;
+            return Key.Unknown;
         }
 
         public static void Checkbinds()
         {
             foreach (var command in binds.Keys)
             {
-                if (command[0] == '-' && Input.IsKeyReleased(binds[command]))
+                if (command[0] == '-' && input.IsKeyReleased(binds[command]))
                 {
                     Exec(command, false);
                     continue;
                 }
 
-                if (Input.IsKeyPressed(binds[command]))
+                if (input.IsKeyPressed(binds[command]))
                     Exec(command, false);
             }
         }
@@ -223,14 +223,7 @@ namespace engine.system
         public static bool CheatsEnabled()
         {
             return _cvars["cheats"].Valueb();
-        }
-
-
-        public static void Tick()
-        {
-            if (recdemo)
-                _frames++;
-        }
+        }        
 
         public static void ParseArgs(string args)
         {
@@ -258,22 +251,20 @@ namespace engine.system
         {
             try
             {
-                SaveToFile(Filesystem.Open(cfgpath, true));
+                SaveToFile(filesystem.Open(cfgpath, true));
             }
             catch
             {
-                Log.WriteLine("failed to write to config file! (" + cfgpath + ")", Log.MessageType.Error);
+                log.WriteLine("failed to write to config file! (" + cfgpath + ")", log.LogMessageType.Error);
             }
         }
 
+        // called after every change to any variable
         public static void SaveToFile(Stream s)
         {
-            Log.DebugLine("saving config!");
-
+            s.Seek(0, SeekOrigin.Begin);
             using (var w = new StreamWriter(s))
             {
-                w.Flush();
-
                 foreach (var key in binds.Keys)
                 {
                     if (key[0] == '-') continue;
@@ -285,25 +276,25 @@ namespace engine.system
                 foreach (var key in _cvars.Keys)
                 {
                     var c = _cvars[key];
-                    if (c.Persistent) w.WriteLine(key.ToLower() + " " + c.Value().ToLower());
+                    if (c.isPersistent) w.WriteLine(key.ToLower() + " " + c.Value().ToLower());
                 }
+
+                w.Flush();
             }
+            s.Close();
         }
 
-        public static void Exec(string command, bool console, bool force = false)
+        public static void Exec(string command, bool console = true, bool force = false, bool silent = false)
         {
             var split = command.ToLower().Split(' ');
             var l = new List<string>(split);
             l.Remove(split[0]);
-            Exec(split[0], console, force, l.ToArray());
+            ExecParam(split[0], console, force, l.ToArray(), silent);
         }
 
-        public static void Exec(string command, bool console, bool force, string[] param = null)
+        private static void ExecParam(string command, bool console = true, bool force = false, string[] param = null, bool silent = false)
         {
             command = command.ToLower();
-
-            if (recdemo && _cmds.ContainsKey(command) && _cmds[command].record &&
-                (_cmds.ContainsKey(command) || _frames == uint.MaxValue - 1)) _frames = 0;
 
             if (!_cmds.ContainsKey(command))
             {
@@ -313,20 +304,20 @@ namespace engine.system
                     {
                         if (_cvars[command].readOnly && !force)
                         {
-                            Log.WriteLine("cvar \"" + command + "\" is readonly");
+                            if (!silent) log.WriteLine("cvar \"" + command + "\" is readonly");
                             return;
                         }
 
                         if (_cvars[command].cheat && !CheatsEnabled())
                         {
-                            Log.WriteLine("you must enable cheats to change this cvar.");
+                            if (!silent) log.WriteLine("you must enable cheats to change this cvar.");
                             return;
                         }
 
                         _cvars[command].Toggle();
-                        Log.WriteLine("cvar \"" + command + "\" set to \"" + _cvars[command].Value() + "\"");
+                        if(!silent) log.WriteLine("cvar \"" + command + "\" set to \"" + _cvars[command].Value() + "\"");
 
-                        if (_cvars[command].Persistent && console) SaveConfig();
+                        if (_cvars[command].isPersistent && console) SaveConfig();
                         return;
                     }
 
@@ -334,47 +325,46 @@ namespace engine.system
                     {
                         if (_cvars[command].readOnly && !force)
                         {
-                            Log.WriteLine("cvar \"" + command + "\" is readonly");
+                            if (!silent) log.WriteLine("cvar '" + command + "' is readonly");
                             return;
                         }
 
                         if (_cvars[command].cheat && !CheatsEnabled())
                         {
-                            Log.WriteLine("you must enable cheats to change this cvar.");
+                            if (!silent) log.WriteLine("you must enable cheats to change this cvar.");
                             return;
                         }
 
                         _cvars[command].Set(param[0]);
-                        Log.WriteLine("cvar \"" + command + "\" set to \"" + _cvars[command].Value() + "\"");
+                        if (!silent) log.WriteLine("cvar '" + command + "' set to '" + _cvars[command].Value() + "'");
 
-                        if (_cvars[command].Persistent && console) SaveConfig();
+                        if (_cvars[command].isPersistent && console) SaveConfig();
                         return;
                     }
 
-                    Log.WriteLine("\"" + command + "\" = \"" + _cvars[command].Value() + "\"");
-
+                    if (!silent) log.WriteLine(command + " = '" + _cvars[command].Value() + "'");
                     return;
                 }
 
-                Log.WriteLine("command (\"" + command + "\") not found.");
+                log.WriteLine("command '" + command + "' not found.");
                 return;
             }
 
             if (GetValueb("debug"))
             {
-                _cmds[command].action.Invoke(param == null ? new string[0] : param);
+                _cmds[command].action.Invoke(param ?? new string[0]);
                 if (_cmds[command].save && console) SaveConfig();
             }
             else
             {
                 try
                 {
-                    _cmds[command].action.Invoke(param == null ? new string[0] : param);
+                    _cmds[command].action.Invoke(param ?? new string[0]);
                     if (_cmds[command].save && console) SaveConfig();
                 }
                 catch (Exception e)
                 {
-                    Log.WriteLine(e.Message);
+                    log.WriteLine(e.Message);
                 }
             }
         }
@@ -385,10 +375,12 @@ namespace engine.system
             {
                 using (var read = new StreamReader(stream))
                 {
-                    while (!read.EndOfStream) Exec(read.ReadLine(), false);
+                    while (!read.EndOfStream) Exec(read.ReadLine(), false, silent: true);
                 }
             }
-            catch { }
+            catch
+            {
+            }
         }
     }
 }

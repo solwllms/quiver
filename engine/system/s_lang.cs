@@ -1,34 +1,52 @@
-﻿using System.Collections.Generic;
+﻿#region
+
+using Quiver.system;
+using System.Collections.Generic;
 using System.IO;
 
-namespace engine.system
+#endregion
+
+namespace Quiver
 {
-    public class Lang
+    public class lang
     {
-        public static string[] langs = new[] { "english", "español", "français", "deutsch" };
-        public static string[] langfiles = new[] { "lang/english.txt", "lang/spanish.txt", "lang/french.txt", "lang/german.txt" };
+        public static string[] langs = {"english", "español", "français", "deutsch"};
+
+        internal static string[] langfiles =
+            {"lang/english.txt", "lang/spanish.txt", "lang/french.txt", "lang/german.txt"};
 
         private static Dictionary<string, string> _dict;
 
-        public static void LoadLang(string file)
+        internal static void LoadLang(string file)
         {
-            Log.WriteLine("loading language file "+file+"..");
+            if (!filesystem.Exists(file))
+            {
+                log.WriteLine("failed to load language file!", log.LogMessageType.Error);
+                return;
+            }
+            
             _dict = new Dictionary<string, string>();
-            using (var read = new StreamReader(Filesystem.Open(file)))
+            using (var read = new StreamReader(filesystem.Open(file)))
             {
                 while (!read.EndOfStream)
                 {
-                    string[] p = read.ReadLine().Split('=');
+                    var p = read.ReadLine().Split('=');
                     if (p[0] == "" || p[0][0] == '\'') continue;
                     _dict.Add(p[0], p[1]);
                 }
             }
         }
 
-        public static string Get(string phrase)
+        /// <summary>
+        /// Fetches localized string identified by key. If no translation is found,
+        /// the key is returned.
+        /// </summary>
+        /// <param name="key">String identifier</param>
+        /// <returns>Localized string</returns>
+        public static string Get(string key)
         {
-            if (!_dict.ContainsKey(phrase)) return phrase;
-            return _dict[phrase];
+            if (_dict == null || !_dict.ContainsKey(key)) return key;
+            return _dict[key];
         }
     }
 }

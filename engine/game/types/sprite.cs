@@ -1,12 +1,17 @@
-﻿using System;
-using System.IO;
-using engine.display;
-using engine.system;
+﻿#region
 
-namespace engine.game.types
+using System;
+using System.IO;
+using Quiver.display;
+using Quiver.system;
+
+#endregion
+
+namespace Quiver.game.types
 {
-    public class Sprite : Ent
+    public class sprite : ent
     {
+        private string _texname;
         public bool fetchignore = false;
 
         public bool solid;
@@ -14,14 +19,12 @@ namespace engine.game.types
         public uint sprheight = 16;
         public uint sprwidth = 16;
         public uint sprx;
-        private string _texname;
 
-        public Sprite(Vector pos) : this("err", pos, true, true)
+        public sprite(vector pos) : this("err", pos, true, true)
         {
-
         }
 
-        public Sprite(string tex, Vector pos, bool isstatic, bool solid = false) : base(pos)
+        public sprite(string tex, vector pos, bool isstatic, bool solid = false) : base(pos)
         {
             SetTexture(tex);
             this.isstatic = isstatic;
@@ -30,19 +33,20 @@ namespace engine.game.types
             SetPos(pos);
         }
 
-        public Texture Tex { get; private set; }
+        public texture Tex { get; private set; }
 
         public void SetTexture(string name)
         {
             _texname = name;
-            Tex = Cache.GetTexture(name);
+            Tex = cache.GetTexture(name);
         }
+
         public string GetTextureName()
         {
             return _texname;
         }
 
-        public override void SetPos(Vector p)
+        public override void SetPos(vector p)
         {
             base.SetPos(p);
             UpdateCollision();
@@ -54,20 +58,20 @@ namespace engine.game.types
             if (!solid)
                 return;
 
-            World.map[(int) Math.Floor(pos.x), (int) Math.Floor(pos.y)].solid = true;
+            world.map[(int) Math.Floor(pos.x), (int) Math.Floor(pos.y)].solid = true;
         }
 
         public override void OnDestroy()
         {
             base.OnDestroy();
-            World.RemoveEnt(this);
+            world.RemoveEnt(this);
         }
 
         public override void DoParseSave(ref BinaryWriter w)
         {
             base.DoParseSave(ref w);
             w.Write(sprx);
-            w.Write(Saveload.Str(_texname, 32));
+            w.Write(saveload.Str(_texname, 32));
         }
 
         public override void DoParseLoad(ref BinaryReader r)

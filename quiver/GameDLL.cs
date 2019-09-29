@@ -1,68 +1,91 @@
-﻿using engine.game;
-using engine.game.types;
-using engine.progs;
-using engine.system;
+﻿#region
+
+using Quiver;
+using Quiver.Audio;
+using Quiver.game;
+using Quiver.game.types;
+using Quiver.system;
 using game.entities;
 using game.states;
 using game.weapons;
+
+#endregion
 
 namespace game
 {
     // ReSharper disable once UnusedMember.Global
     // ReSharper disable once InconsistentNaming
-    public class GameDLL : Dll
+    public class GameDLL : dll
     {
+        private gmbase _gmode;
+
         public GameDLL() : base("QUIVER", "Sol Williams", "v0.1", "vanilla quiver")
         {
-            Discordrpc.Init("433659106147172354", null);
+            discordrpc.Init("433659106147172354", null);
         }
 
         public override void Init()
         {
             // register all map events
-            Progs.RegisterMapEvent("nextlevel", delegate
-            {
-                World.LoadLevel("maps/" + Level.next + ".lvl", false);
+            progs.RegisterMapEvent("nextlevel", delegate (mapcell cell) {
+                if (world.GetTextureAlias(cell.walltex) != "textures/exit") return;
+                level.Load("maps/" + level.next + ".lvl", false);
             });
-            Progs.RegisterMapEvent("prevlevel", delegate
+            progs.RegisterMapEvent("prevlevel", delegate
             {
-                World.LoadLevel("maps/" + Level.prev + ".lvl", false);
-                var c = Level.data.CoordinatesOf(-2);
-                World.Player.pos = new Vector(c.Item1, c.Item2);
+                level.Load("maps/" + level.prev + ".lvl", false);
+                var c = level.data.CoordinatesOf(-2);
+                world.Player.pos = new vector(c.Item1, c.Item2);
             });
-            Progs.RegisterMapEvent("glassshot", delegate(Mapcell cell)
+            progs.RegisterMapEvent("glassshot", delegate (mapcell cell)
             {
-                Audio.PlaySound3D("sound/glass/glass" + engine.system.Engine.random.Next(1, 4), cell.pos, 70);
+                audio.PlaySound3D("sound/glass/glass" + engine.random.Next(1, 4), cell.pos, 70);
+            });
+            progs.RegisterMapEvent("useconsole1", delegate { statemanager.SetState(new consoleGame()); });
+
+            progs.RegisterMapEvent("ws_use", delegate (mapcell cell)
+            {
+                mapcell door = world.FindTexturedCell("textures/exit_lock");
+                door.SetWalltex("textures/exit");
+                door.interactable = true;
+
+                cell.SetWalltex("textures/brick1_sw1");
+            });
+            progs.RegisterMapEvent("escape", delegate (mapcell cell)
+            {
+                statemanager.SetState(new credits(), true);
             });
 
             // register all entities
-            Progs.RegisterEnt(typeof(m_Eye));
-            Progs.RegisterEnt(typeof(p_Guts));
-            Progs.RegisterEnt(typeof(m_Robo));
-            Progs.RegisterEnt(typeof(p_Lazer));
+            progs.RegisterEnt(typeof(m_Eye));
+            progs.RegisterEnt(typeof(p_Guts));
+            progs.RegisterEnt(typeof(m_Robo));
+            progs.RegisterEnt(typeof(p_Lazer));
 
             // register all weapons
-            Progs.RegisterWeapon(typeof(WRevolver));
+            progs.RegisterWeapon(typeof(wRevolver));
+
+            _gmode = new gameMode();
         }
 
-        public override Gmbase GetGamemode()
+        public override gmbase GetGamemode()
         {
-            return new Gamemode();
+            return _gmode;
         }
 
         public override IState GetMenuState()
         {
-            return new Menu();
+            return new menu();
         }
 
         public override IState GetInitialState()
         {
-            return new Splash();
+            return new splash();
         }
 
         public override void Shutdown()
         {
-            Discordrpc.Shutdown();
+            discordrpc.Shutdown();
         }
     }
 }

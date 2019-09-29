@@ -1,14 +1,19 @@
-﻿using System;
-using System.IO;
-using engine.display;
-using engine.game;
-using SFML.Graphics;
-using SFML.System;
-using SFML.Window;
+﻿#region
 
-namespace engine.system
+using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using Quiver.Audio;
+using Quiver.display;
+using Quiver.game;
+using Quiver.system;
+
+#endregion
+
+namespace Quiver
 {
-    public class Engine
+    public class engine
     {
         public const uint DEF_WINDOW_WIDTH = 1280;
         public const uint DEF_WINDOW_HEIGHT = 720;
@@ -22,188 +27,148 @@ namespace engine.system
         public static float ftime;
         public static float fps;
         public static int frame;
-        
-        private static Clock _fclock;
 
-        public static RenderWindow window;
+        private static Stopwatch _fclock;
         private static string _title;
 
         public static Random random;
 
-        public static void Main(string[] args)
+        private static string args;
+
+        internal static void Init(string[] argsa)
         {
-            _fclock = new Clock();
+            _fclock = new Stopwatch();
             random = new Random();
 
-            try
-            {
-                SetTitle("Loading..");
-                SetFullscreen(false);
-            }
-            catch (Exception e)
-            {
-                Log.WriteLine("failed to initialize window.", Log.MessageType.Fatal);
-            }
+            args = string.Join(" ", argsa);
+            Init();
 
-            Init(string.Join(" ", args));
-
-            while (window.IsOpen)
-            {
-                window.DispatchEvents();
-
-                ftime = _fclock.Restart().AsSeconds();
-
-                frame++;
-                if (frame > 60)
-                    frame = 1;
-
-                if (frame % 10 == 0) fps = 1.0f / ftime;
-
-                Tick();
-                Render();
-                Screen.RenderTarget(ref window);
-
-                window.Display();
-            }
-
-            Log.WriteLine("..good bye!");
+            winconsole.Start();
         }
 
         public static void Exit()
         {
-            Audio.Dispose();
-            Log.WriteLine("shutting down..");
-            window.Close();
+            audio.Unload();
+            log.WriteLine("shutting down..");
+            s_Window.CloseWindow();
+            winconsole.Shutdown();
         }
 
-        private static void Init(string args)
+        private static void Init()
         {
-            Log.Init();
-            Cmd.Init();
+            log.Init();
+            cmd.Init();
 
             /* initialise video */
-            Screen.Init(SCREEN_WIDTH, SCREEN_HEIGHT);
-            Renderer.Init();
+            screen.Init(SCREEN_WIDTH, SCREEN_HEIGHT);
+            renderer.Init();
 
             /* initialise audio */
-            Audio.Init();
+            audio.Init();
 
-            Cmd.ParseArgs(args);
+            try
+            {
+                cmd.ParseArgs(args);
+            } catch { }
 
             /* initialise filesystem and register default directories */
-            Filesystem.AddDirectory(Directory.GetCurrentDirectory() + "/" + Cmd.GetValue("dir") + "/");
-            Filesystem.AddDirectory(Directory.GetCurrentDirectory());
+            filesystem.AddDirectory(Directory.GetCurrentDirectory() + "/" + cmd.GetValue("dir") + "/");
+            filesystem.AddDirectory(Directory.GetCurrentDirectory());
+
+            foreach (var zip in filesystem.GetAllFiles("*.pak"))
+                filesystem.AddArchive(zip);
 
             /* load game components (MUST AFTER FILESYS!) */
-            Gui.Init();
-            Input.Init();
+            gui.Init();
+            input.Init();
 
-            progs.Progs.Init();
-            progs.Progs.RegisterEnt(typeof(Player));
+            progs.Init();
+            progs.RegisterEnt(typeof(player));
+
+            rgbDevice.Init();
 
             /* load game dll */
-            progs.Progs.LoadDll("game.dll");
-            Lang.LoadLang("lang/english.txt");
+            progs.LoadDll("game.dll");
+        }
+
+        internal static void PostLoad()
+        {
+            lang.LoadLang("lang/english.txt");
 
             /* do autoexec */
             AutoExec();
 
-            /* load default state */
-            Statemanager.SetState(progs.Progs.dll.GetInitialState());
-
-            Cmd.ParseArgs(args);
+            cmd.ParseArgs(args);
         }
 
         public static bool HasFocus()
         {
-            return window.HasFocus();
+            return s_Window.HasFocus();
         }
-
         public static void SetIcon(string tex)
         {
-            var p = Filesystem.GetPath(tex);
-            if (p == null || window == null) return;
-
-            var i = new Image(p);
-            window.SetIcon(i.Size.X, i.Size.Y, i.Pixels);
-            i.Dispose();
+            s_Window.SetIcon(tex);
         }
-        public static void SetTitle(string t)
+        public static void SetTitle(string title)
         {
-            _title = t;
+            _title = title;
 #if DEBUG
             _title += " - DEVELOPMENT BUILD";
-            Console.Title = t + " - CONSOLE LOG";
+            try
+            {
+                Console.Title = title + " - CONSOLE LOG";
+            }
+            catch
+            {
+                log.ThrowFatal("Launching in debug mode without console not supported!");
+            }
 #endif
-            window?.SetTitle(_title);
+            s_Window.SetTitle(_title);
         }
         public static void SetFullscreen(bool f)
         {
-            window?.Dispose();
-            window = new RenderWindow(f ? VideoMode.DesktopMode : new VideoMode(Engine.DEF_WINDOW_WIDTH, Engine.DEF_WINDOW_HEIGHT),
-                "", f ? Styles.Fullscreen : Styles.Default, new ContextSettings(0, 0, 0));
-            Engine.windowWidth = window.Size.X;
-            Engine.windowHeight = window.Size.Y;
-            if (Screen.pixels != null)
-                Screen.UpdateSprite();
-
-            window.SetTitle(_title);
-            window.SetActive();
-            window.Closed += delegate { window.Close(); };
-            window.GainedFocus += delegate { Input.MouseReturn(); };
-            window.LostFocus += delegate { Input.MouseLost(); };
-            window.Clear(Color.Red);
-            window.SetFramerateLimit(60); // lock at 60 Hz
-        }
-
-        public static bool IsKeyPressed(Keyboard.Key k)
-        {
-            return Keyboard.IsKeyPressed(k);
+            s_Window.SetFullscreen(f);
         }
 
         private static void AutoExec()
         {
-            if (Filesystem.GetPath("cfg/autoexec.cfg") != null)
-                Cmd.Exec(Filesystem.Open("autoexec.cfg"));
+            if (filesystem.Exists("cfg/autoexec.cfg"))
+                cmd.Exec(filesystem.Open("autoexec.cfg"));
 
-            if (Filesystem.GetPath(Cmd.cfgpath) != null)
-                Cmd.Exec(Filesystem.Open(Cmd.cfgpath));
+            if (filesystem.Exists(cmd.cfgpath))
+                cmd.Exec(filesystem.Open(cmd.cfgpath));
         }
 
-        private static void Render()
+        internal static void Render()
         {
-            Statemanager.current.Render();
+            statemanager.current.Render();
         }
 
-        private static void Tick()
+        internal static void Tick()
         {
-            Discordrpc.Runcallbacks();
-            Statemanager.current.Update();
-            Input.Update();
+            ftime = (float)_fclock.Elapsed.TotalSeconds;
+            _fclock.Restart();
+
+            frame++;
+            if (frame > 60)
+                frame = 1;
+
+            if (frame % 10 == 0) fps = 1.0f / ftime;
+
+            winconsole.Tick();
+            discordrpc.Runcallbacks();
+
+            audio.Tick();
+            statemanager.current.Update();
+            input.Update();
         }
 
-        public static uint UintColor(uint r, uint g, uint b)
-        {
-            return (r << 16) | (g << 8) | b;
-        }
-
-        public static uint UintColor(Color c)
-        {
-            return (uint) ((c.R << 16) | (c.G << 8) | c.B);
-        }
-
-        public static Color ColorUint(uint col)
-        {
-            return new Color(Convert.ToByte((col >> 16) & 255), Convert.ToByte((col >> 8) & 255),
-                Convert.ToByte(col & 255));
-        }
-
-        public static uint MixColor(Color c1, Color c2, int div)
+        public static Color MixColor(Color c1, Color c2, int div)
         {
             var r = Math.Min(c1.R + c2.R / div, 255);
             var g = Math.Min(c1.G + c2.G / div, 255);
             var b = Math.Min(c1.B + c2.B / div, 255);
-            return UintColor(new Color(Convert.ToByte(r), Convert.ToByte(g), Convert.ToByte(b)));
+            return Color.FromArgb(Convert.ToByte(r), Convert.ToByte(g), Convert.ToByte(b));
         }
     }
 }

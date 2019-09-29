@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace engine.Properties {
+namespace Quiver.Properties {
     using System;
     
     

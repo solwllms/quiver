@@ -1,11 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{F91FE20A-32B0-4D45-BAE3-DF7212F1E018}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <RootNamespace>engine</RootNamespace>
     <AssemblyName>quiver</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
@@ -26,6 +26,9 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -36,6 +39,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -45,6 +49,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>
@@ -57,103 +62,120 @@
     <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="display\d_transitions.cs" />
-    <Compile Include="display\w_animation.cs" />
-    <Compile Include="game\gmbase.cs" />
-    <Compile Include="game\map.cs" />
-    <Compile Include="game\types\monster.cs" />
-    <Compile Include="game\types\dirsprite.cs" />
+    <Compile Include="Audio\a_audio.cs" />
+    <Compile Include="Audio\a_soundfile.cs" />
+    <Compile Include="Display\d_transitions.cs" />
+    <Compile Include="Display\w_animation.cs" />
+    <Compile Include="Game\gmbase.cs" />
+    <Compile Include="Game\map.cs" />
+    <Compile Include="Game\types\monster.cs" />
+    <Compile Include="Game\types\dirsprite.cs" />
+    <Compile Include="Progs\securityPrompt.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="states\options\OptionButton.cs" />
-    <Compile Include="states\options\OptionGap.cs" />
-    <Compile Include="states\options\OptionHeader.cs" />
-    <Compile Include="states\options\OptionListing.cs" />
-    <Compile Include="states\options\OptionMulti.cs" />
-    <Compile Include="states\options\OptionSlider.cs" />
-    <Compile Include="states\options\OptionText.cs" />
-    <Compile Include="system\discordrpc.cs" />
-    <Compile Include="progs\p_dll.cs" />
-    <Compile Include="game\types\weapon.cs" />
-    <Compile Include="states\game.cs" />
-    <Compile Include="game\types\mapcell.cs" />
-    <Compile Include="game\types\projectile.cs" />
-    <Compile Include="game\types\sprite.cs" />
-    <Compile Include="system\s_hardware.cs" />
-    <Compile Include="system\s_keys.cs" />
-    <Compile Include="system\s_lvl.cs" />
-    <Compile Include="system\s_lang.cs" />
-    <Compile Include="system\s_saves.cs" />
-    <Compile Include="system\s_vector.cs" />
-    <Compile Include="game\types\entity.cs" />
-    <Compile Include="game\world.cs" />
+    <Compile Include="States\loading.cs" />
+    <Compile Include="States\options\OptionButton.cs" />
+    <Compile Include="States\options\OptionGap.cs" />
+    <Compile Include="States\options\OptionHeader.cs" />
+    <Compile Include="States\options\OptionListing.cs" />
+    <Compile Include="States\options\OptionMulti.cs" />
+    <Compile Include="States\options\OptionSlider.cs" />
+    <Compile Include="States\options\OptionText.cs" />
+    <Compile Include="System\DiscordRPC.cs" />
+    <Compile Include="Progs\p_dll.cs" />
+    <Compile Include="Game\types\weapon.cs" />
+    <Compile Include="States\game.cs" />
+    <Compile Include="Game\types\mapcell.cs" />
+    <Compile Include="Game\types\projectile.cs" />
+    <Compile Include="Game\types\sprite.cs" />
+    <Compile Include="System\RGBDevice.cs" />
+    <Compile Include="System\s_keys.cs" />
+    <Compile Include="System\s_lvl.cs" />
+    <Compile Include="System\s_lang.cs" />
+    <Compile Include="System\s_saves.cs" />
+    <Compile Include="System\s_vector.cs" />
+    <Compile Include="Game\types\entity.cs" />
+    <Compile Include="Game\world.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="states\prompt.cs" />
-    <Compile Include="system\s_cache.cs" />
-    <Compile Include="system\s_audio.cs" />
-    <Compile Include="system\s_cmd.cs" />
-    <Compile Include="states\console.cs" />
-    <Compile Include="system\s_engine.cs" />
-    <Compile Include="system\s_langext.cs" />
-    <Compile Include="system\s_filesystem.cs" />
-    <Compile Include="display\d_gui.cs" />
-    <Compile Include="progs\p_progs.cs" />
-    <Compile Include="system\s_cmd_gen.cs" />
-    <Compile Include="system\s_input.cs" />
-    <Compile Include="game\player.cs" />
-    <Compile Include="display\d_renderer.cs" />
-    <Compile Include="display\d_screen.cs" />
-    <Compile Include="system\s_log.cs" />
-    <Compile Include="system\s_astarpath.cs" />
-    <Compile Include="system\s_pqueue.cs" />
-    <Compile Include="system\s_state.cs" />
-    <Compile Include="display\d_texture.cs" />
-    <Compile Include="system\s_vis.cs" />
+    <Compile Include="States\prompt.cs" />
+    <Compile Include="System\s_cache.cs" />
+    <Compile Include="System\s_cmd.cs" />
+    <Compile Include="States\console.cs" />
+    <Compile Include="System\s_engine.cs" />
+    <Compile Include="System\s_langext.cs" />
+    <Compile Include="System\s_filesystem.cs" />
+    <Compile Include="Display\d_gui.cs" />
+    <Compile Include="Progs\p_loader.cs" />
+    <Compile Include="System\s_cmd_gen.cs" />
+    <Compile Include="System\s_input.cs" />
+    <Compile Include="Game\player.cs" />
+    <Compile Include="Display\d_renderer.cs" />
+    <Compile Include="Display\d_screen.cs" />
+    <Compile Include="System\s_log.cs" />
+    <Compile Include="System\s_pathfinding.cs" />
+    <Compile Include="System\s_pqueue.cs" />
+    <Compile Include="System\s_state.cs" />
+    <Compile Include="Display\d_texture.cs" />
+    <Compile Include="System\s_vis.cs" />
+    <Compile Include="System\s_window.cs" />
+    <Compile Include="System\WinConsole.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="sfmlnet-audio-2">
-      <HintPath>..\lib\sfmlnet-audio-2.dll</HintPath>
+    <Reference Include="OpenTK">
+      <HintPath>..\lib\OpenTK.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="sfmlnet-graphics-2">
-      <HintPath>..\lib\sfmlnet-graphics-2.dll</HintPath>
+    <Reference Include="RGB.NET.Core">
+      <HintPath>..\lib\RGB.NET.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="sfmlnet-system-2">
-      <HintPath>..\lib\sfmlnet-system-2.dll</HintPath>
+    <Reference Include="RGB.NET.Devices.CoolerMaster">
+      <HintPath>..\lib\RGB.NET.Devices.CoolerMaster.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="sfmlnet-window-2">
-      <HintPath>..\lib\sfmlnet-window-2.dll</HintPath>
+    <Reference Include="RGB.NET.Devices.Corsair">
+      <HintPath>..\lib\RGB.NET.Devices.Corsair.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="System" />
+    <Reference Include="RGB.NET.Devices.Razer">
+      <HintPath>..\lib\RGB.NET.Devices.Razer.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System">
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Management" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
+    <Reference Include="System.IO.Compression, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Windows.Forms">
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="System.Xml">
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\error.png" />
+    <EmbeddedResource Include="Resources\error.png" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="icon.ico" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="resources\App.config" />
+    <None Include="Resources\App.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -172,4 +194,33 @@
     </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\packages\RGB.NET.Resources.Asus.0.1.0\build\RGB.NET.Resources.Asus.targets" Condition="Exists('..\packages\RGB.NET.Resources.Asus.0.1.0\build\RGB.NET.Resources.Asus.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\RGB.NET.Resources.Asus.0.1.0\build\RGB.NET.Resources.Asus.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\RGB.NET.Resources.Asus.0.1.0\build\RGB.NET.Resources.Asus.targets'))" />
+    <Error Condition="!Exists('..\packages\RGB.NET.Resources.CoolerMaster.0.1.0\build\RGB.NET.Resources.CoolerMaster.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\RGB.NET.Resources.CoolerMaster.0.1.0\build\RGB.NET.Resources.CoolerMaster.targets'))" />
+    <Error Condition="!Exists('..\packages\RGB.NET.Resources.Corsair.0.1.0\build\RGB.NET.Resources.Corsair.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\RGB.NET.Resources.Corsair.0.1.0\build\RGB.NET.Resources.Corsair.targets'))" />
+    <Error Condition="!Exists('..\packages\RGB.NET.Resources.Logitech.0.1.0\build\RGB.NET.Resources.Logitech.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\RGB.NET.Resources.Logitech.0.1.0\build\RGB.NET.Resources.Logitech.targets'))" />
+    <Error Condition="!Exists('..\packages\RGB.NET.Resources.Novation.0.1.0\build\RGB.NET.Resources.Novation.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\RGB.NET.Resources.Novation.0.1.0\build\RGB.NET.Resources.Novation.targets'))" />
+    <Error Condition="!Exists('..\packages\RGB.NET.Resources.Razer.0.1.0\build\RGB.NET.Resources.Razer.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\RGB.NET.Resources.Razer.0.1.0\build\RGB.NET.Resources.Razer.targets'))" />
+    <Error Condition="!Exists('..\packages\RGB.NET.Devices.Asus.0.0.1.39\build\net45\RGB.NET.Devices.Asus.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\RGB.NET.Devices.Asus.0.0.1.39\build\net45\RGB.NET.Devices.Asus.targets'))" />
+    <Error Condition="!Exists('..\packages\RGB.NET.Devices.CoolerMaster.0.0.1.39\build\net45\RGB.NET.Devices.CoolerMaster.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\RGB.NET.Devices.CoolerMaster.0.0.1.39\build\net45\RGB.NET.Devices.CoolerMaster.targets'))" />
+    <Error Condition="!Exists('..\packages\RGB.NET.Devices.Corsair.0.0.1.39\build\net45\RGB.NET.Devices.Corsair.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\RGB.NET.Devices.Corsair.0.0.1.39\build\net45\RGB.NET.Devices.Corsair.targets'))" />
+    <Error Condition="!Exists('..\packages\RGB.NET.Devices.Razer.0.0.1.39\build\net45\RGB.NET.Devices.Razer.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\RGB.NET.Devices.Razer.0.0.1.39\build\net45\RGB.NET.Devices.Razer.targets'))" />
+  </Target>
+  <Import Project="..\packages\RGB.NET.Resources.CoolerMaster.0.1.0\build\RGB.NET.Resources.CoolerMaster.targets" Condition="Exists('..\packages\RGB.NET.Resources.CoolerMaster.0.1.0\build\RGB.NET.Resources.CoolerMaster.targets')" />
+  <Import Project="..\packages\RGB.NET.Resources.Corsair.0.1.0\build\RGB.NET.Resources.Corsair.targets" Condition="Exists('..\packages\RGB.NET.Resources.Corsair.0.1.0\build\RGB.NET.Resources.Corsair.targets')" />
+  <Import Project="..\packages\RGB.NET.Resources.Logitech.0.1.0\build\RGB.NET.Resources.Logitech.targets" Condition="Exists('..\packages\RGB.NET.Resources.Logitech.0.1.0\build\RGB.NET.Resources.Logitech.targets')" />
+  <Import Project="..\packages\RGB.NET.Resources.Novation.0.1.0\build\RGB.NET.Resources.Novation.targets" Condition="Exists('..\packages\RGB.NET.Resources.Novation.0.1.0\build\RGB.NET.Resources.Novation.targets')" />
+  <Import Project="..\packages\RGB.NET.Resources.Razer.0.1.0\build\RGB.NET.Resources.Razer.targets" Condition="Exists('..\packages\RGB.NET.Resources.Razer.0.1.0\build\RGB.NET.Resources.Razer.targets')" />
+  <Import Project="..\packages\RGB.NET.Devices.Asus.0.0.1.39\build\net45\RGB.NET.Devices.Asus.targets" Condition="Exists('..\packages\RGB.NET.Devices.Asus.0.0.1.39\build\net45\RGB.NET.Devices.Asus.targets')" />
+  <Import Project="..\packages\RGB.NET.Devices.CoolerMaster.0.0.1.39\build\net45\RGB.NET.Devices.CoolerMaster.targets" Condition="Exists('..\packages\RGB.NET.Devices.CoolerMaster.0.0.1.39\build\net45\RGB.NET.Devices.CoolerMaster.targets')" />
+  <Import Project="..\packages\RGB.NET.Devices.Corsair.0.0.1.39\build\net45\RGB.NET.Devices.Corsair.targets" Condition="Exists('..\packages\RGB.NET.Devices.Corsair.0.0.1.39\build\net45\RGB.NET.Devices.Corsair.targets')" />
+  <Import Project="..\packages\RGB.NET.Devices.Razer.0.0.1.39\build\net45\RGB.NET.Devices.Razer.targets" Condition="Exists('..\packages\RGB.NET.Devices.Razer.0.0.1.39\build\net45\RGB.NET.Devices.Razer.targets')" />
+  <PropertyGroup>
+    <PostBuildEvent>RD /S /Q $(OutDir)Images\
+RD /S /Q $(OutDir)Layouts\</PostBuildEvent>
+  </PropertyGroup>
 </Project>

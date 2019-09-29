@@ -1,25 +1,31 @@
-﻿using System;
-using System.Linq;
-using SFML.Graphics;
+﻿#region
 
-namespace engine.display
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+
+#endregion
+
+namespace Quiver.display
 {
-    public class Gui
+    public class gui
     {
         public const int CHARSACROSS = 26;
         public const int WIDELINE = 3;
-        public static Texture font;
+        public static texture font;
 
-        public static Color lighter = new Color(158, 58, 129);
-        public static Color darker = new Color(79, 29, 64);
+        public static Color lighter = Color.FromArgb(174, 234, 0);
+        public static Color darker = Color.FromArgb(36, 196, 50);
+        public static Color back = Color.FromArgb(48, 48, 48);
 
         public static char[] chars =
         {
             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
             'V', 'W', 'X', 'Y', 'Z',
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '!', '?', '\'', ',', '.', '-', ':', ';', '"', '(', ')',
-            '[', ']', '<', '>', '∙',  
-            '_', '/', '\\', '+', '=','$', 'É', 'Í',  'Á', 'Ú', 'Ñ', 'Ü', 'Ö', 'Ä', 'Ê', 'Í', 'Ô', 'À', 'Ç'
+            '[', ']', '<', '>', '∙',
+            '_', '/', '\\', '+', '=', '$', 'É', 'Í', 'Á', 'Ú', 'Ñ', 'Ü', 'Ö', 'Ä', 'Ê', 'Í', 'Ô', 'À', 'Ç', '{'
         };
 
         public static char[] wideChars =
@@ -29,19 +35,30 @@ namespace engine.display
 
         public static void Init()
         {
-            font = new Texture("gui/font");
+            font = new texture("gui/font");
         }
 
         public static void Draw(uint x, uint y, uint rw, uint ry, Color col)
         {
             for (uint tx = 0; tx < rw; tx++)
             for (uint ty = 0; ty < ry; ty++)
-                Screen.SetPixel(x + tx, y + ty, col);
+                screen.SetPixel(x + tx, y + ty, col);
+        }
+
+        // gameplay ui
+        public static void Prompt(string s, int a = -1)
+        {
+            WriteCentre(s, screen.height / 2 - 3, a);
+        }
+
+        public static void PromptBottom(string s)
+        {
+            WriteCentre(s, 70);
         }
 
         public static void WriteCentered(string s, uint y, Color c)
         {
-            Write(s, (uint) (Screen.width / 2 - s.Length * 4 / 2), y, c);
+            Write(s, (uint) (screen.width / 2 - s.Length * 4 / 2), y, c);
         }
 
         public static void WritePixels(uint x, uint y, uint width, uint height, uint col)
@@ -53,12 +70,12 @@ namespace engine.display
 
         public static void WritePixel(uint x, uint y, uint col)
         {
-            Screen.SetPixel(x, y, col);
+            screen.SetPixel(x, y, col);
         }
 
-        public static void WriteCentre(string t, uint y)
+        public static void WriteCentre(string t, uint y, int a = -1)
         {
-            Write(t, (uint)((Screen.width - GetStringWidth(t)) / 2) - 2, y);
+            Write(t, (uint) ((screen.width - GetStringWidth(t)) / 2) - 2, y, a);
         }
 
         public static void Write(object obj, uint x, uint y, int a = -1)
@@ -106,20 +123,20 @@ namespace engine.display
                         ? ((fx + fy) % 2 == 0 ? Color.White : Color.Black)
                         : font.GetPixel((uint) (cx * w + fx), (uint) (cy * 6 + fy));
 
-                    if (color != Color.Black && y + fy > 0 && IsOnScreen((int) x + fx, (int) y + fy))
+                    if (color.ToArgb() != Color.Black.ToArgb() && y + fy > 0 && IsOnScreen((int) x + fx, (int) y + fy))
                     {
                         //paint pixel if it isn't black
 
                         if (alpha == -1)
                         {
-                            Screen.SetPixel((uint) (x + fx), (uint) (y + fy), col);
+                            screen.SetPixel((uint) (x + fx), (uint) (y + fy), col);
                         }
                         else
                         {
-                            var a = system.Engine.ColorUint(Screen.GetPixel((uint) (x + fx), (uint) (y + fy)));
-                            var b = new Color(255, 255, 255);
+                            var a = screen.GetPixel((uint) (x + fx), (uint) (y + fy));
+                            var b = Color.FromArgb(255, 255, 255);
 
-                            Screen.SetPixel((uint) (x + fx), (uint) (y + fy), system.Engine.MixColor(a, b, alpha));
+                            screen.SetPixel((uint) (x + fx), (uint) (y + fy), engine.MixColor(a, b, alpha));
                         }
                     }
                 }
@@ -127,41 +144,60 @@ namespace engine.display
             x += (uint) w;
         }
 
+        public static string[] GetTruncatedLines(string msg, int charLen)
+        {
+            string[] words = msg.Split(' ');
+            List<String> old = new List<string>();
+
+            string cur = "";
+            for (int i = 0; i < words.Length; i++)
+            {
+                if (cur.Length >= charLen)
+                {
+                    old.Add(cur);
+                    cur = "";
+                }
+
+                cur += words[i] + " ";
+            }
+            old.Add(cur);
+            return old.ToArray();
+        }
+
         public static int GetStringWidth(string text)
         {
-            int c = 0;
+            var c = 0;
             foreach (var t in text) c += wideChars.Contains(t) ? 6 : 4;
             return c;
         }
 
-        public static void DrawTexture(Texture tex, int sx, int sy)
+        public static void DrawTexture(texture tex, int sx, int sy)
         {
-            DrawTexture(tex, sx, sy, (int) tex.Size.X, (int) tex.Size.Y);
+            DrawTexture(tex, sx, sy, (int) tex.Width, (int) tex.Height);
         }
 
-        public static void DrawTexture(Texture tex, int sx, int sy, int w, int h)
+        public static void DrawTexture(texture tex, int sx, int sy, int w, int h)
         {
             for (var x = 0; x < w; x++)
             for (var y = 0; y < h; y++)
             {
                 var c = tex.GetPixel((uint) x, (uint) y);
-                if (c != Renderer.magicpink && IsOnScreen(x + sx, y + sy))
-                    Screen.SetPixel((uint) (x + sx), (uint) (y + sy), c);
+                if (c != renderer.magicpink && IsOnScreen(x + sx, y + sy))
+                    screen.SetPixel((uint) (x + sx), (uint) (y + sy), c);
             }
         }
 
-        public static void DrawStencil(Texture tex, int sx, int sy, int w, int h, Color c)
+        public static void DrawStencil(texture tex, int sx, int sy, int w, int h, Color c)
         {
             for (var x = 0; x < w; x++)
             for (var y = 0; y < h; y++)
-                if (c != Renderer.magicpink && IsOnScreen(x + sx, y + sy))
-                    Screen.SetPixel((uint) (x + sx), (uint) (y + sy), c);
+                if (c != renderer.magicpink && IsOnScreen(x + sx, y + sy))
+                    screen.SetPixel((uint) (x + sx), (uint) (y + sy), c);
         }
 
         private static bool IsOnScreen(int x, int y)
         {
-            return x < Screen.width && y < Screen.height
-                                    && x >= 0 && y >= 0;
+            return x < screen.width && y < screen.height && x >= 0 && y >= 0;
         }
     }
 }

@@ -1,25 +1,31 @@
-﻿using engine.system;
+﻿#region
 
-namespace engine.game.types
+using Quiver.Audio;
+using Quiver.system;
+
+#endregion
+
+namespace Quiver.game.types
 {
-    public class Projectile : Sprite
+    public class projectile : sprite
     {
         private readonly string _hitsound;
+        protected int maxdmg;
 
-        protected int mindmg = 0;
-        protected int maxdmg = 0;
+        protected int mindmg;
 
-        public Projectile(string texture, string hitsound, Vector pos, Vector dir, float speed, int mindmg, int maxdmg) : base(texture, pos,
+        public projectile(string texture, string hitsound, vector pos, vector dir, float speed, int mindmg,
+            int maxdmg) : base(texture, pos,
             false)
         {
-            this._hitsound = hitsound;
+            _hitsound = hitsound;
 
             this.mindmg = mindmg;
             this.maxdmg = maxdmg;
 
             sprwidth = 8;
             health = 100;
-            stateLive = Livestate.Alive;
+            stateLive = livestate.Alive;
             velocity = dir / (100 - speed);
         }
 
@@ -27,9 +33,9 @@ namespace engine.game.types
         {
             base.Tick();
 
-            if (pos.DistanceTo(World.Player.pos) < 0.1)
+            if (pos.DistanceTo(world.Player.pos) < 0.1)
             {
-                World.Player.DoDamage((byte) system.Engine.random.Next(mindmg, maxdmg));
+                world.Player.DoDamage((byte) engine.random.Next(mindmg, maxdmg));
                 OnCollide();
             }
         }
@@ -38,7 +44,7 @@ namespace engine.game.types
         {
             base.OnCollide();
 
-            Audio.PlaySound3D(_hitsound, pos, 40);
+            audio.PlaySound3D(_hitsound, pos, 40);
             Destroy();
         }
     }

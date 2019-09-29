@@ -1,115 +1,75 @@
-﻿using System;
-using engine.display;
-using engine.game;
-using SFML.Window;
-using Console = engine.states.Console;
+﻿#region
 
-namespace engine.system
+using System;
+using Quiver.display;
+using Quiver.game;
+using Quiver.states;
+using Quiver.system;
+using OpenTK.Input;
+
+#endregion
+
+namespace Quiver
 {
-    public partial class Cmd
+    public partial class cmd
     {
-        public static void Setupcommands()
+        public static cvar cvarCheats = new cvar("cheats", "0", false, true);
+        public static cvar cvarDebug = new cvar("debug", "0", false, true, cheat: true);
+        public static cvar cvarDir = new cvar("dir", "quiver", readOnly: true);
+        public static cvar cvarDifficulty = new cvar("difficulty", "normal", true);
+
+        internal static void SetupCMDs()
         {
+#if DEBUG
+            cvarDebug.Set("1");
+#else
+            cvarDebug.Set("0");
+#endif
+
             // system
-            Register("bind", new Command(Bind, "bind [key] [command]", true));
-            Register("help", new Command(Help));
-            Register("exit", new Command(delegate
+            Register("bind", new command(Bind, "bind [key] [command]", true));
+            Register("help", new command(Help));
+            Register("exit", new command(delegate
             {
-                Engine.Exit();
+                engine.Exit();
                 return true;
             }));
-            new Cvar("language", "english", true, callback: delegate
+
+            Register("ls", new command(filesystem.PrintPaks, "ls <search>"));
+
+            new cvar("language", "english", true,
+                callback: delegate { lang.LoadLang(lang.langfiles[Array.IndexOf(lang.langs, GetValue("language"))]); });
+            Register("map", new command(delegate(string[] p)
             {
-                Lang.LoadLang(Lang.langfiles[Array.IndexOf(Lang.langs, GetValue("language"))]);
-            });
-            Register("map", new Command(delegate (string[] p)
-            {
-                World.LoadLevel("maps/"+p[0]+".lvl", true);
+                string f = "maps/" + p[0] + ".lvl";
+                if (!filesystem.Exists(f))
+                {
+                    log.WriteLine("failed to find level '"+f+"'", log.LogMessageType.Error);
+                    return false;
+                }
+                level.Load(f, true);
                 return true;
             }, "map [name]"));
-            new Cvar("nointro", "0", true, true);
-            Register("toggleconsole", new Command(delegate
+            new cvar("nointro", "0", true, true);
+            Register("toggleconsole", new command(delegate
             {
-                if (Statemanager.current.GetType() != typeof(Console))
-                    Statemanager.SetState(new Console());
+                if (statemanager.current.GetType() != typeof(console))
+                    statemanager.SetState(new console());
                 else
-                    Statemanager.GoBack();
+                    statemanager.GoBack();
                 return true;
             }));
-            Bind(Keyboard.Key.Tilde, "toggleconsole");
+            Bind(Key.Tilde, "toggleconsole");
 
-            Register("screenshot", new Command(delegate
+            Register("screenshot", new command(delegate
             {
-                Screen.WriteScreenshot();
+                screen.WriteScreenshot();
                 return true;
             }));
-            Bind(Keyboard.Key.F11, "screenshot");
-
-            /*
-            // demos
-            register("record", new command(delegate (string[] p) {
-                if (p.Length < 1)
-                    return false;
-
-                cmd.recdemo = true;
-                logger.WriteLine("demo recording started..");
-                //demofile.StartWriting(p[0]);
-                cmd.frames = 0;
-                return true;
-            }, "record [filename]"));
-            register("stop", new command(delegate (string[] p) {
-                if (cmd.recdemo)
-                {
-                    cmd.recdemo = false;
-                    logger.WriteLine("demo recording stopped..");
-                    demofile.StopWriting();
-                }
-                return true;
-            }));
-            register("play", new command(delegate (string[] p) {
-                if (p.Length < 1)
-                    return false;
-
-                if (cmd.recdemo)
-                    return false;
-
-                //statemanager.SetState(new demo(p[0]));
-                return true;
-            }, "play [demoname]"));
-            */
-
-            // general game
-            new Cvar("cheats", "0", false, true);
-            new Cvar("debug", "0", false, true, cheat: true);
-            new Cvar("dir", "quiver", readOnly: true);
-            new Cvar("difficulty", "normal", true);
-
-            // renderer
-            new Cvar("showfps", "0", true, true);
-            new Cvar("fullscreen", "0", true, true,
-                callback: delegate { Engine.SetFullscreen(GetValueb("fullscreen")); });
-
-            // audio
-            new Cvar("audio", "1", true, true, callback: delegate
-            {
-                if (GetValueb("audio"))
-                    Audio.Init();
-                else
-                    Audio.Dispose();
-            });
-            new Cvar("volume", "100", true, callback: delegate { Audio.Volume = (int) GetValuef("volume"); });
-            new Cvar("musicvol", "20", true, callback: delegate { Audio.UpdateVolumes(); });
-
-            // discord rpc
-            new Cvar("rpc", "1", true, true, callback: delegate
-            {
-                if (GetValueb("rpc"))
-                    Discordrpc.Init();
-                else
-                    Discordrpc.Shutdown();
-            });
-
-            Player.Initcmds();
+            Bind(Key.F11, "screenshot");
+            
+            // sets up movement commands ect.
+            player.Initcmds();
         }
     }
 }

@@ -1,14 +1,18 @@
-﻿using System;
+﻿#region
+
+using System;
+using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
-using SFML.Graphics;
-using Console = engine.states.Console;
+using Quiver.states;
 
-namespace engine.system
+#endregion
+
+namespace Quiver.system
 {
-    public class Log
+    public class log
     {
-        public enum MessageType
+        public enum LogMessageType
         {
             Message,
             Error,
@@ -19,18 +23,18 @@ namespace engine.system
 
         private static string _logFile;
 
-        public static void Init()
+        internal static void Init()
         {
-            _logFile = Filesystem.GetPath("log.txt", true);
+            _logFile = filesystem.GetPath("log.txt", true);
 
             WriteLine("using log file " + _logFile);
         }
 
-        public static void WriteLine(object line, MessageType type = MessageType.Message)
+        public static void WriteLine(object line, LogMessageType type = LogMessageType.Message)
         {
-            if (type == MessageType.Error)
+            if (type == LogMessageType.Error || type == LogMessageType.Fatal)
                 line = "ERROR: " + line;
-            if (type == MessageType.Warning)
+            if (type == LogMessageType.Warning)
                 line = "WARNING: " + line;
 
             DebugLine(line, type);
@@ -40,34 +44,36 @@ namespace engine.system
                 {
                     w.WriteLine(DateTime.Now.ToString("[yyyy-MM-dd HH:mm:ss]") + " " + line);
                 }
-
-            if (type == MessageType.Fatal)
-                ThrowFatal(line.ToString());
         }
 
-        public static void ThrowFatal(string line)
+        public static void ThrowFatal(string line, Exception e = null)
         {
+            WriteLine(line, LogMessageType.Fatal);
+
+            if(e != null && cmd.cvarDebug.Valueb())
+            {
+                WriteLine(e.Message + " (" + e.Source + ")");
+                WriteLine(e.StackTrace);
+            }
+
             MessageBox.Show(line, "FATAL ERROR!");
             Environment.Exit(-1);
         }
 
         // Logs to the console and not to a file for speed reasons. (Handy for printing alot! - or stuff nobody cares about for debugging)
-        public static void DebugLine(object line, MessageType type = MessageType.Message)
+        public static void DebugLine(object line, LogMessageType type = LogMessageType.Message)
         {
             var color =
-                type == MessageType.Error ? Color.Red :
-                type == MessageType.Warning ? Color.Yellow :
-                type == MessageType.Good ? Color.Green : Color.White;
-            Console.Print(line.ToString(), color);
+                type == LogMessageType.Error ? Color.Red :
+                type == LogMessageType.Warning ? Color.Yellow :
+                type == LogMessageType.Good ? Color.Green : Color.White;
+            console.Print(line.ToString(), color);
 
-            if (type == MessageType.Fatal)
-                ThrowFatal(line.ToString());
-
-            System.Console.ForegroundColor =
-                type == MessageType.Error ? ConsoleColor.Red :
-                type == MessageType.Warning ? ConsoleColor.Yellow :
-                type == MessageType.Good ? ConsoleColor.Green : ConsoleColor.White;
-            System.Console.WriteLine(DateTime.Now.ToString("[HH:mm:ss] ") + line);
+            Console.ForegroundColor =
+                type == LogMessageType.Error ? ConsoleColor.Red :
+                type == LogMessageType.Warning ? ConsoleColor.Yellow :
+                type == LogMessageType.Good ? ConsoleColor.Green : ConsoleColor.White;
+            Console.WriteLine(DateTime.Now.ToString("[HH:mm:ss] ") + line);
         }
     }
 }

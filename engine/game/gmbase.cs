@@ -1,12 +1,16 @@
-﻿namespace engine.game
+﻿namespace Quiver.game
 {
-    public class Gmbase
+    public class gmbase
     {
         public virtual void Start()
         {
         }
 
         public virtual void Tick()
+        {
+        }
+
+        public virtual void DrawHud()
         {
         }
 

@@ -1,23 +1,23 @@
-﻿using engine.display;
-using engine.game;
-using engine.game.types;
-using engine.progs;
-using engine.system;
+﻿#region
+
+using Quiver;
+using Quiver.Audio;
+using Quiver.display;
+using Quiver.game;
+using Quiver.game.types;
+using Quiver.system;
+
+#endregion
 
 namespace game.entities
 {
-    internal class m_Eye : Monster
+    internal class m_Eye : monster
     {
-        static Animation death = new Animation("sprites/eye_death", 0, 6, false);
+        private static readonly animation Death = new animation("sprites/eye_death", 0, 6, false);
 
-        public m_Eye(Vector pos) : base(pos, "sprites/eye_rot")
+        public m_Eye(vector pos) : base(pos, "sprites/eye_rot")
         {
             SetRotational();
-        }
-
-        public override void Tick()
-        {
-            base.Tick();
         }
 
         public override void AliveTick()
@@ -25,7 +25,7 @@ namespace game.entities
             if (timer % 160 == 0)
             {
                 timer = 0;
-                GoTo(World.Player.pos);
+                GoTo(world.Player.pos);
 
                 if (CanSeePlayer(7))
                 {
@@ -33,29 +33,28 @@ namespace game.entities
                     timer = 0;
                 }
             }
-            else if(timer % 240 == 0)
-                Audio.PlaySound3D("sound/eye/eyeidle" + engine.system.Engine.random.Next(1, 2), pos, 70);
+            else if (timer % 240 == 0)
+            {
+                audio.PlaySound3D("sound/eye/eyeidle" + Quiver.engine.random.Next(1, 2), pos, 70);
+            }
         }
 
-        void Shoot()
+        private void Shoot()
         {
-            World.AddEnt((Ent)Progs.CreateEnt(2, pos, World.Player.pos + World.Player.velocity - pos));
+            world.AddEnt((ent) progs.CreateEnt(2, pos, world.Player.pos + world.Player.velocity - pos));
         }
 
         public override void DyingTick()
         {
-            if (anim != death) SetAnim(death);
-            else if (anim.playing == false)
-            {
-                SetState(Livestate.Dead);
-            }
+            if (anim != Death) SetAnim(Death);
+            else if (anim.playing == false) SetState(livestate.Dead);
         }
 
         public override void OnKilled()
         {
-            SetAnim(death);
+            SetAnim(Death);
             anim.Stop();
-            Audio.PlaySound3D("sound/eye/eyekill", pos, 200);
+            audio.PlaySound3D("sound/eye/eyekill", pos, 200);
         }
 
         public override void DeadTick()
@@ -66,7 +65,7 @@ namespace game.entities
         public override void DoDamage(byte damage)
         {
             base.DoDamage(damage);
-            Audio.PlaySound3D("sound/eye/eyepain", pos);
+            audio.PlaySound3D("sound/eye/eyepain", pos);
         }
     }
 }

@@ -1,29 +1,37 @@
-﻿using engine.display;
-using engine.system;
-using SFML.Graphics;
-using SFML.Window;
+﻿#region
+
+using System.Drawing;
+using Quiver.Audio;
+using Quiver.display;
+using Quiver.system;
+using OpenTK.Input;
+
+#endregion
 
 namespace game.states
 {
-    public class Gameover : IState
+    public class gameover : IState
     {
-        private Transition _fade;
+        private transition _fade;
 
         void IState.Init()
         {
-            _fade = new Wipe();
-            Audio.PlayTrack("music/dead", true, 200);
+            _fade = new wipe();
+            audio.PlayTrack("music/dead", 200, true);
+        }
+
+        void IState.Focus()
+        {
         }
 
         void IState.Render()
         {
-            for (uint i = 0; i < Screen.width * Screen.height; i++)
-                Screen.SetPixel(i % Screen.width, i / Screen.width, new Color(107, 19, 0));
+            for (uint i = 0; i < screen.width * screen.height; i++)
+                screen.SetPixel(i % screen.width, i / screen.width, Color.FromArgb(107, 19, 0));
 
-            Gui.Write("MISSION FAILED", 10, 38, Color.White);
-            Gui.Write("THE DEAD HAVE NO VOICE", 10, 46, Color.White);
+            gui.Write("MISSION FAILED", 10, 38, Color.White);
 
-            Cache.GetTexture("gui/skull").Draw(100, 19);
+            cache.GetTexture("gui/skull").Draw(100, 19);
 
             _fade.Draw();
         }
@@ -33,15 +41,11 @@ namespace game.states
             if (!_fade.IsDone())
                 return;
 
-            if (Input.IsKeyPressed(Keyboard.Key.Escape))
-            {
-                Statemanager.SetState(new Menu());
-            }
+            if (input.IsKeyPressed(Key.Escape)) statemanager.SetState(new menu());
         }
 
         public void Dispose()
         {
-
         }
     }
 }

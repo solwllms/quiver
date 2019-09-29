@@ -1,28 +1,104 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
-using engine.display;
-using engine.states.options;
-using engine.system;
-using SFML.Graphics;
-using SFML.Window;
+using Quiver;
+using Quiver.Audio;
+using Quiver.display;
+using Quiver.states.options;
+using Quiver.system;
+using OpenTK.Input;
+
+#endregion
 
 namespace game.states
 {
-    public class ControlsKeys : IState
+    public class controlsKeys : IState
     {
-        Dictionary<OptionListing, string> _listings;
-        
-        static int _cursor = 0;
-        bool _selected = false;
+        private static int _cursor;
+        private Dictionary<optionListing, string> _listings;
+        private bool _selected;
 
         void IState.Init()
         {
-            _listings = new Dictionary<OptionListing, string>();
+            _listings = new Dictionary<optionListing, string>();
             Populate();
         }
 
-        void Populate() {
+        void IState.Focus()
+        {
+        }
+
+        void IState.Render()
+        {
+            for (uint i = 0; i < screen.width * screen.height; i++)
+            {
+                var x = i % screen.width;
+                var y = i / screen.width;
+                screen.SetPixel(x, y, gui.darker);
+            }
+
+            if (!_selected)
+            {
+                gui.Write(lang.Get("$options.editkeys"), 19, 5, Color.Black);
+                gui.Write(lang.Get("$options.editkeys"), 19, 4, Color.White);
+            }
+            else
+            {
+                gui.Write(lang.Get("$general.anykey"), 19, 5, Color.Black);
+                gui.Write(lang.Get("$general.anykey"), 19, 4, Color.White);
+            }
+
+            uint n = 0;
+            var ls = (_cursor + 1 - 3).Clamp(0, _listings.Count);
+            var le = (_cursor + 1 + (8 - _cursor)).Clamp(0, _listings.Count);
+
+            for (var i = (uint) ls; i < le; i++)
+            {
+                _listings.Keys.ElementAt((int) i).Draw(_cursor == i, 20, 14 + n * 8);
+                n++;
+            }
+        }
+
+        void IState.Update()
+        {
+            if (_selected)
+                Keyinput(_listings.Values.ElementAt(_cursor));
+            else
+                cmd.Checkbinds();
+
+            _listings.Keys.ElementAt(_cursor).Tick();
+
+            if (input.IsKeyPressed(Key.Down))
+            {
+                CursorMove(1);
+                if (_cursor != 0)
+                    while (!_listings.Keys.ElementAt(_cursor).selectable)
+                        CursorMove(1);
+            }
+
+            if (input.IsKeyPressed(Key.Up))
+            {
+                CursorMove(-1);
+                if (_cursor != 0)
+                    while (!_listings.Keys.ElementAt(_cursor).selectable)
+                        CursorMove(-1);
+            }
+
+            if (input.IsKeyPressed(Key.Escape))
+                if (statemanager.history.Peek() != null)
+                    statemanager.GoBack();
+        }
+
+        public void Dispose()
+        {
+            _listings.Clear();
+        }
+
+        private void Populate()
+        {
             _listings.Clear();
             Addbind("Forward", "+forward");
             Addbind("Back", "+back");
@@ -34,100 +110,32 @@ namespace game.states
             Addbind("Console", "toggleconsole");
         }
 
-        void Addbind(string label, string bind)
+        private void Addbind(string label, string bind)
         {
-            _listings.Add(new OptionButton(label, delegate () { _selected = true; }, Cmd.binds[bind].ToString()), bind);
+            _listings.Add(new optionButton(label, delegate { _selected = true; }, cmd.binds[bind].ToString()), bind);
         }
 
-        void Keyinput(string bind)
+        private void Keyinput(string bind)
         {
-            foreach (Keyboard.Key key in Enum.GetValues(typeof(Keyboard.Key)))
-            {
-                if (Input.IsKey(key) && key != Keyboard.Key.Return)
+            foreach (Key key in Enum.GetValues(typeof(Key)))
+                if (input.IsKey(key) && key != Key.Enter)
                 {
-                    Cmd.binds[bind] = key;
-                    if(bind[0] == '+') Cmd.binds["-"+bind.Substring(1)] = key;
+                    cmd.binds[bind] = key;
+                    if (bind[0] == '+') cmd.binds["-" + bind.Substring(1)] = key;
 
                     Populate();
                     _selected = false;
 
-                    Cmd.SaveConfig();
+                    cmd.SaveConfig();
                 }
-            }
-        }
-
-        void IState.Render()
-        {
-            for (uint i = 0; i < Screen.width * Screen.height; i++)
-            {
-                uint x = i % Screen.width;
-                uint y = i / Screen.width;
-                Screen.SetPixel(x, y, Gui.darker);
-            }
-            if (!_selected)
-            {
-                Gui.Write(Lang.Get("$options.editkeys"), 19, 5, Color.Black);
-                Gui.Write(Lang.Get("$options.editkeys"), 19, 4, Color.White);
-            }
-            else
-            {
-                Gui.Write(Lang.Get("$general.anykey"), 19, 5, Color.Black);
-                Gui.Write(Lang.Get("$general.anykey"), 19, 4, Color.White);
-            }
-
-            uint n = 0;
-            int ls = ((_cursor + 1) - 3).Clamp(0, _listings.Count);
-            int le = ((_cursor + 1) + (8 - _cursor)).Clamp(0, _listings.Count);
-
-            for (uint i = (uint)ls; i < le; i++)
-            {
-                _listings.Keys.ElementAt((int)i).Draw(_cursor == i , 20, 14 + (n * 8));
-                n++;
-            }
-        }
-
-        void IState.Update()
-        {
-            if (_selected)
-            {
-                Keyinput(_listings.Values.ElementAt(_cursor));
-            }
-            else
-                Cmd.Checkbinds();
-
-            _listings.Keys.ElementAt(_cursor).Tick();
-
-            if (Input.IsKeyPressed(Keyboard.Key.Down))
-            {
-                CursorMove(1);
-                if (_cursor != 0) while (!_listings.Keys.ElementAt(_cursor).selectable) { CursorMove(1); }
-            }
-            if (Input.IsKeyPressed(Keyboard.Key.Up))
-            {
-                CursorMove(-1);
-                if (_cursor != 0) while (!_listings.Keys.ElementAt(_cursor).selectable) { CursorMove(-1); }
-            }
-
-            if (Input.IsKeyPressed(Keyboard.Key.Escape))
-            {
-                if (Statemanager.history.Peek() != null)
-                {
-                    Statemanager.GoBack();
-                }
-            }
         }
 
         public void CursorMove(int dir)
         {
-            int pc = _cursor;
+            var pc = _cursor;
             _cursor = (_cursor + dir).Clamp(0, _listings.Count - 1);
             if (pc != _cursor)
-                Audio.PlaySound2D("sound/ui/hover");
-        }                
-
-        public void Dispose()
-        {
-            _listings.Clear();
+                audio.PlaySound("sound/ui/hover");
         }
     }
 }

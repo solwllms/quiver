@@ -1,17 +1,22 @@
-﻿using engine.display;
-using engine.system;
-using SFML.Window;
+﻿#region
+
+using Quiver;
+using Quiver.Audio;
+using Quiver.display;
+using Quiver.system;
+
+#endregion
 
 namespace game.states
 {
-    internal class Splash : IState
+    internal class splash : IState
     {
-        private Transition _fade;
+        private readonly string[] _screens = {"gui/splash_evoke", "gui/splash_by", "gui/splash_quiver"};
+        private transition _fade;
 
         private string _screen;
 
         private int _screenN;
-        private readonly string[] _screens = {"gui/splash_evoke", "gui/splash_by", "gui/splash_quiver"};
         private int _t;
 
         public void Dispose()
@@ -20,13 +25,15 @@ namespace game.states
 
         void IState.Init()
         {
-            Audio.PlayTrack("music/theme", true, 60);
+            audio.PlayTrack("music/opium", 60, true);
+            rgbDevice.SetAll(0, 255, 0);
             ChangeScreen();
         }
 
+
         void IState.Render()
         {
-            Cache.GetTexture(_screen).Draw(0, 0);
+            cache.GetTexture(_screen).Draw(0, 0);
 
             if (_fade != null)
             {
@@ -39,7 +46,7 @@ namespace game.states
 
         void IState.Update()
         {
-            if (Input.IsKeyPressed(Keyboard.Key.Return) || Cmd.GetValueb("nointro")) End();
+            if (input.AnyKey() || cmd.GetValueb("nointro")) End();
 
             _t++;
             if (_t == 300)
@@ -57,16 +64,20 @@ namespace game.states
             }
         }
 
+        void IState.Focus()
+        {
+        }
+
         private void ChangeScreen()
         {
             //audio.PlayTrack("music/theme", true, 60);
-            _fade = new Wipe();
+            _fade = new wipe();
             _screen = _screens[_screenN];
         }
 
         private void End()
         {
-            Statemanager.SetState(new Menu());
+            statemanager.SetState(new menu());
         }
     }
 }

@@ -1,32 +1,46 @@
-﻿using engine.display;
-using engine.game;
-using engine.system;
-using SFML.Window;
+﻿#region
 
-namespace engine.states
+using Quiver.Audio;
+using Quiver.display;
+using Quiver.game;
+using Quiver.system;
+using OpenTK.Input;
+
+#endregion
+
+namespace Quiver.states
 {
-    public class Game : IState
+    public class game : IState
     {
-        public static Game current;
-        private Transition _fade;
+        public static game current;
 
-        public Game(bool respawn)
+        private static string _chapterMsgDraw = "";
+        private static string _chapterMsg = "";
+        private static int _chapterI;
+        private static int _chapterA;
+        private transition _fade;
+
+        public game(bool respawn)
         {
-            Cache.ClearSounds();
+            //cache.ClearSounds();
             if (!respawn)
             {
-                _fade = new Wipe();
+                _fade = new wipe();
             }
             else
             {
-                Audio.PlaySound2D("sound/player/spawn");
-                _fade = new Fizzle();
+                audio.PlaySound("sound/player/spawn");
+                _fade = new fizzle();
             }
         }
 
         public void Dispose()
         {
-            current = null;
+            //current = null;
+        }
+
+        void IState.Focus()
+        {
         }
 
         void IState.Init()
@@ -36,7 +50,37 @@ namespace engine.states
 
         void IState.Render()
         {
-            Renderer.Render();
+            renderer.Render();
+            progs.dll.GetGamemode().DrawHud();
+
+            // chapter message
+            if ((_fade == null || _fade.IsFairlyDone()) && _chapterMsg != "")
+            {
+                gui.Prompt(_chapterMsgDraw, 20 / _chapterA);
+
+                if (engine.frame % 5 == 0)
+                {
+                    if (_chapterI > _chapterMsg.Length)
+                    {
+                        if (_chapterI - _chapterMsg.Length == 20)
+                        {
+                            _chapterI = 0;
+                            _chapterMsg = "";
+                            _chapterMsgDraw = "";
+                        }
+                        else
+                        {
+                            _chapterA--;
+                            _chapterI++;
+                        }
+                    }
+                    else
+                    {
+                        _chapterMsgDraw = _chapterMsg.Substring(0, _chapterI);
+                        _chapterI++;
+                    }
+                }
+            }
 
             if (_fade != null)
             {
@@ -45,7 +89,7 @@ namespace engine.states
                 if (_fade.IsDone())
                     _fade = null;
                 else
-                    World.clock.Restart();
+                    world.clock.Restart();
             }
         }
 
@@ -55,11 +99,17 @@ namespace engine.states
                 if (!_fade.IsFairlyDone())
                     return;
 
-            World.Tick();
-            Cmd.Checkbinds();
+            world.Tick();
+            cmd.Checkbinds();
 
-            if (Input.IsKeyPressed(Keyboard.Key.Escape))
-                Statemanager.SetState(progs.Progs.dll.GetMenuState());
+            if (input.IsKeyPressed(Key.Escape))
+                statemanager.SetState(progs.dll.GetMenuState());
+        }
+
+        public static void SetChapterMsg(string s)
+        {
+            _chapterMsg = s;
+            _chapterA = 20;
         }
     }
 }

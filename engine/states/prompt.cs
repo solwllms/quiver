@@ -1,81 +1,101 @@
-﻿using System.IO;
-using engine.display;
-using engine.system;
-using SFML.Graphics;
-using SFML.Window;
+﻿#region
 
-namespace engine.states
+using System.Drawing;
+using System.IO;
+using Quiver.display;
+using Quiver.system;
+using OpenTK.Input;
+
+#endregion
+
+namespace Quiver.states
 {
-    public delegate void Promptok();
+    public delegate void promptok();
 
-    public delegate void Promptsubmit(string input);
+    public delegate void promptsubmit(string input);
 
-    public class Prompt : IState
+    public class prompt : IState
     {
-        private Promptok _action;
-        private uint[,] _background;
-
-        public bool cursor;
-        private uint _h;
-
+        private readonly promptok _action;
+        private readonly bool _hasno = false;
+        private readonly promptok _actionno;
         private readonly bool _ispath = false;
-        private string _message;
-        private readonly Promptsubmit _submit;
+        private readonly promptsubmit _submit;
 
         private readonly bool _textinput;
-        private string _title;
+        private readonly string _title;
+        private uint[,] _background;
+        private uint _h;
+        private string _message;
         private uint _w;
 
         private uint _x;
         private uint _y;
 
-        public Prompt(string title, string message, Promptok action)
+        public bool cursor;
+
+        public prompt(string title, string message, promptok action)
         {
-            this._title = title;
-            this._message = message;
-            this._action = action;
+            _title = title;
+            _message = message;
+            _action = action;
             _textinput = false;
             cursor = false;
         }
 
-        public Prompt(string title, string message, Promptsubmit submit)
+        public prompt(string title, string message, promptok action, promptok actionno)
         {
-            this._title = title;
-            this._message = message;
-            this._submit = submit;
+            _title = title;
+            _message = message;
+            _action = action;
+            _actionno = actionno;
+            _hasno = true;
+            _textinput = false;
+            cursor = false;
+        }
+
+        public prompt(string title, string message, promptsubmit submit)
+        {
+            _title = title;
+            _message = message;
+            _submit = submit;
             _textinput = true;
             cursor = false;
         }
 
+        void IState.Focus()
+        {
+        }
+
         void IState.Init()
         {
-            _w = Screen.width - 50;
-            _h = Screen.height / 3;
-            _x = Screen.width / 2 - _w / 2;
-            _y = Screen.height / 2 - _h / 2;
+            _w = screen.width - 50;
+            _h = screen.height / 3;
+            _x = screen.width / 2 - _w / 2;
+            _y = screen.height / 2 - _h / 2;
 
-            _background = new uint[Screen.width, Screen.height];
-            for (uint i = 0; i < Screen.width * Screen.height; i++)
+            _background = new uint[screen.width, screen.height];
+            for (uint i = 0; i < screen.width * screen.height; i++)
             {
-                var x = i % Screen.width;
-                var y = i / Screen.width;
-                _background[x, y] = (Screen.GetPixel(x, y) >> 1) & 8355711;
+                var x = i % screen.width;
+                var y = i / screen.width;
+                _background[x, y] = (screen.GetPixel(x, y).ToUint() >> 1) & 8355711;
             }
         }
 
         void IState.Render()
         {
-            for (uint i = 0; i < Screen.width * Screen.height; i++)
+            for (uint i = 0; i < screen.width * screen.height; i++)
             {
-                var x = i % Screen.width;
-                var y = i / Screen.width;
-                Screen.SetPixel(x, y, _background[x, y]);
+                var x = i % screen.width;
+                var y = i / screen.width;
+                screen.SetPixel(x, y, _background[x, y]);
             }
 
             if (cursor)
-                Cache.GetTexture("gui/prompt").Draw(_x, _y, 0, 0, 110, 32);
+                cache.GetTexture("gui/prompt").Draw(_x, _y, 0, 0, 110, 32);
             else
-                Cache.GetTexture("gui/prompt").Draw(_x, _y, 0, 32, 110, 32);
+                cache.GetTexture("gui/prompt").Draw(_x, _y, 0, 32, 110, 32);
 
             Printctr(_title, 1, Color.White);
 
@@ -85,30 +105,30 @@ namespace engine.states
             }
             else
             {
-                Gui.Draw(_x + 22, _y + 11, 66, 9, Color.White);
+                gui.Draw(_x + 22, _y + 11, 66, 9, Color.White);
                 Printctr(_message, 12, Color.Black);
             }
         }
 
         void IState.Update()
         {
-            if (Input.IsKeyPressed(Keyboard.Key.Escape))
+            if (input.IsKeyPressed(Key.Escape))
                 Doback();
 
-            if (Input.IsKeyPressed(Keyboard.Key.Right))
+            if (input.IsKeyPressed(Key.Right))
                 cursor = false;
-            if (Input.IsKeyPressed(Keyboard.Key.Left))
+            if (input.IsKeyPressed(Key.Left))
                 cursor = true;
 
             if (!_textinput)
             {
-                if (Input.IsKeyPressed(Keyboard.Key.Y))
+                if (input.IsKeyPressed(Key.Y))
                     Doyes();
-                if (Input.IsKeyPressed(Keyboard.Key.N))
+                if (input.IsKeyPressed(Key.N))
                     Doback();
             }
 
-            if (Input.IsKeyPressed(Keyboard.Key.Return))
+            if (input.IsKeyPressed(Key.Enter))
             {
                 if (cursor && _message.Length > 0)
                     Doyes();
@@ -116,30 +136,32 @@ namespace engine.states
                     Doback();
             }
 
-            if (Input.IsKeyPressed(Keyboard.Key.BackSpace) && _message.Length > 0)
+            if (input.IsKeyPressed(Key.BackSpace) && _message.Length > 0)
                 _message = _message.Remove(_message.Length - 1);
 
-            if (_textinput && _message.Length < 16 && (!_ispath || !Input.inputstring.Contains(" ") &&
-                                                     Input.inputstring.IndexOfAny(Path.GetInvalidPathChars()) >= 0))
-                _message += Input.inputstring;
+            if (_textinput && _message.Length < 16 && (!_ispath || !input.inputstring.Contains(" ") &&
+                                                       input.inputstring.IndexOfAny(Path.GetInvalidPathChars()) >= 0))
+                _message += input.inputstring;
         }
 
         public void Dispose()
         {
+            /*
             _title = null;
             _message = null;
             _action = null;
             _background = null;
+            */
         }
 
         public void Printctr(string s, uint ty, Color c)
         {
-            Gui.Write(s, (uint) (_x + (_w / 2 - s.Length * 4 / 2)), _y + ty, c);
+            gui.Write(s, (uint) (_x + (_w / 2 - s.Length * 4 / 2)), _y + ty, c);
         }
 
         public void Print(uint tx, uint ty, string s)
         {
-            Gui.Write(s, _x + tx, _y + ty);
+            gui.Write(s, _x + tx, _y + ty);
         }
 
         private void Doyes()
@@ -147,7 +169,7 @@ namespace engine.states
             if (!_textinput)
             {
                 _action.Invoke();
-                Statemanager.GoBack();
+                statemanager.GoBack();
             }
             else
             {
@@ -157,7 +179,8 @@ namespace engine.states
 
         private void Doback()
         {
-            Statemanager.GoBack();
+            if (_hasno) _actionno.Invoke();
+            else statemanager.GoBack();
         }
     }
 }

@@ -1,16 +1,20 @@
-﻿using engine.game;
-using engine.system;
+﻿#region
 
-namespace engine.progs
+using Quiver.game;
+using Quiver.system;
+
+#endregion
+
+namespace Quiver
 {
-    public class Dll
+    public class dll
     {
         public string desc;
         public string dev;
         public string title;
         public string version;
 
-        public Dll(string title, string dev, string version, string desc)
+        public dll(string title, string dev, string version, string desc)
         {
             this.title = title;
             this.dev = dev;
@@ -36,7 +40,7 @@ namespace engine.progs
             return null;
         }
 
-        public virtual Gmbase GetGamemode()
+        public virtual gmbase GetGamemode()
         {
             return null;
         }

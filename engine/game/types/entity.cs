@@ -1,17 +1,21 @@
-﻿using System;
-using System.IO;
-using engine.system;
+﻿#region
 
-namespace engine.game.types
+using System;
+using System.IO;
+using Quiver.system;
+
+#endregion
+
+namespace Quiver.game.types
 {
-    public enum Livestate
+    public enum livestate
     {
         Dead,
         Dying,
         Alive
     }
 
-    public class Ent : Saveable
+    public class ent : saveable
     {
         public float angle;
 
@@ -20,24 +24,24 @@ namespace engine.game.types
         public byte health = 100;
         public int id;
         public bool isstatic = false;
-        public Vector pos;
+        public vector pos;
 
-        protected Livestate stateLive = Livestate.Alive;
+        protected livestate stateLive = livestate.Alive;
 
-        public Vector velocity;
+        public vector velocity;
 
-        public Ent(Vector pos)
+        public ent(vector pos)
         {
-            id = progs.Progs.GetEntId(GetType());
+            id = progs.GetEntId(GetType());
 
-            velocity = new Vector(0, 0);
+            velocity = new vector(0, 0);
             this.pos = pos;
         }
 
         public virtual void Tick()
         {
-            if (!World.map[(int) (pos.x + velocity.x + collisionerror), (int) (pos.y + velocity.y + collisionerror)]
-                .solid && stateLive != Livestate.Dead)
+            if (!world.map[(int) (pos.x + velocity.x + collisionerror), (int) (pos.y + velocity.y + collisionerror)]
+                    .solid && stateLive != livestate.Dead)
                 pos += velocity;
             else
                 OnCollide();
@@ -55,32 +59,34 @@ namespace engine.game.types
             health = (byte) h;
         }
 
-        public virtual void SetPos(Vector p)
+        public virtual void SetPos(vector p)
         {
             pos = p;
         }
 
-        public virtual void SetState(Livestate s)
+        public virtual void SetState(livestate s)
         {
             stateLive = s;
         }
-        public Livestate GetState()
+
+        public livestate GetState()
         {
             return stateLive;
         }
 
         public void Destroy()
         {
-            World.DestroyEnt(this);
+            world.DestroyEnt(this);
         }
+
         public virtual void OnDestroy()
         {
         }
 
         public override void DoParseSave(ref BinaryWriter w)
         {
-            Vector.Serialize(ref pos, ref w);
-            Vector.Serialize(ref velocity, ref w);
+            vector.Serialize(ref pos, ref w);
+            vector.Serialize(ref velocity, ref w);
             w.Write(Convert.ToByte(health));
             w.Write(Convert.ToInt32(stateLive));
             w.Write(Convert.ToSingle(angle));
@@ -88,10 +94,10 @@ namespace engine.game.types
 
         public override void DoParseLoad(ref BinaryReader r)
         {
-            pos = Vector.DeSerialize(ref r);
-            velocity = Vector.DeSerialize(ref r);
+            pos = vector.DeSerialize(ref r);
+            velocity = vector.DeSerialize(ref r);
             health = r.ReadByte();
-            stateLive = (Livestate) r.ReadInt32();
+            stateLive = (livestate) r.ReadInt32();
             angle = r.ReadSingle();
         }
     }

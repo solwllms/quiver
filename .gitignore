@@ -1,6 +1,12 @@
-
-bin/log.txt
+bin/
+bin_tools/
+bin_release/screenshots/
+*/cstrike/sound/
+packages/
+soundtrack.pak
+log.txt
 *.exe
+*.exe.*
 *.pdb
 *.dll
 *.so*

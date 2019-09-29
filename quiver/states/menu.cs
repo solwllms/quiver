@@ -1,22 +1,22 @@
-﻿using System;
-using engine.display;
-using engine.game;
-using engine.states;
-using engine.system;
-using SFML.Graphics;
-using SFML.Window;
+﻿#region
+
+using System;
+using System.Drawing;
+using Quiver.Audio;
+using Quiver.display;
+using Quiver.game;
+using Quiver.states;
+using Quiver.system;
+using Quiver;
+using OpenTK.Input;
+
+#endregion
 
 namespace game.states
 {
-    internal class Menu : IState
+    internal class menu : IState
     {
         private static uint _cursor;
-        private uint[,] _background;
-        private int _f;
-        private Transition _fade;
-
-        private bool _repaint;
-        private bool _isgame;
 
         private readonly string[] _prompts =
         {
@@ -25,31 +25,43 @@ namespace game.states
             "$quit.mess3"
         };
 
-        public Menu()
-        {
+        private uint[,] _background;
+        private int _f;
+        private transition _fade;
+        private bool _isgame;
 
+        private bool _repaint;
+
+        void IState.Focus()
+        {
+            if (!_isgame && audio.GetTrack() != "music/opium")
+            {
+                audio.StopTrack();
+                audio.PlayTrack("music/opium", 60, true);
+            }
         }
 
         public void Init()
         {
-            _isgame = Statemanager.history.Count > 0 && Statemanager.Wasgame;
-            _repaint = _isgame || Statemanager.history.Peek().GetType() == typeof(Gameover);
+            _isgame = statemanager.history.Count > 0 && statemanager.Wasgame;
+            _repaint = statemanager.history.Count > 0 && (_isgame || statemanager.history.Peek().GetType() == typeof(gameover));
 
             if (!_isgame)
-                Discordrpc.Update("in menus", "");
+                discordrpc.Update("in menus", "");
             if (!_repaint)
-                _fade = new Wipe();
+                _fade = new wipe();
 
-            _background = new uint[Screen.width, Screen.height];
+            _background = new uint[screen.width, screen.height];
             if (_repaint)
-                for (uint i = 0; i < Screen.width * Screen.height; i++)
+                for (uint i = 0; i < screen.width * screen.height; i++)
                 {
-                    var x = i % Screen.width;
-                    var y = i / Screen.width;
-                    _background[x, y] = (Screen.GetPixel(x, y) >> 1) & 8355711;
+                    var x = i % screen.width;
+                    var y = i / screen.width;
+                    _background[x, y] = (screen.GetPixel(x, y).ToUint() >> 1) & 8355711;
                 }
 
             _cursor = 0;
+            rgbDevice.SetAll(0, 255, 0);
         }
 
         void IState.Render()
@@ -58,27 +70,27 @@ namespace game.states
 
             _f = (_f + 1) % 360;
             var ly = 13 - (uint) (Math.Cos((float) _f / 20) * 3);
-            Cache.GetTexture("gui/logo2").Draw(42, ly, 0, 0, 12, 23); // Q
+            cache.GetTexture("gui/logo2").Draw(42, ly, 0, 0, 14, 25); // Q
             ly = 13 - (uint) (Math.Cos((float) _f / 20 + 45) * 3);
-            Cache.GetTexture("gui/logo2").Draw(56, ly, 14, 0, 10, 23); // U
+            cache.GetTexture("gui/logo2").Draw(56, ly, 14, 0, 12, 25); // U
             ly = 13 - (uint) (Math.Cos((float) _f / 20 + 90) * 3);
-            Cache.GetTexture("gui/logo2").Draw(68, ly, 26, 0, 4, 23); // I
+            cache.GetTexture("gui/logo2").Draw(68, ly, 26, 0, 6, 25); // I
             ly = 13 - (uint) (Math.Cos((float) _f / 20 + 135) * 3);
-            Cache.GetTexture("gui/logo2").Draw(74, ly, 32, 0, 10, 23); // V
+            cache.GetTexture("gui/logo2").Draw(74, ly, 32, 0, 12, 25); // V
             ly = 13 - (uint) (Math.Cos((float) _f / 20 + 180) * 3);
-            Cache.GetTexture("gui/logo2").Draw(86, ly, 44, 0, 8, 23); // E
+            cache.GetTexture("gui/logo2").Draw(86, ly, 44, 0, 10, 25); // E
             ly = 13 - (uint) (Math.Cos((float) _f / 20 + 225) * 3);
-            Cache.GetTexture("gui/logo2").Draw(96, ly, 54, 0, 12, 23); // R
+            cache.GetTexture("gui/logo2").Draw(96, ly, 54, 0, 14, 25); // R
             ly = 13 - (uint) (Math.Cos((float) _f / 20 + 270) * 3);
 
-            Gui.Write("alpha", 100, 33, Gui.lighter);
+            //Gui.Write("alpha", 100, 33, Gui.lighter);
 
-            Drawmenuitem(_cursor, 0, Lang.Get("$menu.newgame"));
-            Drawmenuitem(_cursor, 1, Lang.Get("$menu.loadgame"));
-            Drawmenuitem(_cursor, 2, Lang.Get("$menu.savegame"), true);
-            Drawmenuitem(_cursor, 3, Lang.Get("$menu.options"));
-            Drawmenuitem(_cursor, 4, Lang.Get("$menu.credits"));
-            Drawmenuitem(_cursor, 5, Lang.Get("$menu.quit"));
+            Drawmenuitem(_cursor, 0, lang.Get("$menu.newgame"));
+            Drawmenuitem(_cursor, 1, lang.Get("$menu.loadgame"));
+            Drawmenuitem(_cursor, 2, lang.Get("$menu.savegame"), true);
+            Drawmenuitem(_cursor, 3, lang.Get("$menu.options"));
+            Drawmenuitem(_cursor, 4, lang.Get("$menu.credits"));
+            Drawmenuitem(_cursor, 5, lang.Get("$menu.quit"));
 
             if (_fade != null)
             {
@@ -91,64 +103,65 @@ namespace game.states
 
         void IState.Update()
         {
-            Cmd.Checkbinds();
+            cmd.Checkbinds();
 
-            if (Input.IsKeyPressed(Keyboard.Key.Down))
+            if (input.IsKeyPressed(Key.Down))
             {
                 var pc = _cursor;
                 _cursor = (_cursor + 1).Clamp((uint) 0, (uint) 5);
                 if (pc != _cursor)
-                    Audio.PlaySound2D("sound/ui/hover");
+                    audio.PlaySound("sound/ui/hover");
             }
 
-            if (Input.IsKeyPressed(Keyboard.Key.Up))
+            if (input.IsKeyPressed(Key.Up))
             {
                 var pc = _cursor;
                 _cursor = (_cursor - 1) % 5;
                 if (pc != _cursor)
-                    Audio.PlaySound2D("sound/ui/hover");
+                    audio.PlaySound("sound/ui/hover");
             }
 
-            if (Input.IsKeyPressed(Keyboard.Key.Return))
+            if (input.IsKeyPressed(Key.Enter))
             {
                 if (_cursor == 0)
                 {
                     if (_isgame)
-                        Statemanager.SetState(new Prompt(Lang.Get("$menu.newgame"), Lang.Get("$menu.unsavedprog"),
-                            delegate() { World.LoadLevel("maps/E1M1.lvl", true); }));
+                        statemanager.SetState(new prompt(lang.Get("$menu.newgame"), lang.Get("$menu.unsavedprog"),
+                            delegate() { level.Load("maps/E1M1.lvl", true); }));
                     else
-                    {
-                        World.LoadLevel("maps/E1M1.lvl", true);
-                    }
+                        level.Load("maps/E1M1.lvl", true);
                 }
                 else if (_cursor == 1)
                 {
-                    Statemanager.SetState(new Loadgame());
+                    statemanager.SetState(new loadgame());
                 }
                 else if (_cursor == 2 && _isgame)
                 {
-                    Statemanager.SetState(new Savegame());
+                    statemanager.SetState(new savegame());
                     //saveload.SaveGame("test");
                 }
                 else if (_cursor == 3)
                 {
-                    Statemanager.SetState(new Options());
+                    statemanager.SetState(new options());
                 }
                 else if (_cursor == 4)
                 {
-                    Statemanager.SetState(new Credits());
+                    statemanager.SetState(new credits());
                 }
                 else if (_cursor == 5)
                 {
-                    Statemanager.SetState(new Prompt(Lang.Get("$menu.quit")+"?",
-                        Lang.Get(_prompts[engine.system.Engine.random.Next(1, _prompts.Length) - 1]), engine.system.Engine.Exit));
+                    statemanager.SetState(new prompt(lang.Get("$menu.quit") + "?",
+                        lang.Get(_prompts[Quiver.engine.random.Next(1, _prompts.Length) - 1]),
+                        () => {
+                            Quiver.engine.Exit();
+                        }));
                 }
             }
 
-            if (Input.IsKeyPressed(Keyboard.Key.Escape) && _isgame)
+            if (input.IsKeyPressed(Key.Escape) && _isgame)
             {
-                Input.mouselock = true;
-                Statemanager.GoBack();
+                input.mouselock = true;
+                statemanager.GoBack();
             }
         }
 
@@ -160,21 +173,21 @@ namespace game.states
         public void Drawmenuitem(uint cursor, uint n, string text, bool gameonly = false)
         {
             if (cursor == n)
-                Gui.Write("> " + text, 49, 38 + n * 7 + 1, Gui.lighter);
-            Gui.Write((cursor == n ? "> " : "  ") + text, 49, 38 + n * 7,
-                gameonly && !_isgame ? Color.Black : Color.White);
+                gui.Write("{ " + text, 49, 38 + n * 7 + 1, _isgame ? gui.back : Color.Black);
+            gui.Write((cursor == n ? "{ " : "  ") + text, 49, 38 + n * 7,
+                gameonly && !_isgame ? gui.back : (cursor == n ? gui.lighter : (_isgame ? gui.back : Color.Black)));
         }
 
         public void RenderBase()
         {
             if (_repaint)
-                for (uint i = 0; i < Screen.width * Screen.height; i++)
+                for (uint i = 0; i < screen.width * screen.height; i++)
                 {
-                    var x = i % Screen.width;
-                    var y = i / Screen.width;
-                    Screen.SetPixel(x, y, _background[x, y]);
+                    var x = i % screen.width;
+                    var y = i / screen.width;
+                    screen.SetPixel(x, y, _background[x, y]);
                 }
-            else Cache.GetTexture("gui/background").Draw(0, 0); //(uint)(Math.Cos((float)_f / 20) * 2)
+            else cache.GetTexture("gui/background").Draw(0, 0); //(uint)(Math.Cos((float)_f / 20) * 2)
         }
     }
 }

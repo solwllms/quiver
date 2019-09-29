@@ -1,0 +1,1 @@
+quiver.exe +dir cstrike

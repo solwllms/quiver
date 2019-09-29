@@ -1,42 +1,70 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using engine.game.types;
-using engine.progs;
-using engine.states;
-using engine.system;
-using SFML.System;
+﻿#region
 
-namespace engine.game
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
+using System.Linq;
+using Quiver.Audio;
+using Quiver.game.types;
+using Quiver.system;
+
+#endregion
+
+namespace Quiver.game
 {
-    public class World
+    public class world
     {
         public static string mapfile;
-        public static Mapcell[,] map;
+        public static mapcell[,] map;
         public static int mapsize;
 
         public static bool sky = true;
+        public static string skybox = "textures/sky1";
+        public static bool rain = false;
+        public static Color fog = Color.FromArgb(170, 170, 230);
 
         public static List<string> texAliascache;
 
-        public static List<Ent> entities;
-        public static Sprite[] sprites;
+        public static List<ent> entities;
+        public static sprite[] sprites;
 
-        public static Clock clock;
+        public static Stopwatch clock;
         public static int startingSec;
 
-        public static Player Player
+        public static player Player
         {
             get
             {
                 try
                 {
                     if (entities != null)
-                        return (Player) entities[0];
+                        return (player) entities[0];
                 }
-                catch { return null; }
+                catch
+                {
+                    return null;
+                }
+
                 return null;
             }
+        }
+
+        public static void ResetData(string file, bool fresh, bool clearents)
+        {
+            mapfile = file;
+            log.WriteLine("loading map.. " + file);
+
+            ent p = null;
+            if (!fresh) p = Player;
+            if (clearents || entities == null) ClearEnts();
+            if (!fresh) entities.Add(p);
+            clock = new Stopwatch();
+
+            texAliascache = new List<string>(255);
+
+            clock.Restart();
+            startingSec = 0;
         }
 
         public static byte GetTextureId(string n)
@@ -51,62 +79,41 @@ namespace engine.game
             return texAliascache[n];
         }
 
-        public static void ClearEnts()
+        public static mapcell FindTexturedCell(string wallTexture)
         {
-            if(entities == null) entities = new List<Ent>();
-            else entities.Clear();
+            for (var x = 0; x < mapsize; x++)
+                for (var y = 0; y < mapsize; y++)
+                {
+                    if (GetTextureAlias(map[x, y].walltex) == wallTexture) return map[x, y];
+                }
+
+            return null;
         }
 
-        public static void LoadLevel(string file, bool fresh, bool genents = true, bool clearents = true)
+        public static void ClearEnts()
         {
-            if (Statemanager.current.GetType() != typeof(Game))
-            {
-                Statemanager.SetState(new Game(false), fresh);
-            }
-
-            mapfile = file;
-            Log.WriteLine("loading map.. "+ mapfile);
-
-            Ent p = null;
-            if (!fresh) p = Player;
-            if(clearents || entities == null) ClearEnts();
-            if(!fresh) entities.Add(p);
-            clock = new Clock();
-
-            texAliascache = new List<string>(255);
-
-            Audio.StopTrack();
-            Audio.ClearSounds();
-
-            clock.Restart();
-            startingSec = 0;
-
-            int v = Audio.volume;
-            Audio.volume = 0;
-            Level.GenerateMap(file, fresh, genents);
-
-            Audio.volume = v;
+            if (entities == null) entities = new List<ent>();
+            else entities.Clear();
         }
 
         public static void Tick()
         {
-            Progs.dll.GetGamemode().Tick();
+            //if(Level.lightmap != null) Level.LightRefresh();
+            progs.dll.GetGamemode().Tick();
             Player.Tick();
-            Audio.UpdateListener(Player.pos.x, Player.pos.y, Player.angle);
+            audio.UpdateListener(Player.pos, Player.angle);
 
             RefreshSprites();
             foreach (var spr in sprites.ToArray()) spr.Tick();
-
-            Cmd.Tick();
         }
 
         public static string GetPlaythruTime()
         {
-            var secs = startingSec + (int) clock.ElapsedTime.AsSeconds();
+            var secs = startingSec + (int) clock.Elapsed.TotalSeconds;
             return (secs / 60).ToString().PadLeft(2, '0') + ":" + (secs % 60).ToString().PadLeft(2, '0');
         }
 
-        public static bool IsSolid(Vector tile)
+        public static bool IsSolid(vector tile)
         {
             if (tile.x < 0 || tile.y < 0 || tile.x >= mapsize || tile.y >= mapsize)
                 return true;
@@ -117,8 +124,11 @@ namespace engine.game
             return false;
         }
 
-        public static bool IsSeethrough(Vector tile)
+        public static bool IsOpaque(vector tile)
         {
+            if (tile.x < 0 || tile.y < 0 || tile.x >= mapsize || tile.y >= mapsize)
+                return true;
+
             if (map[(int) Math.Floor(tile.x), (int) Math.Floor(tile.y)].wall)
                 return true;
 
@@ -127,12 +137,12 @@ namespace engine.game
 
         public static void GetPlayer()
         {
-            entities = new List<Ent>();
+            entities = new List<ent>();
         }
 
-        public static void CreatePlayer(Vector pos)
+        public static void CreatePlayer(vector pos)
         {
-            entities.Add((Ent) progs.Progs.CreateEnt(0, pos));
+            entities.Add((ent) progs.CreateEnt(0, pos));
             WarmPlayer();
         }
 
@@ -146,22 +156,22 @@ namespace engine.game
         public static void RefreshSprites()
         {
             sprites = Array.ConvertAll(
-                entities.Where(element => element is Sprite).ToArray(),
-                item => (Sprite) item);
+                entities.Where(element => element is sprite).ToArray(),
+                item => (sprite) item);
         }
 
-        public static void AddEnt(Ent e)
+        public static void AddEnt(ent e)
         {
             entities.Add(e);
         }
 
-        public static void DestroyEnt(Ent e)
+        public static void DestroyEnt(ent e)
         {
-            e.OnDestroy();
+            e?.OnDestroy();
             entities.Remove(e);
         }
 
-        public static void RemoveEnt(Ent e)
+        public static void RemoveEnt(ent e)
         {
             entities.Remove(e);
         }

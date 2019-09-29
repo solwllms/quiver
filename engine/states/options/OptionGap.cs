@@ -1,8 +1,8 @@
-﻿namespace engine.states.options
+﻿namespace Quiver.states.options
 {
-    public class OptionGap : OptionListing
+    public class optionGap : optionListing
     {
-        public OptionGap() : base("")
+        public optionGap() : base("")
         {
             selectable = false;
         }
