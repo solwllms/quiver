@@ -1,0 +1,49 @@
+<dataset>
+  <settings>
+  </settings>
+  <cells>
+    <cell id="default">
+      <wall>false</wall>
+      <solid>false</solid>
+      <floortex>textures/dust/sandfloor</floortex>
+    </cell>
+    <cell id="1">
+      <wall>true</wall>
+      <solid>true</solid>
+      <walltex>textures/dust/sandwall</walltex>
+    </cell>
+    <cell id="2">
+      <wall>true</wall>
+      <solid>true</solid>
+      <walltex>textures/dust/crate</walltex>
+    </cell>
+    <cell id="3">
+      <wall>true</wall>
+      <solid>true</solid>
+      <walltex>textures/dust/door</walltex>
+    </cell>
+    <cell id="4">
+      <wall>true</wall>
+      <solid>true</solid>
+      <walltex>textures/dust/sandwall_a</walltex>
+    </cell>
+    <cell id="5">
+      <wall>true</wall>
+      <solid>true</solid>
+      <walltex>textures/dust/sandwall_b</walltex>
+    </cell>
+    <cell id="6">
+      <wall>false</wall>
+      <solid>false</solid>
+      <floortex>textures/dust/sandroad</floortex>
+    </cell>
+    <cell id="7">
+      <wall>false</wall>
+      <solid>false</solid>
+      <floortex>textures/dust/sandroadbomb</floortex>
+    </cell>
+  </cells>
+  <ents>
+
+  </ents>
+</dataset>

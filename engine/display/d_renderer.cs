@@ -1,498 +1,510 @@
-﻿using System;
-using engine.game;
-using engine.game.types;
-using engine.system;
-using SFML.Graphics;
+﻿#region
 
-namespace engine.display
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using Quiver.game;
+using Quiver.game.types;
+using Quiver.system;
+
+#endregion
+
+namespace Quiver.display
 {
-    public struct Screencell
+    public struct screencell
     {
         public int mapx;
         public int mapy;
         public float dist;
     }
-
-    public struct Screensprite
+    public struct screensprite
     {
         public int index;
         public float dist;
     }
 
-    public class Renderer
+    public class renderer
     {
-        /*         
-        RAYCASTER RENDERER :
-
-        Based upon concept and theory (en.wikipedia.org/wiki/Ray_casting)
-        and on Lode Vandevenne's C implementation (lodev.org/cgtutor/raycasting.html).
-
-        ..and further reading.
-         */
-
-        public const int BORDER = 0;
-        public const int HUDSIZE = 1;
-        public const int TEXSIZE = 32;
-        public static Color magicpink = new Color(255, 0, 255);
-
-        private static int[] rain;
-        private static double[,] _zBuffer;
-
-        public static double dirX = -1, dirY = 0;
-        public static double planeX = 0, planeY = 0.66;
-
-        public static Screensprite centersprite;
-        public static Screencell centercell;
-
-        public static void Init()
-        {
-            _zBuffer = new double[Screen.width, Screen.height];
-
-            rain = new int[Screen.width - (BORDER * 2)];
-            for (uint i = 0; i < rain.Length; i++)
-                ReseedRain(i, false);
-            
-            Vis.Precomp();
-        }
-
-        private static uint dispHeight = Engine.SCREEN_HEIGHT - HUDSIZE;
-        public static void Render(bool allowextras = true)
-        {
-            Screen.Clear();
-            centersprite = new Screensprite {dist = -1};
-
-            if (DrawWorld((int)Engine.SCREEN_WIDTH, (int)dispHeight) == -1)
-                return;
-            try
-            {
-                DrawSprites((int)Engine.SCREEN_WIDTH, (int)Engine.SCREEN_HEIGHT);
-            }
-            catch
-            {
-            }
-
-            PostProcess();
-
-            DrawHud(allowextras);
-        }
-
-        private static Vector plast;
-        private static void DrawHud(bool allowextras)
-        {
-            Vector velocity = new Vector(0, 0);
-            if (!object.ReferenceEquals(null, plast))
-            {
-                velocity = World.Player.pos - plast;
-            }
-            World.Player.weapon.Draw(velocity);
-            for (uint x = 0; x < Screen.width; x++)
-            {
-                Screen.SetPixel(x, 89, Color.Black);
-            }
-
-            if (allowextras)
-                if (Cmd.GetValueb("showfps"))
-                {
-                    Gui.Write(Math.Round(Engine.fps), 0, 0);
-                    Gui.Write(Math.Round(Engine.ftime, 3) + "ms", 0, 6);
-                }
-
-            Gui.Write("&", 5, 82);
-            Gui.Write(World.Player.health, 11, 82, World.Player.health > 15 ? Color.White : Color.Red);
-            Gui.Write("^" + World.GetPlaythruTime(), 45, 82);
-
-            //Cache.GetTexture("gui/icon_pistol").Draw(110, 82);
-            Gui.Write(World.Player.weapon.clip, 130, 82);
-            Gui.Write(World.Player.weapon.nonclip, 140, 82);
-
-            Screen.SetPixel(Screen.width / 2, Screen.height / 2, Color.White);
-
-            if (GetLookedAt().interactable && centercell.dist < 1.5f)
-                Prompt("[" + Input.GetKeyName(Cmd.Getbind("use")) + "] "+Lang.Get("$game.use"));
-
-            if (World.Player.weapon.reloadMsgTime != -1)
-                Gui.Write(Lang.Get("$game.reload"), 110, (uint) (50 + World.Player.weapon.reloadMsgTime),
-                    20 / (World.Player.weapon.reloadMsgTime + 1) + 1);
-
-            plast = World.Player.pos;
-        }
-
-        private static void Prompt(string text)
-        {
-            Gui.Write(text, 60, 70);
-        }
-
-        public static Mapcell GetLookedAt()
-        {
-            if (centercell.mapx >= World.mapsize || centercell.mapy >= World.mapsize || centercell.mapx < 0 || centercell.mapy < 0) return new Mapcell(new Vector(0, 0), "", "", ""){interactable = false};
-            return World.map[centercell.mapx, centercell.mapy];
-        }
-
-        private static int DrawWorld(int width, int dh)
-        {
-            var coffs = World.clock.ElapsedTime.AsMilliseconds() / 1200 % 360;
-            var sh = (int) Screen.height;
-
-            for (uint x = BORDER; x < width - BORDER; x++)
-            {
-                rain[x - BORDER] += 8;
-                var vcolumn = 2 * x / (double) width - 1;
-
-                double rayPx = World.Player.pos.x;
-                double rayPy = World.Player.pos.y;
-                var rayDx = dirX + planeX * vcolumn;
-                var rayDy = dirY + planeY * vcolumn;
-
-                var curMapx = (int) rayPx;
-                var curMapy = (int) rayPy;
-
-                var ssx = Math.Sqrt(1 + rayDy * rayDy / (rayDx * rayDx));
-                var ssy = Math.Sqrt(1 + rayDx * rayDx / (rayDy * rayDy));
-
-                var northsouth = false;
-
-                var stepX = rayDx < 0 ? -1 : 1;
-                var stepY = rayDy < 0 ? -1 : 1;
-
-                var lenx = (rayDx < 0 ? rayPx - curMapx : curMapx + 1.0 - rayPx) * ssx;
-
-                var leny = (rayDy < 0 ? rayPy - curMapy : curMapy + 1.0 - rayPy) * ssy;
-
-                var hit = 0;
-                while (hit == 0)
-                {
-                    if (lenx < leny)
-                    {
-                        lenx += ssx;
-                        curMapx += stepX;
-                        northsouth = false;
-                    }
-                    else
-                    {
-                        leny += ssy;
-                        curMapy += stepY;
-                        northsouth = true;
-                    }
-
-                    if (curMapx >= World.mapsize || curMapy >= World.mapsize || curMapx < 0 || curMapy < 0) break;
-                    else hit = World.map[curMapx, curMapy].wall ? 1 : 0;
-                }
-                
-                var walldist = northsouth
-                    ? (curMapy - rayPy + (1 - stepY) / 2) / rayDy
-                    : (curMapx - rayPx + (1 - stepX) / 2) / rayDx;
-
-                if (x == Screen.width / 2)
-                    centercell = new Screencell {mapx = curMapx, mapy = curMapy, dist = (float) walldist};
-
-                /* HACKY! (prevents div by 0 fatals) */
-                if (walldist == 0)
-                {
-                    World.Player.Turn(1);
-                    return -1;
-                }
-
-                var vlineh = Math.Abs((int) (sh / walldist));
-                var drawmin = (-vlineh / 2 + sh / 2).Clamp(0, sh);
-                var drawmax = (vlineh / 2 + sh / 2).Clamp(0, sh);
-
-                var wallhit = northsouth ? rayPx + walldist * rayDx : rayPy + walldist * rayDy;
-                wallhit -= Math.Floor(wallhit);
-
-                var texelx = (int) (wallhit * TEXSIZE);
-                if (!northsouth && rayDx > 0 || northsouth && rayDy < 0) texelx = TEXSIZE - texelx - 1;
-
-                //  FLOOR AND CEILING CALC.
-                double floorx, floory;
-                if (!northsouth && rayDx > 0)
-                {
-                    floorx = curMapx;
-                    floory = curMapy + wallhit;
-                }
-                else if (!northsouth && rayDx < 0)
-                {
-                    floorx = curMapx + 1.0;
-                    floory = curMapy + wallhit;
-                }
-                else if (northsouth && rayDy > 0)
-                {
-                    floorx = curMapx + wallhit;
-                    floory = curMapy;
-                }
-                else
-                {
-                    floorx = curMapx + wallhit;
-                    floory = curMapy + 1.0;
-                }
-                
-                Mapcell cell = null;
-                Texture wall = null;
-                
-                    cell = World.map[curMapx.Clamp(0, World.mapsize-1), curMapy.Clamp(0, World.mapsize - 1)];
-                    wall = Cache.GetTexture(World.GetTextureAlias(cell.walltex));
-                    for (uint y = BORDER; y < sh - BORDER; y++)
-                    if (y >= drawmax && y <= sh)
-                    {
-                        var d = sh / (2.0 * y - sh);
-                        var w = d / walldist * 1;
-
-                        var fog = 10 - d;
-                        _zBuffer[x, y] = fog;
-
-                        var floormapx = w * floorx + (1.0 - w) * rayPx;
-                        var floormapy = w * floory + (1.0 - w) * rayPy;
-
-                        cell = World.map[((int) floormapx).Clamp(0, World.mapsize - 1),
-                            ((int) floormapy).Clamp(0, World.mapsize - 1)];
-
-                        var ctexelx = (int) Math.Abs(floormapx * TEXSIZE % TEXSIZE);
-                        var ctexely = (int) Math.Abs(floormapy * TEXSIZE % TEXSIZE);
-
-                        var ct = Colorize(
-                            Cache.GetTexture(World.GetTextureAlias(cell.ceiltex))
-                                .GetPixel((uint) ctexelx, (uint) ctexely), cell.color);
-                        var fc = Colorize(
-                            Cache.GetTexture(World.GetTextureAlias(cell.floortex))
-                                .GetPixel((uint) ctexelx, (uint) ctexely), cell.color);
-                        var cc = (ct >> 1) & 8355711;
-                        
-                        if (y < dh) Screen.SetPixel(x, y, fc);
-                        if (!World.sky)
-                        {
-                            _zBuffer[x, sh - y] = fog;
-                            Screen.SetPixel(x, (uint) (sh - y), cc);
-                        }
-                        else DrawSky(x, (uint)sh - y);
-                    }
-                    else if (y > drawmin && y < drawmax && y < dh && y >= BORDER && hit == 1)
-                    {
-                        var d = (int) (y + 1) * 2 - sh + vlineh;
-                        var texely = Math.Abs(d * TEXSIZE / vlineh / 2) % TEXSIZE;
-
-                        _zBuffer[x, y] = 10 - walldist;
-                        if (wall == null) continue;
-
-                        var ic = wall.GetPixel((uint) texelx, (uint) texely);
-                        if (ic == magicpink) DrawSky(x, y);
-                        else
-                        {
-                            var c = Colorize(ic, cell.color);
-                            if (northsouth) c = (c >> 1) & 8355711;
-                            Screen.SetPixel(x, y, c);
-                        }
-                    }
-            }
-
-            return 0;
-        }
-
-        static void DrawSky(uint x, uint y)
-        {
-            var sbx = (int)(x - Math.Atan2(dirY, dirX) * (512 / (Math.PI * 2))) - 128;
-
-            _zBuffer[x, y] = 256;
-
-            var sb = Cache.GetTexture(Level.skybox);
-            Screen.SetPixel(x, (uint)(y), sb.GetPixel((uint)sbx, (uint)(y)));
-        }
-
-        public static void DrawSprites(int w, int h)
-        {
-            var nsprites = World.sprites.Length;
-
-            // SORT SPRITES
-            var spriteorder = new Spriterenderinfo[nsprites];
-            for (var i = 0; i < nsprites; i++)
-            {
-                double sx = World.sprites[i].pos.x;
-                double sy = World.sprites[i].pos.y;
-
-                spriteorder[i] = new Spriterenderinfo
-                {
-                    index = i,
-                    x = sx,
-                    y = sy,
-                    dist = (World.Player.pos.x - sx) * (World.Player.pos.x - sx) +
-                           (World.Player.pos.y - sy) * (World.Player.pos.y - sy)
-                };
-            }
-
-            CombSort(ref spriteorder);
-
-            // DRAW SPRITES
-            for (var i = 0; i < nsprites; i++)
-            {
-                var xpos = spriteorder[i].x - World.Player.pos.x;
-                var ypos = spriteorder[i].y - World.Player.pos.y;
-
-                // TRANSFORM
-                var invDet = 1.0 / (planeX * dirY - dirX * planeY);
-                var transformx = invDet * (dirY * xpos - dirX * ypos);
-                var transformy = invDet * (-planeY * xpos + planeX * ypos);
-
-                if (transformy == 0) continue;
-
-                var s = World.sprites[spriteorder[i].index];
-                var screenx = (int) (w / 2 * (1 + transformx / transformy));
-
-                var sprh = Math.Abs((int) (h / transformy));
-                var ymin = (-sprh / 2 + h / 2).Clamp(0, h);
-                var ymax = (sprh / 2 + h / 2).Clamp(0, h);
-
-                var sprw = Math.Abs((int) (h / transformy / (16 / s.sprwidth)));
-                var xmin = (-sprw / 2 + screenx).Clamp(0, w);
-                var xmax = (sprw / 2 + screenx).Clamp(0, w);
-
-                // DRAW
-                for (var x = xmin; x < xmax; x++)
-                {
-                    if (!(x >= BORDER && x < w - BORDER)) continue;
-
-                    var txs = s.sprx * s.sprwidth;
-
-                    var texelx = 256 * (x - (-sprw / 2 + screenx)) * (int) s.sprwidth / sprw / 256;
-                    var vis = transformy <= 10 - _zBuffer[x, Screen.height / 2];
-
-                    if (transformy > 0 && x > 0 && x < w && vis)
-                    {
-                        if (x == Screen.width / 2 &&
-                            (centersprite.dist == -1 || centersprite.dist > spriteorder[i].dist) && !s.fetchignore)
-                            centersprite = new Screensprite
-                            {
-                                index = spriteorder[i].index,
-                                dist = (float) spriteorder[i].dist
-                            };
-
-                        for (var y = ymin; y < ymax; y++)
-                        {
-                            if (!(y >= BORDER && y < h - HUDSIZE)) continue;
-
-                            var d = y * 2 - h + sprh;
-                            var texely = d * (int) s.sprheight / sprh / 2;
-                            texely = texely.Clamp(0, (int) s.sprheight);
-
-                            var c = s.Tex.GetPixel(txs + (uint) texelx, (uint) texely);
-                            if (c != magicpink)
-                            {
-                                _zBuffer[x, y] = 10 - spriteorder[i].dist;
-                                Screen.SetPixel((uint) x, (uint) y, c);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        private static Vector prevPos;
-        private static void PostProcess()
-        {
-            /* Distance brightness calc (fog/diminish lighting - doom!)*/
-            for (uint x = 0; x < Screen.width; x++)
-            {
-                for (uint y = 0; y < Screen.height; y++)
-                {
-                    var zl = ((_zBuffer[x, y] + 2) / 2.2).Clamp(0, 200);
-                    var xx = (x - Screen.width / 2.0) / Screen.width;
-
-                    var col = Screen.GetPixel(x, y);
-                    var db = (uint) (zl * 26 * (xx * xx + 1));
-                    db = (((db + ((x + y) & 3) * 8) >> 4) << 4).Clamp((uint) 0, (uint) 255);
-
-                    var r = (((col >> 16) & 0xff) * db) >> 8;
-                    var g = (((col >> 8) & 0xff) * db) >> 8;
-                    var b = ((col & 0xff) * db) >> 8;
-
-                    Screen.SetPixel(x, y, Engine.UintColor(r, g, b));
-                }
-
-                if (World.sky)
-                {
-                    if (x > BORDER && x < Screen.width - BORDER)
-                    {
-                        int rh = (int) rain[x - BORDER];
-                        if (rh >= BORDER)
-                        {
-                            bool t2 = ((prevPos?.x - World.Player.pos.x > 1 && x % 2 == 0) ||
-                                        (prevPos?.y - World.Player.pos.y > 1 && x % 3 == 0));
-                            if (rh - 8 < dispHeight && !t2)
-                            {
-                                for (int i = 0; i < 8; i++)
-                                {
-                                    int y = rh - i;
-                                    if (y > BORDER && y < Screen.height - BORDER && y < dispHeight)
-                                        Screen.SetPixel(x, (uint) y,
-                                            Engine.MixColor(new Color(128, 128, 135),
-                                                Engine.ColorUint(Screen.GetPixel(x, (uint) y)), 1));
-                                }
-                            }
-                            else
-                            {
-                                ReseedRain(x - BORDER, t2);
-                            }
-                        }
-                    }
-                }
-            }
-
-            prevPos = World.Player.pos;
-        }
-
-        static void ReseedRain(uint i, bool t2)
-        {
-            if (t2) rain[i] = Engine.random.Next((int)BORDER - 1, (int)Screen.height);
-            else rain[i] = Engine.random.Next(-200, (int)BORDER - 1);
-        }
-
-        private static void CombSort(ref Spriterenderinfo[] order)
-        {
-            var gap = order.Length;
-            var swapped = false;
-            while (gap > 1 || swapped)
-            {
-                gap = gap * 10 / 13;
-                if (gap == 9 || gap == 10) gap = 11;
-                if (gap < 1) gap = 1;
-                swapped = false;
-                for (var i = 0; i < order.Length - gap; i++)
-                {
-                    var j = i + gap;
-                    if (order[i].dist < order[j].dist)
-                    {
-                        SwapSprite(ref order[i], ref order[j]);
-                        swapped = true;
-                    }
-                }
-            }
-        }
-
-        private static void Swap<T>(ref T v1, ref T v2) where T : IComparable<T>
-        {
-            var tv1 = v1;
-            v1 = v2;
-            v2 = tv1;
-        }
-
-        private static void SwapSprite(ref Spriterenderinfo v1, ref Spriterenderinfo v2)
-        {
-            var tv1 = v1;
-            v1 = v2;
-            v2 = tv1;
-        }
-
-        public static uint Colorize(Color bw, Color tint)
-        {
-            var r = (uint)((double)bw.R * tint.R) >> 8;
-            var g = (uint)((double)bw.G * tint.G) >> 8;
-            var b = (uint)((double)bw.B * tint.B) >> 8;
-            return Engine.UintColor(r, g, b);
-        }
-
-        private struct Spriterenderinfo
+        private struct sprRenderInf
         {
             public int index;
             public double dist;
             public double x;
             public double y;
+        }
+
+        /*         
+        RAYCASTER RENDERER :
+
+        Based upon concept and theory (en.wikipedia.org/wiki/Ray_casting)
+        and on opimizations of Lode Vandevenne's C implementation
+        (lodev.org/cgtutor/raycasting.html).
+
+        ..and further reading.
+         */
+
+        public const int BORDER = 0;
+        public const int HUDSIZE = 0;
+
+        private static readonly uint DispHeight = engine.SCREEN_HEIGHT - HUDSIZE;
+
+        public const int TEXSIZE = 32;
+        public static Color magicpink = Color.FromArgb(255, 0, 255);
+
+        // fullbright
+        private static Dictionary<vector, Color> _fbcache;
+
+        // post processing
+        private static int[] _rain;
+        private static float[,] _zBuffer;
+
+        // skybox
+        private static texture sb;
+        private static float _sbAngle;
+
+        // camera
+        internal static vector camDir = new vector(-1, 0);
+        internal static vector camPlane = new vector(0, 0);
+
+        // world interaction
+        private static screensprite centersprite;
+        private static screencell centercell;
+
+        // ray data
+        private static vector _rayDir;
+        private static vector _shift;
+        private static vector _len;
+
+        internal static void Init()
+        {
+            _zBuffer = new float[screen.width, screen.height];
+            _fbcache = new Dictionary<vector, Color>();
+
+            _rain = new int[screen.width - BORDER * 2];
+            for (uint i = 0; i < _rain.Length; i++) ReseedRain(i);
+
+            vis.Precomp();
+        }
+
+        public static screensprite GetCenterSprite()
+        {
+            return centersprite;
+        }
+        public static screencell GetCenterCell()
+        {
+            return centercell;
+        }
+        public static mapcell GetCenterMapCell()
+        {
+            if (centercell.mapx >= world.mapsize || centercell.mapy >= world.mapsize || centercell.mapx < 0 || centercell.mapy < 0)
+                return new mapcell(new vector(0, 0), "", "", "") {interactable = false};
+
+            return world.map[centercell.mapx, centercell.mapy];
+        }
+
+        private static vector _plast;
+        internal static void Render(bool allowextras = true)
+        {
+            screen.Clear();
+            _fbcache.Clear();
+
+            sb = cache.GetTexture(world.skybox);
+            centersprite = new screensprite {dist = -1};
+
+            DrawWorld((int) DispHeight);
+            DrawSprites((int) engine.SCREEN_HEIGHT);
+            PostProcess();
+
+            var velocity = new vector(0, 0);
+            if (!ReferenceEquals(null, _plast)) velocity = world.Player.pos - _plast;
+            world.Player.weapon.Draw(velocity);
+
+            _plast = world.Player.pos;
+        }
+
+        private static void DrawWorld(int dh)
+        {
+            _sbAngle = (float) Math.Atan2(camDir.y, camDir.x);
+
+            var sh = (int) screen.height;
+            for (uint x = BORDER; x < engine.SCREEN_WIDTH - BORDER; x++)
+            {
+                // rain advance
+                _rain[x - BORDER] += 8;
+
+                #region Raycasting
+                int curMapx = (int)world.Player.pos.x;
+                int curMapy = (int)world.Player.pos.y;
+                bool northsouth = false;
+                float wallDist = -1;
+
+                bool hit = CastRay(x, ref curMapx, ref curMapy, ref northsouth, ref wallDist);
+                #endregion
+
+                // calculate strip bounds
+                var lineHeight = Math.Abs((int)(sh / wallDist));
+                var lineMin = (-lineHeight / 2 + sh / 2).Clamp(0, sh);
+                var lineMax = (lineHeight / 2 + sh / 2).Clamp(0, sh);
+
+                #region Wall Mapping
+                var wallHit = northsouth
+                    ? world.Player.pos.x + wallDist * _rayDir.x
+                    : world.Player.pos.y + wallDist * _rayDir.y;
+                wallHit -= (float)Math.Floor(wallHit);
+
+                var wallTexelX = (int)(wallHit * TEXSIZE);
+                if (!northsouth && _rayDir.x > 0 || northsouth && _rayDir.y < 0) wallTexelX = TEXSIZE - wallTexelX - 1;
+
+                var cell = world.map[curMapx.Clamp(0, world.mapsize - 1), curMapy.Clamp(0, world.mapsize - 1)];
+                var wall = cache.GetTexture(world.GetTextureAlias(cell.walltex));
+
+                #endregion
+
+                #region Floor/Ceil Mapping
+
+                vector floor;
+                if (!northsouth && _rayDir.x > 0)
+                    floor = new vector(curMapx, curMapy + wallHit);
+                else if (!northsouth && _rayDir.x < 0)
+                    floor = new vector((float)(curMapx + 1.0), curMapy + wallHit);
+                else if (northsouth && _rayDir.y > 0)
+                    floor = new vector(curMapx + wallHit, curMapy);
+                else
+                    floor = new vector(curMapx + wallHit, (float)(curMapy + 1.0));
+
+                #endregion
+
+                // plot strip
+                for (uint y = BORDER; y < sh - BORDER; y++) {
+                    if (y >= lineMax && y <= sh)
+                    {
+                        #region Draw Floor/Ceil
+
+                        var d = sh / (2.0 * y - sh);
+                        var weight = (float)(d / wallDist);
+
+                        var floorMap = floor * weight + game.world.Player.pos * (1.0f - weight);
+
+                        cell = game.world.map[((int)floorMap.x).Clamp(0, game.world.mapsize - 1),
+                            ((int)floorMap.y).Clamp(0, game.world.mapsize - 1)];
+
+                        floorMap *= TEXSIZE;
+
+                        var floorTexelx = (int)Math.Abs(floorMap.x % TEXSIZE);
+                        var floorTexely = (int)Math.Abs(floorMap.y % TEXSIZE);
+
+                        // apply fog
+                        var fog = (float)(10 - d);
+                        _zBuffer[x, y] = fog;
+
+                        // lightmapping
+                        var world = new vector((int)floorMap.x, (int)floorMap.y);
+                        world.x = world.x.Clamp(0, level.LightmapSize - 1);
+                        world.y = world.y.Clamp(0, level.LightmapSize - 1);
+                        var light = level.lightmap[(int)world.x, (int)world.y];
+
+                        // texturing
+                        var ceilCol = cache.GetTexture(game.world.GetTextureAlias(cell.ceiltex))
+                            .GetPixel((uint)floorTexelx, (uint)floorTexely);
+                        var floorCol = cache.GetTexture(game.world.GetTextureAlias(cell.floortex))
+                            .GetPixel((uint)floorTexelx, (uint)floorTexely);
+
+                        if (y < dh)
+                        {
+                            if (floorCol == magicpink)
+                            {
+                                _zBuffer[x, y] = fog / 10;
+                                _fbcache.Add(new vector(x, y), cell.emission);
+                            }
+
+                            screen.SetPixel(x, y, Additive(floorCol, light));
+                        }
+
+                        if (!game.world.sky)
+                        {
+                            if (ceilCol == magicpink)
+                            {
+                                _zBuffer[x, sh - y] = fog / 10;
+                                _fbcache.Add(new vector(x, sh - y), cell.emission);
+                            }
+                            else
+                            {
+                                _zBuffer[x, sh - y] = fog;
+                            }
+
+                            screen.SetPixel(x, (uint)sh - y, (Additive(ceilCol, light) >> 1) & 8355711);
+                        }
+                        else
+                        {
+                            DrawSky(x, (uint)sh - y);
+                        }
+
+                        #endregion
+                    }
+                    else if (y > lineMin && y < lineMax && y < dh && y >= BORDER && hit)
+                    {
+                        #region Draw Wall
+                        var d = (int)(y + 1) * 2 - sh + lineHeight;
+                        var texely = Math.Abs(d * TEXSIZE / lineHeight / 2) % TEXSIZE;
+
+                        _zBuffer[x, y] = 10 - wallDist;
+                        if (wall == null) continue;
+
+                        var ic = wall.GetPixel((uint)wallTexelX, (uint)texely);
+                        if (ic == magicpink)
+                        {
+                            DrawSky(x, y);
+                        }
+                        else
+                        {
+                            var world = new vector((int)(floor.x * TEXSIZE), (int)(floor.y * TEXSIZE));
+                            if (northsouth)
+                            {
+                                if (_rayDir.y > 0) world.y -= 1;
+                                else world.y += 1;
+                            }
+                            else
+                            {
+                                if (_rayDir.x > 0) world.x -= 1;
+                                else world.x += 1;
+                            }
+
+                            world.x = world.x.Clamp(0, level.LightmapSize - 1);
+                            world.y = world.y.Clamp(0, level.LightmapSize - 1);
+
+                            var c = Additive(ic, level.lightmap[(int)world.x, (int)world.y]);
+                            screen.SetPixel(x, y, c);
+                        }
+                        #endregion
+                    }
+                }
+            }
+        }
+
+        private static bool CastRay(uint x, ref int curMapx, ref int curMapy, ref bool northsouth, ref float wallDist)
+        {
+            float vcolumn = 2 * x / (float)engine.SCREEN_WIDTH - 1;
+            _rayDir = new vector(camDir.x + camPlane.x * vcolumn, camDir.y + camPlane.y * vcolumn);
+            int stepX = _rayDir.x < 0 ? -1 : 1;
+            int stepY = _rayDir.y < 0 ? -1 : 1;
+
+            _shift = new vector((float)Math.Sqrt(1 + _rayDir.y * _rayDir.y / (_rayDir.x * _rayDir.x)),
+                (float)Math.Sqrt(1 + _rayDir.x * _rayDir.x / (_rayDir.y * _rayDir.y)));
+
+            _len = new vector(
+                (float)(_rayDir.x < 0 ? world.Player.pos.x - curMapx : curMapx + 1.0 - world.Player.pos.x) * _shift.x,
+                (float)(_rayDir.y < 0 ? world.Player.pos.y - curMapy : curMapy + 1.0 - world.Player.pos.y) * _shift.y);
+
+            bool hit = false;
+            while (!hit)
+            {
+                if (_len.x < _len.y)
+                {
+                    _len.x += _shift.x;
+                    curMapx += stepX;
+                    northsouth = false;
+                }
+                else
+                {
+                    _len.y += _shift.y;
+                    curMapy += stepY;
+                    northsouth = true;
+                }
+
+                if (curMapx >= world.mapsize || curMapy >= world.mapsize || curMapx < 0 || curMapy < 0) break;
+                hit = world.map[curMapx, curMapy].wall;
+            }
+
+            wallDist = northsouth
+                ? (curMapy - world.Player.pos.y + (1 - stepY) / 2) / _rayDir.y
+                : (curMapx - world.Player.pos.x + (1 - stepX) / 2) / _rayDir.x;
+
+            if (x == screen.width / 2)
+                centercell = new screencell { mapx = curMapx, mapy = curMapy, dist = wallDist };
+
+            return hit;
+        }
+
+        private static void DrawSky(uint x, uint y)
+        {
+            var sbx = (uint)(x - _sbAngle * (512 / (Math.PI * 2))) - 128;
+            screen.SetPixel(x, y, sb.GetPixel(sbx, y));
+
+            _zBuffer[x, y] = 256;
+        }
+
+        private static sprRenderInf[] SortSprites()
+        {
+            var nsprites = world.sprites.Length;
+
+            // sort sprites
+            var spriteorder = new sprRenderInf[nsprites];
+            for (var i = 0; i < nsprites; i++)
+            {
+                double sx = world.sprites[i].pos.x;
+                double sy = world.sprites[i].pos.y;
+
+                spriteorder[i] = new sprRenderInf
+                {
+                    index = i,
+                    x = sx,
+                    y = sy,
+                    dist = (world.Player.pos.x - sx) * (world.Player.pos.x - sx) +
+                           (world.Player.pos.y - sy) * (world.Player.pos.y - sy)
+                };
+            }
+
+            return spriteorder.OrderBy(x => x.dist).ToArray();
+        }
+
+        private static void DrawSprites(int h)
+        {
+            var nsprites = world.sprites.Length;
+            var spriteorder = SortSprites();
+            int w = (int)engine.SCREEN_WIDTH;
+
+            for (var i = 0; i < nsprites; i++)
+            {
+                var pos = new vector((float) spriteorder[i].x - world.Player.pos.x,
+                    (float) spriteorder[i].y - world.Player.pos.y);
+
+                // transform
+                var invDet = (float) 1.0 / (camPlane.x * camDir.y - camDir.x * camPlane.y);
+                var transform = new vector(invDet * (camDir.y * pos.x - camDir.x * pos.y),
+                    invDet * (-camPlane.y * pos.x + camPlane.x * pos.y));
+
+                if (transform.x == 0) continue;
+
+                var s = world.sprites[spriteorder[i].index];
+                var screenx = (int) (w / 2 * (1 + transform.x / transform.y));
+
+                var scaleWidth = Math.Abs((int) (h / transform.y / (16 / s.sprwidth)));
+                var scaleHeight = Math.Abs((int) (h / transform.y));
+
+                var ymin = (-scaleHeight / 2 + h / 2).Clamp(0, h);
+                var ymax = (scaleHeight / 2 + h / 2).Clamp(0, h);
+
+                var xmin = (-scaleWidth / 2 + screenx).Clamp(0, w);
+                var xmax = (scaleWidth / 2 + screenx).Clamp(0, w);
+
+                // draw
+                for (var x = xmin; x < xmax; x++)
+                {
+                    if (!(x >= BORDER && x < w - BORDER)) continue;
+
+                    var txs = s.sprx * s.sprwidth;
+                    var texelx = 256 * (x - (-scaleWidth / 2 + screenx)) * (int) s.sprwidth / scaleWidth / 256;
+
+                    var vis = transform.y <= 10 - _zBuffer[x, screen.height / 2];
+                    if (transform.y > 0 && x > 0 && x < w && vis)
+                    {
+                        if (x == screen.width / 2 &&
+                            (centersprite.dist == -1 || centersprite.dist > spriteorder[i].dist) && !s.fetchignore)
+                        {
+                            centersprite = new screensprite
+                            {
+                                index = spriteorder[i].index,
+                                dist = (float)spriteorder[i].dist
+                            };
+                        }
+
+                        for (var y = ymin; y < ymax; y++)
+                        {
+                            if (!(y >= BORDER && y < h - HUDSIZE)) continue;
+
+                            var d = y * 2 - h + scaleHeight;
+                            var texely = d * (int) s.sprheight / scaleHeight / 2;
+                            texely = texely.Clamp(0, (int) s.sprheight);
+
+                            var c = s.Tex.GetPixel(txs + (uint) texelx, (uint) texely);
+                            if (c != magicpink)
+                            {
+                                _zBuffer[x, y] = 10 - (float) spriteorder[i].dist;
+
+                                var world = new vector(s.pos.x, s.pos.y) * TEXSIZE;
+                                var ic = Additive(c, level.lightmap[(int) world.x, (int) world.y]);
+
+                                var v = new vector(x, y);
+                                if (_fbcache.ContainsKey(v)) _fbcache.Remove(v);
+                                screen.SetPixel((uint) x, (uint) y, ic);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private static void PostProcess()
+        {
+            for (uint x = 0; x < screen.width; x++)
+            {
+                DrawDiminishLighting(x);
+                if (world.rain) DrawRain(x);
+            }
+        }
+
+        private static void DrawDiminishLighting(uint x)
+        {
+            for (uint y = 0; y < screen.height; y++)
+            {
+                var zl = ((_zBuffer[x, y] + 2) / 2.2).Clamp(0, 200);
+                var xx = (x - screen.width / 2.0) / screen.width;
+
+                Color col = screen.GetPixel(x, y);
+                var db = (uint)(zl * 26 * (xx * xx + 1));
+                db = (((db + ((x + y) & 3) * 8) >> 4) << 4).Clamp((uint)0, (uint)255);
+
+                int r = (int)((col.R * db) / 255);
+                int g = (int)((col.G * db) / 255);
+                int b = (int)((col.B * db) / 255);
+                screen.SetPixel(x, y, Color.FromArgb(r, g, b));
+
+                if (_fbcache.ContainsKey(new vector(x, y)))
+                {
+                    screen.SetPixel(x, y, Additive(screen.GetPixel(x, y), _fbcache[new vector(x, y)]));
+                }
+            }
+        }
+        
+        private static void DrawRain(uint x)
+        {
+            if (x > BORDER && x < screen.width - BORDER)
+            {
+                int rh = _rain[x - BORDER];
+                if (rh >= BORDER)
+                {
+                    if (rh - 8 < DispHeight)
+                    {
+                        for (int i = 0; i < 8; i++)
+                        {
+                            int y = rh - i;
+                            if (y > BORDER && y < screen.height - BORDER && y < DispHeight)
+                            {
+                                screen.SetPixel(x, (uint)y,
+                                    engine.MixColor(Color.FromArgb(128, 128, 135), screen.GetPixel(x, (uint)y), 15));
+                            }
+                        }
+                    }
+                    else
+                    {
+                        ReseedRain(x - BORDER);
+                    }
+                }
+            }
+        }
+
+        private static void ReseedRain(uint i)
+        {
+            _rain[i] = engine.random.Next(-200, BORDER - 1);
+        }
+
+        public static uint Additive(Color bw, Color tint)
+        {
+            var r = (byte) ((float) (bw.R + tint.R) / 2);
+            var g = (byte) ((float) (bw.G + tint.G) / 2);
+            var b = (byte) ((float) (bw.B + tint.B) / 2);
+            return (uint) ((r << 16) | (g << 8) | b);
         }
     }
 }

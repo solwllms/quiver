@@ -1,46 +1,51 @@
-﻿using System;
-using System.Linq;
-using engine.display;
-using engine.system;
-using SFML.Window;
+﻿#region
 
-namespace engine.states.options
+using System;
+using System.Linq;
+using Quiver.Audio;
+using Quiver.display;
+using Quiver.system;
+using OpenTK.Input;
+
+#endregion
+
+namespace Quiver.states.options
 {
-    public class OptionMulti : OptionListing
+    public class optionMulti : optionListing
     {
-        private int _cursor;
         private readonly string _cvar;
         private readonly string[] _options;
 
-        private Action onChange;
+        private readonly Action _onChange;
+        private int _cursor;
 
-        public OptionMulti(string label, string[] options, string cvar) : this(label, options, cvar, null)
+        public optionMulti(string label, string[] options, string cvar) : this(label, options, cvar, null)
         {
         }
 
-        public OptionMulti(string label, string[] options, string cvar, Action onChange) : base(label)
+        public optionMulti(string label, string[] options, string cvar, Action onChange) : base(label)
         {
-            this._options = options;
-            this._cvar = cvar;
-            this.onChange = onChange;
+            _options = options;
+            _cvar = cvar;
+            this._onChange = onChange;
 
-            if (options.Contains(Cmd.GetValue(cvar)))
-                _cursor = Array.IndexOf(options, Cmd.GetValue(cvar));
+            if (options.Contains(cmd.GetValue(cvar)))
+                _cursor = Array.IndexOf(options, cmd.GetValue(cvar));
         }
 
         public override void Draw(bool hover, uint x, uint y)
         {
             base.Draw(hover, x, y);
 
-            Gui.Write(Cmd.GetValue(_cvar), x + 78, y);
+            gui.Write(cmd.GetValue(_cvar), x + 78, y);
         }
 
         public override void Tick()
         {
             base.Tick();
 
-            if (Input.IsKeyPressed(Keyboard.Key.Left)) CursorMove(-1);
-            if (Input.IsKeyPressed(Keyboard.Key.Right)) CursorMove(1);
+            if (input.IsKeyPressed(Key.Left)) CursorMove(-1);
+            if (input.IsKeyPressed(Key.Right)) CursorMove(1);
         }
 
         public void CursorMove(int dir)
@@ -49,9 +54,9 @@ namespace engine.states.options
             _cursor = (_cursor + dir).Clamp(0, _options.Length - 1);
             if (pc != _cursor)
             {
-                Audio.PlaySound2D("sound/ui/hover");
-                Cmd.SetValue(_cvar, _options[_cursor]);
-                onChange?.Invoke();
+                audio.PlaySound("sound/ui/hover");
+                cmd.SetValue(_cvar, _options[_cursor]);
+                _onChange?.Invoke();
             }
         }
     }

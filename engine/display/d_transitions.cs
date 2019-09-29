@@ -1,8 +1,12 @@
-﻿using engine.system;
+﻿#region
 
-namespace engine.display
+using Quiver.system;
+
+#endregion
+
+namespace Quiver.display
 {
-    public class Transition
+    public class transition
     {
         public virtual void Draw()
         {
@@ -19,76 +23,76 @@ namespace engine.display
         }
     }
 
-    public class Wipe : Transition
+    public class wipe : transition
     {
         private readonly uint[,] _prebuff;
         private readonly int[] _shift;
 
-        public Wipe()
+        public wipe()
         {
-            _prebuff = new uint[Screen.width, Screen.height];
-            for (uint x = 0; x < Screen.width; x++)
-            for (uint y = 0; y < Screen.height; y++)
-                _prebuff[x, y] = Screen.GetPixel(x, y);
+            _prebuff = new uint[screen.width, screen.height];
+            for (uint x = 0; x < screen.width; x++)
+            for (uint y = 0; y < screen.height; y++)
+                _prebuff[x, y] = screen.GetPixel(x, y).ToUint();
 
-            _shift = new int[Screen.width];
-            for (var x = 0; x < Screen.width; x++) _shift[x] = -system.Engine.random.Next(0, 50);
+            _shift = new int[screen.width];
+            for (var x = 0; x < screen.width; x++) _shift[x] = -engine.random.Next(0, 50);
         }
 
         public override void Draw()
         {
-            for (uint x = 0; x < Screen.width; x++)
+            for (uint x = 0; x < screen.width; x++)
             {
-                var ys = (uint) _shift[x].Clamp(0, (int) Screen.height);
-                for (uint y = 0; y < Screen.height; y++)
+                var ys = (uint) _shift[x].Clamp(0, (int) screen.height);
+                for (uint y = 0; y < screen.height; y++)
                     if (y > ys)
-                        Screen.SetPixel(x, y,
-                            _prebuff[x, (y - ys).Clamp((uint) 0, Screen.height - 1)]);
+                        screen.SetPixel(x, y,
+                            _prebuff[x, (y - ys).Clamp((uint) 0, screen.height - 1)]);
                 _shift[x]++;
             }
         }
 
         public override bool IsDone()
         {
-            for (var x = 0; x < Screen.width; x++)
-                if (_shift[x] < Screen.height - 1)
+            for (var x = 0; x < screen.width; x++)
+                if (_shift[x] < screen.height - 1)
                     return false;
             return true;
         }
     }
 
-    public class Fizzle : Transition
+    public class fizzle : transition
     {
         private readonly bool[,] _fade;
-        private uint _n;
         private readonly uint[,] _prebuff;
+        private uint _n;
 
-        public Fizzle()
+        public fizzle()
         {
-            _n = Screen.width * Screen.height;
-            _fade = new bool[Screen.width, Screen.height];
-            _prebuff = new uint[Screen.width, Screen.height];
-            for (uint x = 0; x < Screen.width; x++)
-            for (uint y = 0; y < Screen.height; y++)
-                _prebuff[x, y] = Screen.GetPixel(x, y);
+            _n = screen.width * screen.height;
+            _fade = new bool[screen.width, screen.height];
+            _prebuff = new uint[screen.width, screen.height];
+            for (uint x = 0; x < screen.width; x++)
+            for (uint y = 0; y < screen.height; y++)
+                _prebuff[x, y] = screen.GetPixel(x, y).ToUint();
         }
 
         public override void Draw()
         {
-            for (uint x = 0; x < Screen.width; x++)
-            for (uint y = 0; y < Screen.height; y++)
+            for (uint x = 0; x < screen.width; x++)
+            for (uint y = 0; y < screen.height; y++)
             {
                 if (_fade[x, y])
                     continue;
 
-                if (x * y % 15 == system.Engine.random.Next(0, 15))
+                if (x * y % 15 == engine.random.Next(0, 15))
                 {
                     _fade[x, y] = true;
                     _n--;
                 }
                 else
                 {
-                    Screen.SetPixel(x, y, _prebuff[x, y]);
+                    screen.SetPixel(x, y, _prebuff[x, y]);
                 }
             }
         }

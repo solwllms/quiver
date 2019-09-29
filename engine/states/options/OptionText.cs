@@ -1,22 +1,26 @@
-﻿using engine.display;
-using SFML.Graphics;
+﻿#region
 
-namespace engine.states.options
+using Quiver.display;
+using System.Drawing;
+
+#endregion
+
+namespace Quiver.states.options
 {
-    public class OptionText : OptionListing
+    public class optionText : optionListing
     {
         private readonly string _text;
         public Color col = Color.Black;
 
-        public OptionText(string text) : base("")
+        public optionText(string text) : base("")
         {
-            this._text = text;
+            _text = text;
             selectable = false;
         }
 
         public override void Draw(bool hover, uint x, uint y)
         {
-            Gui.Write(_text, x, y, col);
+            gui.Write(_text, x, y, col);
         }
 
         public override void Tick()

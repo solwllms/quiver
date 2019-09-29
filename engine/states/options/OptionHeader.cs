@@ -1,17 +1,22 @@
-﻿using engine.display;
+﻿#region
 
-namespace engine.states.options
+using Quiver.display;
+using System.Drawing;
+
+#endregion
+
+namespace Quiver.states.options
 {
-    public class OptionHeader : OptionListing
+    public class optionHeader : optionListing
     {
-        public OptionHeader(string label) : base(label)
+        public optionHeader(string label) : base(label)
         {
             selectable = false;
         }
 
         public override void Draw(bool hover, uint x, uint y)
         {
-            Gui.Write(label, x + 4, y, Gui.darker);
+            gui.Write(label, x + 4, y, Color.White);
         }
 
         public override void Tick()

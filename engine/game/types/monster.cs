@@ -1,47 +1,52 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using engine.display;
-using engine.system;
+﻿#region
 
-namespace engine.game.types
+using System.Collections.Generic;
+using System.IO;
+using Quiver.display;
+using Quiver.system;
+
+#endregion
+
+namespace Quiver.game.types
 {
-    public class Monster : Dirsprite
+    public class monster : dirsprite
     {
+        private readonly vector _offs;
+
         // animation / graphical
-        private readonly string rotTex;
-        protected Animation anim;
+        private readonly string _rotTex;
 
         // used by THIS to handle logic
         private bool _movex;
-        private Vector offs;
-        private List<Vector> path;
-        protected float speed = 0.5f / 32;
-        protected Vector target;
+        protected animation anim;
 
         // used by CHILDs to handle their own logic
         protected bool attacking = false;
+        private List<vector> _path;
+        protected float speed = 0.5f / 32;
+        protected vector target;
         protected int timer;
 
-        public Monster(Vector pos, string texture) : base(texture, pos, false)
+        public monster(vector pos, string texture) : base(texture, pos, false)
         {
-            path = new List<Vector>();
+            _path = new List<vector>();
 
-            offs = new Vector((float) system.Engine.random.Next(3, 7) / 10, (float) system.Engine.random.Next(3, 7) / 10);
+            _offs = new vector((float) engine.random.Next(3, 7) / 10, (float) engine.random.Next(3, 7) / 10);
             sprwidth = 8;
             health = 100;
-            stateLive = Livestate.Alive;
+            stateLive = livestate.Alive;
 
-            rotTex = texture;
+            _rotTex = texture;
         }
 
         public void SetRotational()
         {
             anim = null;
-            SetTexture(rotTex);
+            SetTexture(_rotTex);
             dodirectional = true;
         }
 
-        public void SetAnim(Animation a)
+        public void SetAnim(animation a)
         {
             anim = a;
             anim.Play();
@@ -49,20 +54,17 @@ namespace engine.game.types
             dodirectional = false;
         }
 
-        public override void SetState(Livestate s)
+        public override void SetState(livestate s)
         {
             base.SetState(s);
-            if (s == Livestate.Dead)
-            {
-                OnKilled();
-            }
+            if (s == livestate.Dead) OnKilled();
         }
 
         public override void Tick()
         {
             base.Tick();
 
-            if (!ReferenceEquals(target, null) && stateLive != Livestate.Dead)
+            if (!ReferenceEquals(target, null) && stateLive != livestate.Dead)
             {
                 if (pos.Floor().Equals(target.Floor())) AdvancePathing();
 
@@ -76,54 +78,65 @@ namespace engine.game.types
 
         public virtual void AdvancePathing()
         {
-            if (path.Count <= 1)
+            if (_path.Count <= 1)
             {
                 velocity.SetTo(0, 0);
                 target = null;
-                path.Clear();
+                _path.Clear();
                 return;
             }
 
-            target = path[1];
-            path.RemoveAt(0);
+            target = _path[1];
+            _path.RemoveAt(0);
         }
 
-        public virtual void GoTo(Vector goal)
+        public virtual void GoTo(vector goal)
         {
-            Pathfinding.GeneratePathTo(pos.Floor(), goal.Floor(), offs, ref path);
+            pathfinding.GeneratePathTo(pos.Floor(), goal.Floor(), _offs, ref _path);
             velocity.SetTo(0, 0);
             AdvancePathing();
         }
 
         public bool CanSeePlayer(int radius)
         {
-            return Vis.CanHearPlayer(this, radius);
+            return vis.CanHearPlayer(this, radius);
         }
 
         public float DistToPlayer()
         {
-            return pos.DistanceTo(World.Player.pos);
+            return pos.DistanceTo(world.Player.pos);
         }
-        
-        public virtual void AliveTick() { }
-        public virtual void DyingTick() { }
-        public virtual void DeadTick() { }
-        public virtual void OnKilled() { }
+
+        public virtual void AliveTick()
+        {
+        }
+
+        public virtual void DyingTick()
+        {
+        }
+
+        public virtual void DeadTick()
+        {
+        }
+
+        public virtual void OnKilled()
+        {
+        }
 
         public void StateTick()
         {
-            if (Engine.frame % 5 == 0 && anim != null)
+            if (engine.frame % 5 == 0 && anim != null)
             {
                 sprx = (uint) anim.currrent;
                 anim.Step();
             }
 
-            if (stateLive == Livestate.Alive)
+            if (stateLive == livestate.Alive)
             {
                 if (health == 0)
                 {
                     velocity.SetTo(0, 0);
-                    stateLive = Livestate.Dying;
+                    stateLive = livestate.Dying;
                     fetchignore = true;
                 }
                 else
@@ -131,11 +144,11 @@ namespace engine.game.types
                     AliveTick();
                 }
             }
-            else if (stateLive == Livestate.Dying)
+            else if (stateLive == livestate.Dying)
             {
                 DyingTick();
             }
-            else if (stateLive == Livestate.Dead)
+            else if (stateLive == livestate.Dead)
             {
                 DeadTick();
             }
@@ -143,7 +156,7 @@ namespace engine.game.types
             timer++;
         }
 
-        public virtual void MoveTowards(Vector newpos)
+        public virtual void MoveTowards(vector newpos)
         {
             var d = velocity.x != 0 && velocity.y != 0;
             var s = d ? speed * 1.2f : speed;
@@ -154,7 +167,7 @@ namespace engine.game.types
             if (pos.y < newpos.y) velocity.y = s;
             if (pos.y > newpos.y) velocity.y = -s;
 
-            if (system.Engine.frame % 20 == 0) _movex = !_movex;
+            if (engine.frame % 20 == 0) _movex = !_movex;
             if (d)
             {
                 if (!_movex)
@@ -163,18 +176,19 @@ namespace engine.game.types
                     velocity.y = 0;
             }
 
-            if (system.Engine.frame % 50 == 0) angle = (float) (pos - target).Angle();
+            if (engine.frame % 50 == 0) angle = (float) (pos - target).Angle();
         }
 
         public override void DoParseSave(ref BinaryWriter w)
         {
             base.DoParseSave(ref w);
-            w.Write(path.Count);
-            for (var i = 0; i < path.Count; i++)
+            w.Write(_path.Count);
+            for (var i = 0; i < _path.Count; i++)
             {
-                var v = path[i];
-                Vector.Serialize(ref v, ref w);
+                var v = _path[i];
+                vector.Serialize(ref v, ref w);
             }
+
             w.Write(timer);
         }
 
@@ -182,7 +196,7 @@ namespace engine.game.types
         {
             base.DoParseLoad(ref r);
             var n = r.ReadInt32();
-            for (var i = 0; i < n; i++) path.Add(Vector.DeSerialize(ref r));
+            for (var i = 0; i < n; i++) _path.Add(vector.DeSerialize(ref r));
             timer = r.ReadInt32();
         }
     }

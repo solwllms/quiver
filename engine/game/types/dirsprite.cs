@@ -1,14 +1,18 @@
-﻿using System;
-using System.IO;
-using engine.system;
+﻿#region
 
-namespace engine.game.types
+using System;
+using System.IO;
+using Quiver.system;
+
+#endregion
+
+namespace Quiver.game.types
 {
-    public class Dirsprite : Sprite
+    public class dirsprite : sprite
     {
         protected bool dodirectional = true;
 
-        public Dirsprite(string tex, Vector pos, bool isstatic, bool solid = false) : base(tex, pos, isstatic, solid)
+        public dirsprite(string tex, vector pos, bool isstatic, bool solid = false) : base(tex, pos, isstatic, solid)
         {
             this.isstatic = isstatic;
         }
@@ -20,7 +24,7 @@ namespace engine.game.types
 
             if (dodirectional)
             {
-                var a = ((World.Player.pos - pos).Angle() - angle) % 360;
+                var a = ((world.Player.pos - pos).Angle() - angle) % 360;
                 sprx = (uint) Math.Abs((int) a + 180) / 45;
             }
         }

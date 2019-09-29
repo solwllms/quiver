@@ -1,60 +1,66 @@
-﻿using System.IO;
-using engine.display;
-using engine.system;
+﻿#region
 
-namespace engine.game.types
+using System.IO;
+using Quiver.Audio;
+using Quiver.display;
+using Quiver.system;
+
+#endregion
+
+namespace Quiver.game.types
 {
-    public class Weapon : Saveable
+    public class weapon : saveable
     {
-        public int clip;
-        private int _cooldown;
-
-        private Animation _fireAnim;
-        private Animation _anim;
-
         private readonly byte _damage;
-        public int maxclip;
-        public int nonclip;
+
+        private readonly animation _fireAnim;
         private readonly int _reloadcd;
-        public int reloadMsgTime = -1;
+
+        private readonly int _shootcd;
+        private animation _anim;
+        private int _cooldown;
         private string _sfxEmpty;
         private string _sfxReload;
 
         private string _sfxShoot;
+        public int clip;
+        public int maxclip;
+        public int nonclip;
+        public int reloadMsgTime = -1;
 
-        private readonly int _shootcd;
-
-        public Weapon(Animation fireAnim, int maxclip, int totalammo, byte damage, int shootcd, int reloadcd, string sfxShoot,
+        public weapon(animation fireAnim, int maxclip, int totalammo, byte damage, int shootcd, int reloadcd,
+            string sfxShoot,
             string sfxReload, string sfxEmpty)
         {
             _fireAnim = fireAnim;
             _anim = fireAnim;
-            this._sfxShoot = sfxShoot;
-            this._sfxReload = sfxReload;
-            this._sfxEmpty = sfxEmpty;
+            _sfxShoot = sfxShoot;
+            _sfxReload = sfxReload;
+            _sfxEmpty = sfxEmpty;
 
-            this._damage = damage;
+            _damage = damage;
 
-            this._shootcd = shootcd;
-            this._reloadcd = reloadcd;
+            _shootcd = shootcd;
+            _reloadcd = reloadcd;
 
             this.maxclip = maxclip;
             nonclip = totalammo;
             Reload();
         }
 
-        public void SetAnimation(Animation anim)
+        public void SetAnimation(animation anim)
         {
-            this._anim = anim;
+            _anim = anim;
         }
-        public Animation GetAnimation()
+
+        public animation GetAnimation()
         {
             return _anim;
         }
 
         public virtual void Tick()
         {
-            if (Engine.frame % 5 == 0) _anim.Step();
+            if (engine.frame % 5 == 0) _anim?.Step();
 
             _cooldown = (_cooldown - 1).Clamp(0, 200);
             if (reloadMsgTime != -1) reloadMsgTime = (reloadMsgTime - 1).Clamp(-1, 200);
@@ -62,6 +68,7 @@ namespace engine.game.types
 
         public int GetAnimFrame()
         {
+            if (_anim == null) return -1;
             return _anim.currrent;
         }
 
@@ -69,11 +76,11 @@ namespace engine.game.types
         {
             if (nonclip == 0)
             {
-                Audio.PlaySound2D("sound/revolver/empty", 70);
+                audio.PlaySound("sound/revolver/empty", 70);
                 return;
             }
 
-            Audio.PlaySound2D("sound/revolver/reload", 70);
+            audio.PlaySound("sound/revolver/reload", 70);
             //if(doGui) reloadMsgTime = 20;
             _cooldown = _reloadcd;
             nonclip = (nonclip - (maxclip - clip)).Clamp(0, 255);
@@ -94,21 +101,29 @@ namespace engine.game.types
                 _anim = _fireAnim;
 
                 _cooldown = _shootcd;
-                Audio.PlaySound2D("sound/revolver/shoot", 70);
+                audio.PlaySound("sound/revolver/shoot", 70);
                 clip = (clip - 1).Clamp(0, 255);
                 _anim = _fireAnim;
                 _anim.Play();
 
-                var e = World.Player.GetLookatEntity();
-                if (e != null && e.GetState() == Livestate.Alive) e.DoDamage(_damage);
+                var e = world.Player.GetLookatEntity();
+                if (e != null && e.GetState() == livestate.Alive) e.DoDamage(_damage);
 
-                var c = Renderer.GetLookedAt();
-                c?.OnShot();
+                var c = renderer.GetCenterMapCell();
+                if(c != null) c.OnShot();
             }
         }
 
-        public virtual void Draw(Vector velocity)
-        { }
+        public virtual void Draw(vector velocity)
+        {
+        }
+
+        public void DrawViewmodel(texture t, uint x, uint y, uint sx, uint sy, uint rw, uint ry)
+        {
+            t.Draw(x, y, sx, sy, rw, ry,
+                level.lightmap[(int) (world.Player.pos.x * renderer.TEXSIZE),
+                    (int) (world.Player.pos.y * renderer.TEXSIZE)]);
+        }
 
         public override void DoParseSave(ref BinaryWriter w)
         {

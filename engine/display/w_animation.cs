@@ -1,31 +1,31 @@
-﻿namespace engine.display
+﻿namespace Quiver.display
 {
-    public class Animation
+    public class animation
     {
-        public string texture = "";
+        private readonly int _end;
+
+        private readonly int _start;
+        public int currrent;
         public int framesPerLine = 8;
-        public int currrent = 0;
+        public bool loop;
 
-        private int start = 0;
-        private int end = 0;
+        public bool playing;
+        public string texture = "";
 
-        public bool playing = false;
-        public bool loop = false;
-
-        public Animation(int start, int end, bool loop)
+        public animation(int start, int end, bool loop)
         {
-            this.start = start;
-            this.end = end;
+            this._start = start;
+            this._end = end;
             currrent = start;
 
             this.loop = loop;
         }
 
-        public Animation(string texture, int start, int end, bool loop)
+        public animation(string texture, int start, int end, bool loop)
         {
             this.texture = texture;
-            this.start = start;
-            this.end = end;
+            this._start = start;
+            this._end = end;
             currrent = start;
 
             this.loop = loop;
@@ -34,12 +34,14 @@
         public void Play()
         {
             playing = true;
-            currrent = start;
+            currrent = _start;
         }
+
         public void Resume()
         {
             playing = true;
         }
+
         public void Stop()
         {
             playing = false;
@@ -49,17 +51,20 @@
         {
             if (!playing) return;
 
-            if (currrent == end)
+            if (currrent == _end)
             {
-                currrent = start;
+                currrent = _start;
                 if (loop != true) Stop();
             }
-            else currrent++;
+            else
+            {
+                currrent++;
+            }
         }
 
         public bool IsDone()
         {
-            return currrent > end && loop != true;
+            return currrent > _end && loop != true;
         }
     }
 }

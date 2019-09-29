@@ -1,35 +1,47 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.IO;
 
-namespace engine.system
+#endregion
+
+namespace Quiver.system
 {
-    public class Vector : IEquatable<Vector>
+    public class vector : IEquatable<vector>
     {
         public float x;
         public float y;
 
-        public Vector(float x, float y)
+        public vector(float x, float y)
         {
             this.x = x;
             this.y = y;
         }
 
-        public Vector(float angle)
+        public vector(float angle)
         {
             x = (float) Math.Cos(angle);
             y = (float) Math.Sin(angle);
         }
 
-        public bool Equals(Vector other)
+        public bool Equals(vector other)
         {
             return x == other.x && y == other.y;
         }
 
-        public float DistanceTo(Vector v2)
+        public float DistanceTo(vector v2)
         {
             return (float) Math.Sqrt(
                 Math.Pow(x - v2.x, 2)
                 + Math.Pow(y - v2.y, 2));
+        }
+
+        public float DistanceToFast(vector v2)
+        {
+            // see Manhattan distance (https://en.wikibooks.org/wiki/Algorithms/Distance_approximations)
+            var dx = Math.Abs(x - v2.x);
+            var dy = Math.Abs(y - v2.y);
+            return dx + dy;
         }
 
         public double Angle()
@@ -37,7 +49,7 @@ namespace engine.system
             return Math.Atan2(y, x) * (180.0 / Math.PI);
         }
 
-        public double AngleBetween(Vector v)
+        public double AngleBetween(vector v)
         {
             var v1 = Normalize();
             var v2 = v.Normalize();
@@ -45,9 +57,9 @@ namespace engine.system
             return Math.Atan2(v1.y - v2.y, v1.x - v2.x) * (180.0 / Math.PI);
         }
 
-        public static Vector Random(int mx, int my)
+        public static vector Random(int mx, int my)
         {
-            return new Vector(Engine.random.Next(-mx, mx), Engine.random.Next(-my, my));
+            return new vector(engine.random.Next(-mx, mx), engine.random.Next(-my, my));
         }
 
         public void Zero()
@@ -56,17 +68,17 @@ namespace engine.system
             y = 0;
         }
 
-        public Vector Normalize()
+        public vector Normalize()
         {
             var d = (float) Math.Sqrt(x * x + y * y);
-            return new Vector(x / d, y / d);
+            return new vector(x / d, y / d);
         }
 
         public override bool Equals(object obj)
         {
             if (obj == null)
                 return false;
-            var c = obj as Vector;
+            var c = obj as vector;
             if ((object) c == null)
                 return false;
             return Equals(obj);
@@ -78,7 +90,7 @@ namespace engine.system
             this.y = y;
         }
 
-        public float DotProduct(Vector o)
+        public float DotProduct(vector o)
         {
             return x * o.x + y * o.y;
         }
@@ -98,63 +110,63 @@ namespace engine.system
             return string.Format("(X:{0}, Y:{1})", x, y);
         }
 
-        public static Vector operator +(Vector v1, Vector v2)
+        public static vector operator +(vector v1, vector v2)
         {
-            return new Vector(v1.x + v2.x, v1.y + v2.y);
+            return new vector(v1.x + v2.x, v1.y + v2.y);
         }
 
-        public static Vector operator -(Vector v1, Vector v2)
+        public static vector operator -(vector v1, vector v2)
         {
-            return new Vector(v1.x - v2.x, v1.y - v2.y);
+            return new vector(v1.x - v2.x, v1.y - v2.y);
         }
 
-        public static bool operator ==(Vector v1, Vector v2)
+        public static bool operator ==(vector v1, vector v2)
         {
             return v1.Equals(v2);
         }
 
-        public static bool operator !=(Vector v1, Vector v2)
+        public static bool operator !=(vector v1, vector v2)
         {
             return !v1.Equals(v2);
         }
 
-        public static Vector operator *(Vector v1, Vector v2)
+        public static vector operator *(vector v1, vector v2)
         {
-            return new Vector(v1.x * v2.x, v1.y * v2.y);
+            return new vector(v1.x * v2.x, v1.y * v2.y);
         }
 
-        public static Vector operator *(Vector v1, float m)
+        public static vector operator *(vector v1, float m)
         {
-            return new Vector(v1.x * m, v1.y * m);
+            return new vector(v1.x * m, v1.y * m);
         }
 
-        public static Vector operator /(Vector v1, float m)
+        public static vector operator /(vector v1, float m)
         {
-            return new Vector(v1.x / m, v1.y / m);
+            return new vector(v1.x / m, v1.y / m);
         }
 
-        public Vector Floor()
+        public vector Floor()
         {
-            return new Vector((int) Math.Floor(x), (int) Math.Floor(y));
+            return new vector((int) Math.Floor(x), (int) Math.Floor(y));
         }
 
-        public Vector Ceil()
+        public vector Ceil()
         {
-            return new Vector((int) Math.Ceiling(x), (int) Math.Ceiling(y));
+            return new vector((int) Math.Ceiling(x), (int) Math.Ceiling(y));
         }
 
-        public Vector Round()
+        public vector Round()
         {
-            return new Vector((int) Math.Round(x), (int) Math.Round(y));
+            return new vector((int) Math.Round(x), (int) Math.Round(y));
         }
 
-        public Vector RoundToPoint5()
+        public vector RoundToPoint5()
         {
-            return new Vector((int) Math.Round(Math.Round(x * 2, MidpointRounding.AwayFromZero) / 2),
+            return new vector((int) Math.Round(Math.Round(x * 2, MidpointRounding.AwayFromZero) / 2),
                 (int) Math.Round(Math.Round(y * 2, MidpointRounding.AwayFromZero) / 2));
         }
 
-        public void MoveTowards(Vector final)
+        public void MoveTowards(vector final)
         {
             if (x < final.x) x++;
             if (x > final.x) x--;
@@ -162,15 +174,15 @@ namespace engine.system
             if (y > final.y) y--;
         }
 
-        public static void Serialize(ref Vector v, ref BinaryWriter w)
+        public static void Serialize(ref vector v, ref BinaryWriter w)
         {
             w.Write(Convert.ToSingle(v.x));
             w.Write(Convert.ToSingle(v.y));
         }
 
-        public static Vector DeSerialize(ref BinaryReader r)
+        public static vector DeSerialize(ref BinaryReader r)
         {
-            return new Vector(r.ReadSingle(), r.ReadSingle());
+            return new vector(r.ReadSingle(), r.ReadSingle());
         }
     }
 }

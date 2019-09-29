@@ -1,0 +1,51 @@
+<dataset>
+  <settings>
+  </settings>
+  <cells>
+    <cell id="default">
+      <wall>false</wall>
+      <solid>false</solid>
+      <floortex>textures/floor_interior</floortex>
+      <ceiltex>textures/ceil_interior</ceiltex>
+    </cell>
+    <cell id="1">
+      <wall>true</wall>
+      <solid>true</solid>
+      <walltex>textures/wall_interior</walltex>
+    </cell>
+    <cell id="2">
+      <wall>true</wall>
+      <solid>true</solid>
+      <walltex>textures/wall_interior_console_none</walltex>
+    </cell>
+    <cell id="3">
+      <wall>false</wall>
+      <solid>false</solid>
+      <floortex>textures/floor_interior</floortex>
+      <ceiltex>textures/ceil_interior_light</ceiltex>
+      <emission>127 201 255</emission>
+  </cell>
+  <cell id="4">
+    <wall>false</wall>
+    <solid>false</solid>
+    <floortex>textures/floor_interior</floortex>
+    <ceiltex>textures/ceil_interior_light</ceiltex>
+    <emission>255 201 127</emission>
+</cell>
+<cell id="5">
+  <wall>false</wall>
+  <solid>false</solid>
+  <floortex>textures/floor_interior</floortex>
+  <ceiltex>textures/ceil_interior_light</ceiltex>
+  <emission>127 255 127</emission>
+</cell>
+  </cells>
+  <ents>
+    <sprite id="6">
+      <texture>sprites/plant</texture>
+      <offset>0.5 0.5</offset>
+      <isstatic>true</isstatic>
+      <solid>true</solid>
+    </sprite>
+  </ents>
+</dataset>

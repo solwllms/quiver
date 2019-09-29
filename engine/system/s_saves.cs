@@ -1,18 +1,22 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using engine.display;
-using engine.game;
-using engine.game.types;
-using engine.states;
+using Quiver.display;
+using Quiver.game;
+using Quiver.game.types;
+using Quiver.states;
 
-namespace engine.system
+#endregion
+
+namespace Quiver.system
 {
-    public class Saveload
+    public class saveload
     {
-        const string DATETIME_FORMAT = "MM/dd/yyyy h:mm tt";
+        public const string DATETIME_FORMAT = "MM/dd/yyyy h:mm tt";
 
         public static char[] Str(string s, int l)
         {
@@ -21,8 +25,9 @@ namespace engine.system
 
         public static string GetSaveDir()
         {
-            return Cmd.GetValue("dir") + "/saves/";
+            return cmd.GetValue("dir") + "/saves/";
         }
+
         public static string ConstructSavPath(string name)
         {
             return GetSaveDir() + name;
@@ -33,147 +38,157 @@ namespace engine.system
             try
             {
                 var fname = ConstructSavPath(name).ToLower();
-                Log.WriteLine("saving game \"" + fname + ".sav" + "\"..");
+                log.WriteLine("saving game \"" + fname + ".sav" + "\"..");
                 BinaryWriter w;
-                using (w = new BinaryWriter(Filesystem.Open(fname + ".sav", true)))
+                using (w = new BinaryWriter(filesystem.Open(fname + ".sav", true)))
                 {
-                    w.Write(Str(progs.Progs.dll.title, 32));
-                    w.Write(Str(progs.Progs.dll.version, 16));
+                    w.Write(Str(progs.dll.title, 32));
+                    w.Write(Str(progs.dll.version, 16));
                     w.Write(Str(name, 16));
-                    w.Write(Str(World.mapfile, 32));
+                    w.Write(Str(world.mapfile, 32));
                     w.Write(Str(DateTime.Now.ToString(DATETIME_FORMAT), 32));
 
-                    Renderer.Render(false);
-                    Screen.WriteScreenshotScaled(ref w);
+                    renderer.Render(false);
+                    screen.WriteScreenshotScaled(ref w);
 
                     var n = 0;
-                    for (var i = 0; i < World.entities.Count; i++)
-                        if (World.entities[i].id >= 0)
+                    for (var i = 0; i < world.entities.Count; i++)
+                        if (world.entities[i].id >= 0)
                             n++;
 
                     w.Write(Convert.ToInt32(n));
-                    for (var i = 0; i < World.entities.Count; i++)
+                    for (var i = 0; i < world.entities.Count; i++)
                     {
-                        if (World.entities[i].id < 0)
+                        if (world.entities[i].id < 0)
                             continue;
 
-                        w.Write(Convert.ToInt32(World.entities[i].id));
-                        if (!World.entities[i].ParseSave(ref w))
-                            Log.WriteLine("failed to save ent \"" + progs.Progs.GetEntType(World.entities[i].id).Name + "\")",
-                                Log.MessageType.Error);
+                        w.Write(Convert.ToInt32(world.entities[i].id));
+                        if (!world.entities[i].ParseSave(ref w))
+                            log.WriteLine("failed to save ent \"" + progs.GetEntType(world.entities[i].id).Name + "\")",
+                                log.LogMessageType.Error);
                     }
 
                     w.Flush();
                 }
+                
             }
-            catch { Log.WriteLine("failed to save game.", Log.MessageType.Error); }
+            catch
+            {
+                log.WriteLine("failed to save game.", log.LogMessageType.Error);
+            }
         }
 
         public static void LoadGame(string path)
         {
-            Log.WriteLine("loading save \"" + path + "\"..");
+            log.WriteLine("loading save \"" + path + "\"..");
             try
             {
-                Statemanager.SetState(new states.Game(false), true);
+                statemanager.SetState(new states.game(false), true);
                 BinaryReader r;
-                using (r = new BinaryReader(Filesystem.Open(path)))
+                using (r = new BinaryReader(filesystem.Open(path)))
                 {
                     var game = new string(r.ReadChars(32)).Trim();
-                    if (game != progs.Progs.dll.title)
+                    if (game != progs.dll.title)
                     {
-                        Log.WriteLine("save file is not compatable! (wrong game)", Log.MessageType.Error);
-                        Statemanager.SetState(progs.Progs.dll.GetMenuState());
+                        log.WriteLine("save file is not compatable! (wrong game)", log.LogMessageType.Error);
+                        statemanager.SetState(progs.dll.GetMenuState());
                         return;
                     }
 
                     var version = new string(r.ReadChars(16)).Trim();
-                    if (version != progs.Progs.dll.version)
+                    if (version != progs.dll.version)
                     {
-                        Log.WriteLine("save file is not compatable! (wrong version)", Log.MessageType.Error);
-                        Statemanager.SetState(progs.Progs.dll.GetMenuState());
+                        log.WriteLine("save file is not compatable! (wrong version)", log.LogMessageType.Error);
+                        statemanager.SetState(progs.dll.GetMenuState());
                         return;
                     }
 
                     var t = new string(r.ReadChars(16));
                     var map = new string(r.ReadChars(32));
                     var dt = new string(r.ReadChars(32));
-                    Screen.ReadImage(ref r, 32, 18);
+                    screen.ReadImage(ref r, 32, 18);
 
-                    World.ClearEnts();
+                    world.ClearEnts();
                     var m = r.ReadInt32();
                     for (var i = 0; i < m; i++)
                     {
                         var id = r.ReadInt32();
-                        World.AddEnt((Ent) progs.Progs.CreateEnt(id, new Vector(0, 0)));
+                        world.AddEnt((ent) progs.CreateEnt(id, new vector(0, 0)));
 
-                        if (!World.entities[i].ParseLoad(ref r))
-                            Log.WriteLine("failed to load ent \"" + progs.Progs.GetEntType(id).Name + "\")",
-                                Log.MessageType.Error);
+                        if (!world.entities[i].ParseLoad(ref r))
+                            log.WriteLine("failed to load ent \"" + progs.GetEntType(id).Name + "\")",
+                                log.LogMessageType.Error);
                     }
 
-                    World.LoadLevel(map, true, false, false);
-
-                    World.WarmPlayer();
-                    Level.PostLoad(false);
+                    level.Load(map, true, false, false);
                 }
             }
-            catch { Log.WriteLine("failed to load save", Log.MessageType.Error); }
+            catch
+            {
+                log.WriteLine("failed to load save", log.LogMessageType.Error);
+            }
         }
 
-        public static Savelisting ReadFileListing(string path)
+        public static savelisting ReadFileListing(string path)
         {
-            var l = new Savelisting();
+            var l = new savelisting();
             l.savefile = path;
 
             BinaryReader r;
-            using (r = new BinaryReader(Filesystem.Open(path)))
+            using (r = new BinaryReader(filesystem.Open(path)))
             {
                 var game = new string(r.ReadChars(32)).Trim();
-                if (game != progs.Progs.dll.title)
+                if (game != progs.dll.title)
                 {
                     l.savefile = "err";
                     return l;
                 }
 
                 var version = new string(r.ReadChars(16)).Trim();
-                if (version != progs.Progs.dll.version)
+                if (version != progs.dll.version)
                 {
                     l.savefile = "err";
                     return l;
                 }
 
                 l.name = new string(r.ReadChars(16)).Trim();
-                string lvl = new string(r.ReadChars(32)).Trim();
+                var lvl = new string(r.ReadChars(32)).Trim();
                 l.datetime = new string(r.ReadChars(32)).Trim();
-                l.texture = Screen.ReadImage(ref r, 32, 18);
+                l.texture = screen.ReadImage(ref r, 32, 18);
             }
 
             return l;
         }
 
-        public static void RefreshListings(ref List<Savelisting> listings, ref int cursor, bool donew = false)
+        public static void RefreshListings(ref List<savelisting> listings, ref int cursor, bool donew = false)
         {
             listings.Clear();
             var dir = GetSaveDir();
-            if (Directory.Exists(dir)) Directory.CreateDirectory(dir);
+            if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
 
             foreach (var p in Directory.GetFiles(dir, "*.sav"))
-                try
-                {
-                    var l = ReadFileListing(p);
+            {
+                //try
+                //{
+                var l = ReadFileListing(p);
 
-                    if (l.savefile != "err")
-                        listings.Add(l);
-                }
-                catch { }
+                if (l.savefile != "err")
+                    listings.Add(l);
+                /*
+            }
+            catch
+            {
+            }*/
+            }
 
-            listings = listings.OrderByDescending(x => DateTime.ParseExact(x.datetime, DATETIME_FORMAT, CultureInfo.InvariantCulture)).ToList();
+            listings = listings.OrderByDescending(x =>
+                DateTime.ParseExact(x.datetime, DATETIME_FORMAT, CultureInfo.InvariantCulture)).ToList();
 
             if (donew)
-                listings.Insert(0, new Savelisting
+                listings.Insert(0, new savelisting
                 {
-                    texture = Cache.GetTexture("gui/newsave"),
-                    name = Lang.Get("$save.newsave"),
+                    texture = cache.GetTexture("gui/newsave"),
+                    name = lang.Get("$save.newsave"),
                     datetime = "",
                     savefile = "."
                 });
@@ -182,45 +197,50 @@ namespace engine.system
 
         public static void OverwriteSavePrompt(string s)
         {
-            Statemanager.SetState(new Prompt(Lang.Get("$save.overwritesave"), Lang.Get("$general.cantundo"), delegate() { SaveGame(s); }));
+            statemanager.SetState(new prompt(lang.Get("$save.overwritesave"), lang.Get("$general.cantundo"),
+                delegate() { SaveGame(s); }));
         }
 
         public static void DeleteSavePrompt(string name)
         {
-            Statemanager.SetState(new Prompt(Lang.Get("$save.deletesave"), Lang.Get("$general.cantundo"), delegate() { DeleteSave(name); }));
+            statemanager.SetState(new prompt(lang.Get("$save.deletesave"), lang.Get("$general.cantundo"),
+                delegate() { DeleteSave(name); }));
         }
 
         public static void DeleteSave(string name)
         {
-            if (File.Exists(Filesystem.GetPath(name)))
+            if (filesystem.Exists(name, false))
             {
-                File.Delete(Filesystem.GetPath(name));
-                Log.WriteLine("deleted save " + name);
+                File.Delete(filesystem.GetPath(name));
+                log.WriteLine("deleted save " + name);
             }
             else
             {
-                Log.WriteLine("save not found " + name);
+                log.WriteLine("save not found " + name);
             }
         }
 
         public static void DeleteAll()
         {
-            Log.WriteLine("deleting saves..");
-            FileInfo[] files = new DirectoryInfo(GetSaveDir()).GetFiles("*.sav")
+            log.WriteLine("deleting saves..");
+            var files = new DirectoryInfo(GetSaveDir()).GetFiles("*.sav")
                 .Where(p => p.Extension == ".sav").ToArray();
-            foreach (FileInfo file in files)
+            foreach (var file in files)
                 try
                 {
                     file.Attributes = FileAttributes.Normal;
                     File.Delete(file.FullName);
                 }
-                catch { }
-            Log.WriteLine("all saves erased.");
+                catch
+                {
+                }
+
+            log.WriteLine("all saves erased.");
         }
 
-        public struct Savelisting
+        public struct savelisting
         {
-            public Texture texture;
+            public texture texture;
             public string name;
             public string datetime;
             public string savefile;
@@ -228,7 +248,7 @@ namespace engine.system
     }
 
 
-    public class Saveable
+    public class saveable
     {
         // write any and all required data to stream
         public bool ParseSave(ref BinaryWriter w)
@@ -241,7 +261,7 @@ namespace engine.system
             }
             catch (Exception e)
             {
-                if (Cmd.GetValueb("debug")) throw e;
+                if (cmd.GetValueb("debug")) throw e;
                 return false;
             }
         }
@@ -260,7 +280,7 @@ namespace engine.system
             }
             catch (Exception e)
             {
-                if (Cmd.GetValueb("debug")) throw e;
+                if (cmd.GetValueb("debug")) throw e;
                 return false;
             }
         }

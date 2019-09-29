@@ -1,164 +1,166 @@
-﻿using System;
+﻿#region
+
+using System;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
-using engine.system;
-using SFML.Graphics;
-using SFML.System;
+using Quiver.system;
+using OpenTK.Graphics.OpenGL;
+using PixelFormat = OpenTK.Graphics.OpenGL.PixelFormat;
 
-namespace engine.display
+#endregion
+
+namespace Quiver.display
 {
-    public class Screen
+    public class screen
     {
-        public static byte[] pixels;
-
         public static uint width;
         public static uint height;
+        
+        public static cvar cvarFps = new cvar("showfps", "0", true, true);
+        public static cvar cvarFullscreen = new cvar("fullscreen", "0", true, true, callback: delegate
+        {
+            engine.SetFullscreen(cvarFullscreen.Valueb());
+        });
+        
+        public static string gpuVendor => GL.GetString​(StringName.Vendor);
+        public static string gpuModel => GL.GetString​(StringName.Renderer);
 
-        private static SFML.Graphics.Texture _texture;
-        private static Sprite _sprite;
+        private static Byte[,] _buffer;
+        private static int _gltexture = -1;
 
         public static void Init(uint width, uint height)
         {
-            Log.WriteLine("initializing video..");
+            log.WriteLine("initializing video..");
             try
             {
-                pixels = new byte[width * height * 4];
-                Screen.width = width;
-                Screen.height = height;
+                screen.width = width;
+                screen.height = height;
+                
+                _buffer = new byte[screen.height, screen.width * 3];
 
-                _texture = new SFML.Graphics.Texture(Screen.width, Screen.height)
-                {
-                    Smooth = false,
-                    Repeated = true
-                };
-
-                _sprite = new Sprite(_texture);
-                UpdateSprite();
+                GL.GenTextures(1, out _gltexture);
             }
             catch (Exception e)
             {
-				throw e;
-                Log.WriteLine("failed to initialize video", Log.MessageType.Fatal);
+                log.ThrowFatal("Failed to initialize video. System out of memory or OpenGL not supported. " +
+                    "If your system meets the target requirements, try again or update your drivers.", e);
             }
-        }
-
-        public static void UpdateSprite()
-        {
-            _sprite.Scale = new Vector2f(
-                Engine.windowWidth / Engine.SCREEN_WIDTH,
-                Engine.windowHeight / Engine.SCREEN_HEIGHT);
+            log.WriteLine("loaded video successfully. ("+gpuVendor + " " + gpuModel+")", log.LogMessageType.Good);
         }
 
         public static void Render()
         {
-            _texture.Update(pixels);
-            _sprite.Texture = _texture;
-            Engine.window.Clear(Color.Black);
-            Engine.window.Draw(_sprite);
+            if (cvarFps.Valueb())
+            {
+                gui.Write(Math.Round(engine.fps), 0, 0);
+                gui.Write(Math.Round(engine.ftime, 3) + "ms", 0, 6);
+            }
+
+            GL.BindTexture(TextureTarget.Texture2D, _gltexture);
+
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, (int)width, (int)height, 0,
+                PixelFormat.Rgb, PixelType.UnsignedByte, _buffer);
+
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
+
+            s_Window.DrawTexture(_gltexture);
+        }
+
+        private static Color ColorFromFloat(float f)
+        {
+            return Color.FromArgb((byte) (255 * f), (byte) (255 * f), (byte) (255 * f));
         }
 
         public static void WriteScreenshot()
         {
-            var dir = Filesystem.GetBaseDirectory() + "screenshots/";
-            var name = dir + DateTime.Now.Ticks + ".png";
-            if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
-
-            Log.WriteLine("screenshot " + name + " taken.");
-            _texture.CopyToImage().SaveToFile(name);
+            log.WriteLine("writing screenshot..");
+            try
+            {
+                Bitmap i = new Bitmap((int)width, (int)height);
+                for (int x = 0; x < width; x++)
+                for (int y = 0; y < height; y++)
+                {
+                    Color c = GetPixel((uint)x, (uint)y);
+                    i.SetPixel(x, y, c);
+                }
+                i.Save(filesystem.Open("screenshots/" +
+                    DateTime.Now.ToString(saveload.DATETIME_FORMAT).Replace("/", "").Replace(':', '-') + ".png", true), ImageFormat.Png);                
+            }
+            catch
+            {
+                log.WriteLine("an error occured while trying to write screenshot.", log.LogMessageType.Error);
+                return;
+            }
+            log.WriteLine("screenshot saved successfully.", log.LogMessageType.Good);
         }
 
         public static void WriteScreenshotScaled(string path, float scale = 0.2f)
         {
-            Renderer.Render();
-            var t = new SFML.Graphics.Texture(width, height);
-            t.Update(pixels);
-            var s = new Sprite(t);
-            s.Scale = new Vector2f(scale, scale);
-            var rt = new RenderTexture(32, 18);
-            rt.Clear(Color.Black);
-            rt.Draw(s);
-            rt.Display();
-            rt.Texture.CopyToImage().SaveToFile(path + ".png");
+            BinaryWriter bw = new BinaryWriter(filesystem.Open(path, true));
+            WriteScreenshotScaled(ref bw, scale);
+            bw.Close();
         }
 
         public static void WriteScreenshotScaled(ref BinaryWriter bw, float scale = 0.2f)
         {
-            // let SFML do the scaling!
-            var t = new SFML.Graphics.Texture(width, height);
-            t.Update(pixels);
-            var s = new Sprite(t);
-            s.Scale = new Vector2f(scale, scale);
-            var rt = new RenderTexture((uint) (width * scale), (uint) (height * scale));
-            rt.Clear(Color.Black);
-            rt.Draw(s);
-            rt.Display();
-
-            // write data to file
-
-            var w = (uint) (width * scale);
-            var h = (uint) (height * scale);
-            var img = rt.Texture.CopyToImage();
-            for (uint x = 0; x < w; x++)
-            for (uint y = 0; y < h; y++)
+            uint step = (uint)(1 / scale);
+            for (uint x = 0; x < width * scale; x += step)
+            for (uint y = 0; y < height * scale; y += step)
             {
-                var c = img.GetPixel(x, y);
-                bw.Write(c.R);
-                bw.Write(c.G);
-                bw.Write(c.B);
+                Color c = GetPixel(x, y);
+                bw.Write(c.R); bw.Write(c.G); bw.Write(c.B);
             }
-
-            rt.Dispose();
-            s.Dispose();
-            t.Dispose();
         }
 
-        public static Texture ReadImage(ref BinaryReader r, uint w, uint h)
+        public static texture ReadImage(ref BinaryReader r, uint w, uint h)
         {
-            var t = new Texture(w, h);
-            for (uint x = 0; x < w; x++)
-            for (uint y = 0; y < h; y++)
+            texture t = new texture(w, h);
+
+            for (int i = 0; i < w*h; i++)
             {
-                var c = new Color(r.ReadByte(), r.ReadByte(), r.ReadByte());
-                t.SetPixel(x, y, c);
+                uint x = (uint)(i % w);
+                uint y = (uint)(i / w);
+                t.SetPixel(x, y, Color.FromArgb(r.ReadByte(), r.ReadByte(), r.ReadByte()));
             }
 
             return t;
         }
-
-        public static void RenderTarget(ref RenderWindow window)
-        {
-            _texture.Update(pixels);
-            _sprite.Texture = _texture;
-            window.Clear(Color.Black);
-            window.Draw(_sprite);
-        }
-
+        
         public static void Clear()
         {
-            Array.Clear(pixels, 0, pixels.Length);
+            Array.Clear(_buffer, 0, _buffer.Length - 1);
         }
 
         public static void SetPixel(uint x, uint y, uint col)
         {
-            var i = (x + y * width) * 4;
-            pixels[i] = Convert.ToByte(col >> 16);
-            pixels[i + 1] = Convert.ToByte((col >> 8) & 255);
-            pixels[i + 2] = Convert.ToByte(col & 255);
-            pixels[i + 3] = 255;
+            uint ox = x * 3;
+            uint oy = y;
+            _buffer[oy, ox] = Convert.ToByte((col >> 16) & 255);
+            _buffer[oy, ox + 1] = Convert.ToByte((col >> 8) & 255);
+            _buffer[oy, ox + 2] = Convert.ToByte(col & 255);
+        }
+        public static void SetPixel(uint x, uint y, Color c)
+        {
+            uint ox = x * 3;
+            uint oy = y;
+            _buffer[oy, ox] = c.R;
+            _buffer[oy, ox + 1] = c.G;
+            _buffer[oy, ox + 2] = c.B;
         }
 
-        public static void SetPixel(uint x, uint y, Color col)
+        public static Color GetPixel(uint x, uint y)
         {
-            var i = (x + y * width) * 4;
-            pixels[i] = col.R;
-            pixels[i + 1] = col.G;
-            pixels[i + 2] = col.B;
-            pixels[i + 3] = 255;
+            uint ox = x * 3;
+            uint oy = y;
+            return Color.FromArgb(_buffer[oy, ox], _buffer[oy, ox + 1], _buffer[oy, ox + 2]);
         }
-
-        public static uint GetPixel(uint x, uint y)
+        public static uint GetPixelUint(uint x, uint y)
         {
-            var i = (x + y * width) * 4;
-            return Engine.UintColor(pixels[i], pixels[i + 1], pixels[i + 2]);
+            return GetPixel(x, y).ToUint();
         }
     }
 }

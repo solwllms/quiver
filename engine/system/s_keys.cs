@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace engine.system
+﻿namespace Quiver.system
 {
-    public partial class Input
+    public partial class input
     {
-        public enum Key
+        public enum key
         {
             Unknown = -1,
             A = 0,
@@ -112,7 +106,7 @@ namespace engine.system
             F14 = 98, // 0x00000062
             F15 = 99, // 0x00000063
             Pause = 100, // 0x00000064
-            KeyCount = 101, // 0x00000065
+            KeyCount = 101 // 0x00000065
         }
     }
 }

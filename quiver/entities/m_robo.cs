@@ -1,24 +1,24 @@
-﻿using engine.display;
-using engine.game;
-using engine.game.types;
-using engine.progs;
-using engine.system;
+﻿#region
+
+using Quiver;
+using Quiver.Audio;
+using Quiver.display;
+using Quiver.game;
+using Quiver.game.types;
+using Quiver.system;
+
+#endregion
 
 namespace game.entities
 {
-    internal class m_Robo : Monster
+    internal class m_Robo : monster
     {
-        static Animation shoot = new Animation("sprites/robo_shoot", 0, 7, false);
-        static Animation death = new Animation("sprites/robo_death", 0, 7, false);
+        private static readonly animation AnimShoot = new animation("sprites/robo_shoot", 0, 7, false);
+        private static readonly animation AnimDeath = new animation("sprites/robo_death", 0, 7, false);
 
-        public m_Robo(Vector pos) : base(pos, "sprites/robo_rot")
+        public m_Robo(vector pos) : base(pos, "sprites/robo_rot")
         {
             SetRotational();
-        }
-
-        public override void Tick()
-        {
-            base.Tick();
         }
 
         public override void AliveTick()
@@ -35,37 +35,34 @@ namespace game.entities
             else if (timer % 160 == 0)
             {
                 timer = 0;
-                GoTo(World.Player.pos);
+                GoTo(world.Player.pos);
 
                 if (CanSeePlayer(7))
                 {
-                    SetAnim(shoot);
+                    SetAnim(AnimShoot);
                     attacking = true;
                     timer = 0;
                 }
             }
         }
 
-        void Shoot()
+        private void Shoot()
         {
-            Audio.PlaySound3D("sound/robo/lazer", pos, 80);
-            World.AddEnt((Ent)Progs.CreateEnt(4, pos, World.Player.pos + World.Player.velocity - pos));
+            audio.PlaySound3D("sound/robo/lazer", pos, 80);
+            world.AddEnt((ent) progs.CreateEnt(4, pos, world.Player.pos + world.Player.velocity - pos));
         }
 
         public override void DyingTick()
         {
-            if(anim != death) SetAnim(death);
-            else if (anim.playing == false)
-            {
-                SetState(Livestate.Dead);
-            }
+            if (anim != AnimDeath) SetAnim(AnimDeath);
+            else if (anim.playing == false) SetState(livestate.Dead);
         }
 
         public override void OnKilled()
         {
-            SetAnim(death);
+            SetAnim(AnimDeath);
             anim.Stop();
-            Audio.PlaySound3D("sound/robo/explosion", pos);
+            audio.PlaySound3D("sound/robo/explosion", pos);
         }
 
         public override void DeadTick()
@@ -76,7 +73,7 @@ namespace game.entities
         public override void DoDamage(byte damage)
         {
             base.DoDamage(damage);
-            Audio.PlaySound3D("sound/robo/robot", pos);
+            audio.PlaySound3D("sound/robo/robot", pos);
         }
     }
 }

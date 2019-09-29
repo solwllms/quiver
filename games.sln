@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "desktop", "engine\desktop.c
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "quiver", "quiver\quiver.csproj", "{CF941192-8DF2-4B77-90F1-6C1649630675}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cstrike", "cstrike\cstrike.csproj", "{F3665B29-3E5C-4F8B-A75D-3FB0A7BA1AAB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,14 @@ Global
 		{CF941192-8DF2-4B77-90F1-6C1649630675}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CF941192-8DF2-4B77-90F1-6C1649630675}.Release|x86.ActiveCfg = Release|Any CPU
 		{CF941192-8DF2-4B77-90F1-6C1649630675}.Release|x86.Build.0 = Release|Any CPU
+		{F3665B29-3E5C-4F8B-A75D-3FB0A7BA1AAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3665B29-3E5C-4F8B-A75D-3FB0A7BA1AAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3665B29-3E5C-4F8B-A75D-3FB0A7BA1AAB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F3665B29-3E5C-4F8B-A75D-3FB0A7BA1AAB}.Debug|x86.Build.0 = Debug|Any CPU
+		{F3665B29-3E5C-4F8B-A75D-3FB0A7BA1AAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3665B29-3E5C-4F8B-A75D-3FB0A7BA1AAB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3665B29-3E5C-4F8B-A75D-3FB0A7BA1AAB}.Release|x86.ActiveCfg = Release|Any CPU
+		{F3665B29-3E5C-4F8B-A75D-3FB0A7BA1AAB}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

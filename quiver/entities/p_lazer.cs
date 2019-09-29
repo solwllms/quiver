@@ -1,34 +1,32 @@
-﻿using engine.game.types;
-using engine.system;
-using SFML.Audio;
-using SFML.System;
+﻿#region
+
+using Quiver.game.types;
+using Quiver.system;
+
+#endregion
 
 namespace game.entities
 {
-    internal class p_Lazer : Projectile
+    internal class p_Lazer : projectile
     {
-        private Sound s;
-        
-        public p_Lazer(Vector pos, Vector dir) : base("sprites/lazer", "", pos, dir, 50, 6, 9)
+        //private Sound _s;
+
+        public p_Lazer(vector pos, vector dir) : base("sprites/lazer", "", pos, dir, 50, 6, 9)
         {
-            s = Audio.PlaySound3D("sound/robo/lazer_move", pos, 2);
+            //_s = audio.PlaySound3D("sound/robo/lazer_move", pos, 2);
         }
 
         public override void Tick()
         {
             base.Tick();
-            try
-            {
-                if (s != null) s.Position = new Vector3f(pos.x, 0, pos.y);
-            }
-            catch { }
+            //if (_s != null) _s.Position = new Vector3f(pos.x, 0, pos.y);
         }
 
         public override void OnDestroy()
         {
             base.OnDestroy();
-            s.Stop();
-            s = null;
+            //_s.Stop();
+            //_s = null;
         }
     }
 }

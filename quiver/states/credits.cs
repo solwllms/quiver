@@ -1,26 +1,37 @@
-﻿using engine.display;
-using engine.system;
-using SFML.Graphics;
-using SFML.Window;
+﻿#region
+
+using System.Drawing;
+using Quiver.Audio;
+using Quiver.display;
+using Quiver.system;
+using OpenTK.Input;
+
+#endregion
 
 namespace game.states
 {
-    internal class Credits : IState
+    internal class credits : IState
     {
-        private Transition _fade;
+        private int _cy;
+        private transition _fade;
 
         private float _t;
-        private bool stop = false;
+        private bool _stop;
 
-        public Credits()
+        public credits()
         {
-            _fade = new Wipe();
-            Audio.StopTrack();
+            _fade = new wipe();
+            audio.StopTrack();
         }
 
         void IState.Init()
         {
-            Audio.PlayTrack("music/theme", true);
+        }
+
+        void IState.Focus()
+        {
+            audio.StopTrack();
+            audio.PlayTrack("music/dead", looping: true);
         }
 
         void IState.Render()
@@ -38,57 +49,88 @@ namespace game.states
 
         void IState.Update()
         {
-            if(!stop) _t += 0.17f;
+            if (!_stop) _t += 0.17f;
 
-            if (Input.IsKeyPressed(Keyboard.Key.Escape))
-                if (Statemanager.history.Peek() != null)
-                    Statemanager.GoBack();
+            if (input.IsKeyPressed(Key.Escape))
+            {
+                if (statemanager.history.Count > 0 && statemanager.history.Peek() != null)
+                    statemanager.GoBack();
+            }
+
+            if (input.IsKeyPressed(Key.Space))
+            {
+                statemanager.SetState(new menu(), true);
+            }
         }
 
         public void Dispose()
         {
-            Audio.StopTrack();
+            audio.StopTrack();
         }
 
         private void Draw()
         {
-            for (uint i = 0; i < Screen.width * Screen.height; i++)
+            for (uint i = 0; i < screen.width * screen.height; i++)
             {
-                var x = i % Screen.width;
-                var y = i / Screen.width;
-                Screen.SetPixel(x, y, Color.Black);
+                var x = i % screen.width;
+                var y = i / screen.width;
+                screen.SetPixel(x, y, Color.Black);
             }
 
-            Gui.DrawTexture(Cache.GetTexture("gui/logo2"), 42, (int)GetY(95));
+            gui.DrawTexture(cache.GetTexture("gui/logo2"), 42, GetY(95));
 
             _cy = 118;
-            PrintCentre("a game by sol williams", 20);
-
-            PrintCentre("music by");
-            PrintCentre("www.hauntedillinois.com");
-            PrintCentre("(aliens.mid \"Aliens Theme\")", 20);
-            
-            PrintCentre("powered by the quiver engine", 7);
-            Gui.DrawTexture(Cache.GetTexture("gui/engine"), 61, (int)GetY(_cy));
+            PrintCentre("");
+            PrintCentre("a game by sol williams");
+            PrintCentre("");
+            PrintCentre("produced as apart of my own");
+            PrintCentre("a-level computer science");
+            PrintCentre("course-work.");
+            PrintCentre("");
+            PrintCentre("");
+            PrintCentre("all art, design and programming");
+            PrintCentre("by sol williams");
+            PrintCentre("");
+            PrintCentre("");
+            PrintCentre("music from");
+            PrintCentre("christoph de babalon's");
+            PrintCentre("\"If You're Into It I'm Out Of It\"");
+            PrintCentre("(c) 1997 Digital Hardcore");
+            PrintCentre("");
+            PrintCentre("used without licence.");
+            PrintCentre("");
+            PrintCentre("");
+            PrintCentre("powered by the quiver engine");
+            gui.DrawTexture(cache.GetTexture("gui/engine"), 61, GetY(_cy));
             _cy += 39;
 
-            PrintCentre("thank you for playing!");
-            PrintCentre("(c) sol williams 2018", 20);
+            PrintCentre("");
+            PrintCentre("this game and it's technology");
+            PrintCentre("is protected by UK and");
+            PrintCentre("international copyright law.");
+            PrintCentre("For more information, contact me.");
+            PrintCentre("");
+            PrintCentre("(c) 2018 sol williams.");
+            PrintCentre("all rights reserved.", 20);
 
-            stop = GetY(_cy) == Screen.height - 14;
-            PrintCentre("press ESC");
+            PrintCentre("thank you for playing!");
+
+            _stop = GetY(_cy) == 14;
+            PrintCentre("press SPACE");
         }
 
-        private int _cy;
         private void PrintCentre(string t, int iy = 6)
         {
-            Gui.WriteCentre(t, GetY(_cy));
+            var y = GetY(_cy);
             _cy += iy;
+
+            if (y < -7) return;
+            gui.WriteCentre(t, (uint) y);
         }
 
-        private uint GetY(int y)
+        private int GetY(int y)
         {
-            return (uint)(y - _t);
+            return (int) (y - _t);
         }
     }
 }

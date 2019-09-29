@@ -1,133 +1,169 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using SFML.Window;
+using OpenTK.Input;
 
-namespace engine.system
+#endregion
+
+namespace Quiver.system
 {
-    public partial class Input
+    public partial class input
     {
-        private static List<Keyboard.Key> _wasDown;
+        public static cvar cvarMouselock = new cvar("mouselock", "0", true, true);
+
+        private static List<Key> _keysDown;
+        private static List<Key> _wasDown;
+
         public static string inputstring;
-        public static Vector mousepos;
+        public static vector mousepos;
 
         public static bool mouselock = true;
         protected static bool mouselocked = true;
 
-        public static void Init()
+        private static MouseState _mouseState;
+        private static KeyboardState _keyboardState;
+
+        internal static void Init()
         {
-            _wasDown = new List<Keyboard.Key>();
+            _keysDown = new List<Key>();
+            _wasDown = new List<Key>();
+
             inputstring = "";
-            mousepos = new Vector(0, 0);
+            mousepos = new vector(0, 0);
         }
 
-        public static void Update()
+        internal static void Update()
         {
-            var tempdown = new List<Keyboard.Key>();
+            if (!engine.HasFocus()) return;
+
+            _wasDown.Clear();
+            _keysDown.ForEach((item) =>
+            {
+                _wasDown.Add(item);
+            });
+            _keysDown.Clear();
+
+            _mouseState = Mouse.GetState();
+            _keyboardState = Keyboard.GetState();
 
             inputstring = "";
-            foreach (Keyboard.Key key in Enum.GetValues(typeof(Keyboard.Key)))
+            foreach (Key key in Enum.GetValues(typeof(Key)))
             {
-                if (IsKeyPressed(key) && Engine.HasFocus())
+                if (_keyboardState.IsKeyDown(key) && engine.HasFocus())
                 {
-                    var v = (int)key;
+                    _keysDown.Add(key);
 
-                    if (key == Keyboard.Key.Space)
-                        inputstring += " ";
+                    if (_wasDown.Contains(key)) continue;
 
-                    if (key == Keyboard.Key.Quote)
-                        inputstring += '"';
-                    if (key == Keyboard.Key.LBracket)
-                        inputstring += '(';
-                    if (key == Keyboard.Key.RBracket)
-                        inputstring += ')';
-                    if (key == Keyboard.Key.Dash)
-                        inputstring += '_';
+                    if (key == Key.Space)           inputstring += " ";
+                    else if (key == Key.Quote)      inputstring += '"';
+                    else if (key == Key.LBracket)   inputstring += '(';
+                    else if (key == Key.RBracket)   inputstring += ')';
+                    else if (key == Key.Minus)      inputstring += '_';
+                    else if (key == Key.Plus)       inputstring += '+';
+                    else if (key == Key.Period)     inputstring += '.';
 
-                    if (v < 26)
-                        inputstring += (char) (v + 65);
-                    if (v >= 26 && v <= 35)
-                        inputstring += (char) (v + 22);
+                    else if (key == Key.Number0)    inputstring += "0";
+                    else if (key == Key.Number1)    inputstring += "1";
+                    else if (key == Key.Number2)    inputstring += "2";
+                    else if (key == Key.Number3)    inputstring += "3";
+                    else if (key == Key.Number4)    inputstring += "4";
+                    else if (key == Key.Number5)    inputstring += "5";
+                    else if (key == Key.Number6)    inputstring += "6";
+                    else if (key == Key.Number7)    inputstring += "7";
+                    else if (key == Key.Number8)    inputstring += "8";
+                    else if (key == Key.Number9)    inputstring += "9";
+
+                    else
+                    {
+                        string c = key.ToString().ToLower();
+                        if (c.Length == 1) inputstring += c;
+                    }
                 }
-
-                if (Engine.IsKeyPressed(key)) tempdown.Add(key);
             }
 
             var mp = GetMousePos();
-            mousepos = new Vector((int) Engine.windowWidth / 2 - mp.x, (int) Engine.windowHeight / 2 - mp.y);
+            mousepos = new vector((int) engine.windowWidth / 2 - mp.x, (int) engine.windowHeight / 2 - mp.y);
 
-            if (mouselocked && !mouselock) mouselocked = false;
-            if (!mouselocked && mouselock && Engine.HasFocus()) mouselocked = mouselock;
-
-            if (mouselocked)
+            if (cvarMouselock.Valueb())
             {
-                SetMousePos(new Vector((int)Engine.windowWidth / 2, (int)Engine.windowHeight / 2));
-            }
-            SetMouseVisible(!mouselocked);
+                if (mouselocked && !mouselock) mouselocked = false;
+                if (!mouselocked && mouselock && engine.HasFocus()) mouselocked = mouselock;
 
-            _wasDown = tempdown;
+                if (mouselocked) SetMousePos(new vector((int) engine.windowWidth / 2, (int) engine.windowHeight / 2));
+                SetMouseVisible(!mouselocked);
+            }
+            else
+            {
+                SetMouseVisible(true);
+            }
         }
 
         public static void MouseReturn()
         {
             mouselocked = mouselock;
         }
+
         public static void MouseLost()
         {
             mouselocked = false;
         }
+
         public static bool MouseLocked()
         {
             return mouselocked;
         }
 
-        public static bool IsKeyPressed(Keyboard.Key key)
+        public static bool IsKeyPressed(Key key)
         {
-            return !_wasDown.Contains(key) && Engine.IsKeyPressed(key);
+            return !_wasDown.Contains(key) && _keyboardState.IsKeyDown(key);
+        }
+        public static bool IsKey(Key key)
+        {
+            return _keyboardState.IsKeyDown(key);
+        }
+        public static bool IsKeyReleased(Key key)
+        {
+            return _wasDown.Contains(key) && !_keyboardState.IsKeyDown(key);
+        }
+        public static bool AnyKey()
+        {
+            return _keyboardState.IsAnyKeyDown;
         }
 
-        public static bool IsKey(Keyboard.Key key)
-        {
-            return Engine.IsKeyPressed(key);
-        }
-
-        public static bool IsKeyReleased(Keyboard.Key key)
-        {
-            return _wasDown.Contains(key) && !Engine.IsKeyPressed(key);
-        }
-
-        public static string GetKeyName(Keyboard.Key key)
+        public static string GetKeyName(Key key)
         {
             return key.ToString();
         }
 
-        public static bool FindKey(string s, out Keyboard.Key k)
+        public static bool FindKey(string s, out Key k)
         {
             try
             {
-                k = (Keyboard.Key) Enum.Parse(typeof(Keyboard.Key), Enum.GetNames(typeof(Keyboard.Key)).First(x => x.ToLower() == s.ToLower()));
+                k = (Key) Enum.Parse(typeof(Key),
+                    Enum.GetNames(typeof(Key)).First(x => x.ToLower() == s.ToLower()));
                 return true;
             }
             catch
             {
-                k = Keyboard.Key.Unknown;
+                k = Key.Unknown;
                 return false;
             }
         }
 
         public static void SetMouseVisible(bool v)
         {
-            Engine.window.SetMouseCursorVisible(v);
+            s_Window.SetMouseVisible(v);
         }
-        public static void SetMousePos(Vector vector)
+        public static void SetMousePos(vector vector)
         {
-            SFML.System.Vector2i t = new SFML.System.Vector2i((int)vector.x, (int)vector.y);
-            Mouse.SetPosition(t, Engine.window);
+            Mouse.SetPosition((int)vector.x, (int)vector.y);
         }
-        public static Vector GetMousePos()
+        public static vector GetMousePos()
         {
-            var m = Mouse.GetPosition(Engine.window);
-            return new Vector(m.X, m.Y);
+            return new vector(_mouseState.X, _mouseState.Y);
         }
     }
 }

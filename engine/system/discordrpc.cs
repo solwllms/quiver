@@ -1,29 +1,40 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Runtime.InteropServices;
 
-namespace engine.system
+#endregion
+
+namespace Quiver.system
 {
     /*
-        based off the entry point intergration defined here:
+        based off the entry point integration defined here:
         https://github.com/discordapp/discord-rpc/blob/master/examples/button-clicker/Assets/DiscordRpc.cs
     */
-    public class Discordrpc
+    public class discordrpc
     {
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate void DisconnectedCallback(int errorCode, string message);
+        public delegate void disconnectedCallback(int errorCode, string message);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate void ErrorCallback(int errorCode, string message);
+        public delegate void errorCallback(int errorCode, string message);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate void ReadyCallback();
+        public delegate void readyCallback();
 
         private const string DLL = "discord-rpc-w32";
         private static string _appid, _steamappid;
-        public static RichPresence current;
+        public static richPresence current;
+        private static eventHandlers handlers;
+
+        public static cvar cvarRpc = new cvar("rpc", "1", true, true, callback: delegate
+        {
+            if (cvarRpc.Valueb()) Init();
+            else Shutdown();
+        });
 
         [DllImport(DLL, EntryPoint = "Discord_Initialize", CallingConvention = CallingConvention.Cdecl)]
-        private static extern void Initialize(string applicationId, ref EventHandlers handlers, bool autoRegister,
+        private static extern void Initialize(string applicationId, ref eventHandlers handlers, bool autoRegister,
             string optionalSteamId);
 
         public static void Init(string dAppid, string sAppid)
@@ -31,52 +42,52 @@ namespace engine.system
             _appid = dAppid;
             _steamappid = sAppid;
 
-            if (Cmd.GetValueb("rpc"))
+            if (cmd.GetValueb("rpc"))
                 Init();
         }
-
+        
         public static void Init()
         {
-            var handlers = new EventHandlers();
+            handlers = new eventHandlers();
 
             handlers.readyCallback = _ReadyCallback;
             handlers.disconnectedCallback += _DisconnectedCallback;
             handlers.errorCallback += _ErrorCallback;
             try
             {
-                Log.WriteLine("initializing discord rich presence..");
+                log.WriteLine("initializing discord rich presence..");
                 Initialize(_appid, ref handlers, true, _steamappid);
             }
             catch
             {
-                Log.WriteLine("failed to init discord rich presence. is " + DLL + " missing?", Log.MessageType.Error);
+                log.WriteLine("failed to init discord rich presence. is " + DLL + " missing?", log.LogMessageType.Error);
             }
         }
 
         private static void _ReadyCallback()
         {
-            Log.WriteLine("discord rich presence (drp) ready!", Log.MessageType.Good);
+            log.WriteLine("discord rich presence (drp) ready!", log.LogMessageType.Good);
         }
 
         private static void _DisconnectedCallback(int errorCode, string message)
         {
-            Log.WriteLine("drp disconnected. (" + string.Format("Disconnect {0}: {1}", errorCode, message) + ")");
+            log.WriteLine("drp disconnected. (" + string.Format("Disconnect {0}: {1}", errorCode, message) + ")");
         }
 
         private static void _ErrorCallback(int errorCode, string message)
         {
-            Log.WriteLine("drp error. (" + string.Format("Disconnect {0}: {1}", errorCode, message) + ")",
-                Log.MessageType.Error);
+            log.WriteLine("drp error. (" + string.Format("Disconnect {0}: {1}", errorCode, message) + ")",
+                log.LogMessageType.Error);
         }
 
         [DllImport(DLL, EntryPoint = "Discord_UpdatePresence", CallingConvention = CallingConvention.Cdecl)]
-        private static extern void UpdatePresence(ref RichPresence presence);
+        private static extern void UpdatePresence(ref richPresence presence);
 
         public static void Update(string details, string state)
         {
             try
             {
-                var rpc = new RichPresence();
+                var rpc = new richPresence();
                 rpc.details = details;
                 rpc.state = state;
                 rpc.largeImageKey = "icon";
@@ -84,12 +95,12 @@ namespace engine.system
                 rpc.smallImageKey = "icon_s";
                 rpc.smallImageText = "";
                 UpdatePresence(ref rpc);
-                Log.WriteLine("updating drp (" + details + ", " + state + ")");
+                log.WriteLine("updating drp (" + details + ", " + state + ")");
                 current = rpc;
             }
             catch
             {
-                Log.WriteLine("failed to update drp!", Log.MessageType.Error);
+                log.WriteLine("failed to update drp!", log.LogMessageType.Error);
             }
         }
 
@@ -121,16 +132,16 @@ namespace engine.system
             }
         }
 
-        public struct EventHandlers
+        public struct eventHandlers
         {
-            public ReadyCallback readyCallback;
-            public DisconnectedCallback disconnectedCallback;
-            public ErrorCallback errorCallback;
+            public readyCallback readyCallback;
+            public disconnectedCallback disconnectedCallback;
+            public errorCallback errorCallback;
         }
 
         // Values explanation and example: https://discordapp.com/developers/docs/rich-presence/how-to#updating-presence-update-presence-payload-fields
         [Serializable]
-        public struct RichPresence
+        public struct richPresence
         {
             public string state; /* max 128 bytes */
             public string details; /* max 128 bytes */
