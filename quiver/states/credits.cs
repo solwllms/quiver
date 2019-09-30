@@ -13,14 +13,13 @@ namespace game.states
     internal class credits : IState
     {
         private int _cy;
-        private transition _fade;
 
         private float _t;
         private bool _stop;
 
         public credits()
         {
-            _fade = new wipe();
+            statemanager.SetTransition(new wipe());
             audio.StopTrack();
         }
 
@@ -37,14 +36,6 @@ namespace game.states
         void IState.Render()
         {
             Draw();
-
-            if (_fade != null)
-            {
-                _fade.Draw();
-
-                if (_fade.IsDone())
-                    _fade = null;
-            }
         }
 
         void IState.Update()

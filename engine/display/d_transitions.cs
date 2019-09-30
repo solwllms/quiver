@@ -11,6 +11,9 @@ namespace Quiver.display
         public virtual void Draw()
         {
         }
+        public virtual void Tick()
+        {
+        }
 
         public virtual bool IsDone()
         {
@@ -45,9 +48,14 @@ namespace Quiver.display
             {
                 var ys = (uint) _shift[x].Clamp(0, (int) screen.height);
                 for (uint y = 0; y < screen.height; y++)
-                    if (y > ys)
-                        screen.SetPixel(x, y,
-                            _prebuff[x, (y - ys).Clamp((uint) 0, screen.height - 1)]);
+                    if (y > ys) screen.SetPixel(x, y, _prebuff[x, (y - ys).Clamp((uint) 0, screen.height - 1)]);
+            }
+        }
+
+        public override void Tick()
+        {
+            for (uint x = 0; x < screen.width; x++)
+            {
                 _shift[x]++;
             }
         }
@@ -88,13 +96,17 @@ namespace Quiver.display
                 if (x * y % 15 == engine.random.Next(0, 15))
                 {
                     _fade[x, y] = true;
-                    _n--;
                 }
                 else
                 {
                     screen.SetPixel(x, y, _prebuff[x, y]);
                 }
             }
+        }
+
+        public override void Tick()
+        {
+            _n--;
         }
 
         public override bool IsDone()

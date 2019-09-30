@@ -18,19 +18,18 @@ namespace Quiver.states
         private static string _chapterMsg = "";
         private static int _chapterI;
         private static int _chapterA;
-        private transition _fade;
 
         public game(bool respawn)
         {
             //cache.ClearSounds();
             if (!respawn)
             {
-                _fade = new wipe();
+                statemanager.SetTransition(new wipe());
             }
             else
             {
                 audio.PlaySound("sound/player/spawn");
-                _fade = new fizzle();
+                statemanager.SetTransition(new fizzle());
             }
         }
 
@@ -54,7 +53,7 @@ namespace Quiver.states
             progs.dll.GetGamemode().DrawHud();
 
             // chapter message
-            if ((_fade == null || _fade.IsFairlyDone()) && _chapterMsg != "")
+            if (statemanager.IsTransitionFairlyDone() && _chapterMsg != "")
             {
                 gui.Prompt(_chapterMsgDraw, 20 / _chapterA);
 
@@ -82,22 +81,12 @@ namespace Quiver.states
                 }
             }
 
-            if (_fade != null)
-            {
-                _fade.Draw();
-
-                if (_fade.IsDone())
-                    _fade = null;
-                else
-                    world.clock.Restart();
-            }
+            if (!statemanager.IsTransitionDone()) world.clock.Restart();
         }
 
         void IState.Update()
         {
-            if (_fade != null)
-                if (!_fade.IsFairlyDone())
-                    return;
+            if (!statemanager.IsTransitionFairlyDone()) return;
 
             world.Tick();
             cmd.Checkbinds();

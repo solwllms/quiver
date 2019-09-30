@@ -24,7 +24,8 @@ namespace Quiver.system
             using (s_Window window = new s_Window())
             {
                 engine.Init(args);
-                window.Run(0.0, 0.0);
+                window.Run(60.0, 0.0);
+
             }
         }
 
@@ -39,18 +40,15 @@ namespace Quiver.system
 
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
-            GL.Clear(ClearBufferMask.ColorBufferBit);
-
             engine.Tick();
-            engine.Render();
-            
-            screen.Render();
-            SwapBuffers();
         }
-
         protected override void OnRenderFrame(FrameEventArgs e)
         {
+            GL.Clear(ClearBufferMask.ColorBufferBit);
 
+            engine.Render();
+            screen.Render();
+            SwapBuffers();
         }
 
         public static void CloseWindow()

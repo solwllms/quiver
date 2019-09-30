@@ -12,11 +12,10 @@ namespace game.states
 {
     public class gameover : IState
     {
-        private transition _fade;
 
         void IState.Init()
         {
-            _fade = new wipe();
+            statemanager.SetTransition(new wipe());
             audio.PlayTrack("music/dead", 200, true);
         }
 
@@ -32,14 +31,11 @@ namespace game.states
             gui.Write("MISSION FAILED", 10, 38, Color.White);
 
             cache.GetTexture("gui/skull").Draw(100, 19);
-
-            _fade.Draw();
         }
 
         void IState.Update()
         {
-            if (!_fade.IsDone())
-                return;
+            if (!statemanager.IsTransitionDone()) return;
 
             if (input.IsKeyPressed(Key.Escape)) statemanager.SetState(new menu());
         }

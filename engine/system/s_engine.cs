@@ -141,7 +141,7 @@ namespace Quiver
 
         internal static void Render()
         {
-            statemanager.current.Render();
+            statemanager.CurrentRender();
         }
 
         internal static void Tick()
@@ -159,7 +159,7 @@ namespace Quiver
             discordrpc.Runcallbacks();
 
             audio.Tick();
-            statemanager.current.Update();
+            statemanager.CurrentUpdate();
             input.Update();
         }
 

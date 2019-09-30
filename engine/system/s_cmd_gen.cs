@@ -53,7 +53,7 @@ namespace Quiver
             new cvar("nointro", "0", true, true);
             Register("toggleconsole", new command(delegate
             {
-                if (statemanager.current.GetType() != typeof(console))
+                if (statemanager.GetCurrentType() != typeof(console))
                     statemanager.SetState(new console());
                 else
                     statemanager.GoBack();

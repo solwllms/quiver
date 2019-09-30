@@ -19,8 +19,6 @@ namespace game.states
         private static uint _cursor;
 
         private uint[,] _background;
-        private int _f;
-        private transition _fade;
         private bool _isgame;
 
         private bool _repaint;
@@ -46,8 +44,7 @@ namespace game.states
 
             if (!_isgame)
                 discordrpc.Update("in menus", "");
-            if (!_repaint)
-                _fade = new wipe();
+            if (!_repaint) statemanager.SetTransition(new wipe());
 
             _background = new uint[screen.width, screen.height];
             if (_repaint)
@@ -72,14 +69,6 @@ namespace game.states
 
             Drawmenuitem(_cursor, 0, lang.Get("PLAY DE_DUST"));
             Drawmenuitem(_cursor, 1, lang.Get("QUIT"));
-
-            if (_fade != null)
-            {
-                _fade.Draw();
-
-                if (_fade.IsDone())
-                    _fade = null;
-            }
         }
 
         void IState.Update()

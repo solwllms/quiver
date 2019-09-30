@@ -27,7 +27,6 @@ namespace game.states
 
         private uint[,] _background;
         private int _f;
-        private transition _fade;
         private bool _isgame;
 
         private bool _repaint;
@@ -48,8 +47,7 @@ namespace game.states
 
             if (!_isgame)
                 discordrpc.Update("in menus", "");
-            if (!_repaint)
-                _fade = new wipe();
+            if (!_repaint) statemanager.SetTransition(new wipe());
 
             _background = new uint[screen.width, screen.height];
             if (_repaint)
@@ -68,7 +66,6 @@ namespace game.states
         {
             RenderBase();
 
-            _f = (_f + 1) % 360;
             var ly = 13 - (uint) (Math.Cos((float) _f / 20) * 3);
             cache.GetTexture("gui/logo2").Draw(42, ly, 0, 0, 14, 25); // Q
             ly = 13 - (uint) (Math.Cos((float) _f / 20 + 45) * 3);
@@ -91,18 +88,13 @@ namespace game.states
             Drawmenuitem(_cursor, 3, lang.Get("$menu.options"));
             Drawmenuitem(_cursor, 4, lang.Get("$menu.credits"));
             Drawmenuitem(_cursor, 5, lang.Get("$menu.quit"));
-
-            if (_fade != null)
-            {
-                _fade.Draw();
-
-                if (_fade.IsDone())
-                    _fade = null;
-            }
         }
 
         void IState.Update()
         {
+            // animation tick!
+            _f = (_f + 1) % 360;
+
             cmd.Checkbinds();
 
             if (input.IsKeyPressed(Key.Down))

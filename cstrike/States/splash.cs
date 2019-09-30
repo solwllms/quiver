@@ -12,7 +12,6 @@ namespace game.states
     internal class splash : IState
     {
         private readonly string[] _screens = {"gui/splash"};
-        private transition _fade;
 
         private string _screen;
 
@@ -34,14 +33,6 @@ namespace game.states
         void IState.Render()
         {
             cache.GetTexture(_screen).Draw(0, 0);
-
-            if (_fade != null)
-            {
-                _fade.Draw();
-
-                if (_fade.IsDone())
-                    _fade = null;
-            }
         }
 
         void IState.Update()
@@ -71,7 +62,7 @@ namespace game.states
         private void ChangeScreen()
         {
             //audio.PlayTrack("music/theme", true, 60);
-            _fade = new fizzle();
+            statemanager.SetTransition(new fizzle());
             _screen = _screens[_screenN];
         }
 

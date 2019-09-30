@@ -91,7 +91,7 @@ namespace game.states
                             if (File.Exists(saveload.ConstructSavPath(s + ".sav")))
                             {
                                 statemanager.GoBack();
-                                statemanager.current.Render();
+                                statemanager.CurrentRender();
                                 saveload.OverwriteSavePrompt(s);
                             }
                             else
