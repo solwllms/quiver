@@ -355,7 +355,37 @@ namespace Quiver.display
                 };
             }
 
-            return spriteorder.OrderBy(x => x.dist).ToArray();
+            CombSort(ref spriteorder);
+            return spriteorder;
+        }
+
+        private static void CombSort(ref sprRenderInf[] order)
+        {
+            var gap = order.Length;
+            var swapped = false;
+            while (gap > 1 || swapped)
+            {
+                gap = gap * 10 / 13;
+                if (gap == 9 || gap == 10) gap = 11;
+                if (gap < 1) gap = 1;
+                swapped = false;
+                for (var i = 0; i < order.Length - gap; i++)
+                {
+                    var j = i + gap;
+                    if (order[i].dist < order[j].dist)
+                    {
+                        Swap<sprRenderInf>(ref order[i], ref order[j]);
+                        swapped = true;
+                    }
+                }
+            }
+        }
+
+        private static void Swap<T>(ref T v1, ref T v2)
+        {
+            var tv1 = v1;
+            v1 = v2;
+            v2 = tv1;
         }
 
         private static void DrawSprites(int h)
