@@ -34,51 +34,58 @@ namespace Quiver.Audio
             {
                 using (BinaryReader reader = new BinaryReader(s))
                 {
-                    string signature = new string(reader.ReadChars(4));
-                    if (signature != "RIFF")
+                    try
                     {
-                        log.WriteLine("audio file '" + file + "' format unsupported. (RIFF mismatch)", log.LogMessageType.Error);
-                        reader.Close();
-                        return;
+                        string signature = new string(reader.ReadChars(4));
+                        if (signature != "RIFF")
+                        {
+                            log.WriteLine("audio file '" + file + "' format unsupported. (RIFF mismatch)", log.LogMessageType.Error);
+                            reader.Close();
+                            return;
+                        }
+
+                        reader.ReadInt32(); // unused
+
+                        string format = new string(reader.ReadChars(4));
+                        if (format != "WAVE")
+                        {
+                            log.WriteLine("audio file '" + file + "' format unsupported. (WAVE mismatch)", log.LogMessageType.Error);
+                            reader.Close();
+                            return;
+                        }
+
+                        string fSig = new string(reader.ReadChars(4));
+                        if (fSig != "fmt ")
+                        {
+                            log.WriteLine("audio file '" + file + "' format unsupported. (fmt mismatch)", log.LogMessageType.Error);
+                            reader.Close();
+                            return;
+                        }
+
+                        formatSize = reader.ReadInt32();
+                        this.format = reader.ReadInt16();
+                        channels = reader.ReadInt16();
+                        sampleRate = reader.ReadInt32();
+                        byteRate = reader.ReadInt32();
+                        blockAlign = reader.ReadInt16();
+                        bitDepth = reader.ReadInt16();
+
+                        string dataSignature = new string(reader.ReadChars(4));
+                        if (dataSignature != "data")
+                        {
+                            log.WriteLine("audio file '" + file + "' format unsupported. (signature mismatch)", log.LogMessageType.Error);
+                            reader.Close();
+                            return;
+                        }
+
+                        dataSize = reader.ReadInt32();
+                        data = reader.ReadBytes(dataSize);
+                        //log.WriteLine("loaded audio file ("+file+") @ "+data.Length+" bytes");
+
                     }
-
-                    reader.ReadInt32(); // unused
-
-                    string format = new string(reader.ReadChars(4));
-                    if (format != "WAVE")
-                    {
-                        log.WriteLine("audio file '" + file + "' format unsupported. (WAVE mismatch)", log.LogMessageType.Error);
-                        reader.Close();
-                        return;
+                    catch {
+                        log.WriteLine("audio file '" + file + "' failed to load.", log.LogMessageType.Error);
                     }
-
-                    string fSig = new string(reader.ReadChars(4));
-                    if (fSig != "fmt ")
-                    {
-                        log.WriteLine("audio file '" + file + "' format unsupported. (fmt mismatch)", log.LogMessageType.Error);
-                        reader.Close();
-                        return;
-                    }
-
-                    formatSize = reader.ReadInt32();
-                    this.format = reader.ReadInt16();
-                    channels = reader.ReadInt16();
-                    sampleRate = reader.ReadInt32();
-                    byteRate = reader.ReadInt32();
-                    blockAlign = reader.ReadInt16();
-                    bitDepth = reader.ReadInt16();
-
-                    string dataSignature = new string(reader.ReadChars(4));
-                    if (dataSignature != "data")
-                    {
-                        log.WriteLine("audio file '" + file + "' format unsupported. (signature mismatch)", log.LogMessageType.Error);
-                        reader.Close();
-                        return;
-                    }
-
-                    dataSize = reader.ReadInt32();
-                    data = reader.ReadBytes(dataSize);
-                    //log.WriteLine("loaded audio file ("+file+") @ "+data.Length+" bytes");
                 }
             }
         }
