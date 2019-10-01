@@ -85,7 +85,7 @@ namespace Quiver.system
         internal static void DrawTexture(int t)
         {
             GL.Enable(EnableCap.Texture2D);
-            GL.Begin(BeginMode.Quads);
+            GL.Begin(PrimitiveType.Quads);
 
             GL.BindTexture(TextureTarget.Texture2D, t);
             GL.TexCoord2(0.0f, 0.0f);
