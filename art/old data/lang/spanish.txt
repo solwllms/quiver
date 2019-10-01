@@ -1,0 +1,76 @@
+' main menu
+$menu.newgame=nuevo juego
+$menu.loadgame=de carga del juego
+$menu.savegame=guardar juego
+$menu.options=opciones
+$menu.credits=créditos
+$menu.quit=dejar de fumar
+
+$menu.unsavedprog=el progreso se perderán!
+
+' quit dialog
+$quit.mess1=de vuelta a la aburrida?
+$quit.mess2=demasiado miedo?
+$quit.mess3=demasiado intenso?
+
+' options
+$options.game=juego
+$options.display=pantalla
+$options.audio=audio
+$options.controls=controles
+
+' game options
+$options.difficulty=controles
+$options.easy=easy
+$options.normal=normal
+$options.hard=difícil
+$options.hell=el infierno
+$options.language=idioma
+$options.showfps=mostrar fps
+$options.hidefps=ocultar fps
+$options.erasesaves=eliminar todas las guarda
+$options.allsavesdel=todos ahorra eliminado
+
+' video options
+$options.device=dispositivo
+$options.windowed=ventana
+$options.fullscreen=pantalla completa
+
+' audio options
+$options.disablesound=desactivar el sonido
+$options.enablesound=habilitar el sonido
+$options.volume=volumen
+$options.mastervol=maestro
+$options.musicvol=la música
+
+' keys options
+$options.editkeys=editar claves
+
+' save game
+$save.entername=escriba el nombre de archivo
+$save.newsave=guardar nuevo
+$save.overwritesave=sobrescribir guardar?
+$save.deletesave=eliminar guardar?
+$save.nosaves=no hay partidas guardadas
+
+' gameplay
+$game.use=uso
+$game.reload=recarga
+
+$loading.loading=la carga de
+$loading.tip=punta
+$loading.tip1=usted puede personalizar las teclas en el menú de opciones.
+$loading.tip2=conservar la munición. usted no desea ejecutar corto.
+$loading.tip3=evitar la innecesaria de combate mediante la adopción de un sigilo enfoque.
+$loading.tip4=usted puede personalizar las teclas en el menú de opciones.
+$loading.tip5=usted puede personalizar las teclas en el menú de opciones.
+$loading.tip6=conservar la munición. usted no desea ejecutar corto.
+$loading.tip7=evitar la innecesaria de combate mediante la adopción de un sigilo enfoque.
+$loading.tip8=usted puede personalizar las teclas en el menú de opciones.
+$loading.tip9=usted puede personalizar las teclas en el menú de opciones.
+$loading.tip0=conservar la munición. usted no desea ejecutar corto.
+
+' general
+$general.cantundo=esto no puede ser deshecho
+$general.success=el éxito
+$general.anykey=presione cualquier tecla

@@ -1,0 +1,76 @@
+' main menu
+$menu.newgame=neues Spiel
+$menu.loadgame=Spiel laden
+$menu.savegame=Spiel speichern
+$menu.options=Optionen
+$menu.credits=credits
+$menu.quit=beenden
+
+$menu.unsavedprog=Fortschritte gehen verloren!
+
+' quit dialog
+$quit.mess1=zurück zu langweilig?
+$quit.mess2=zu gruselig?
+$quit.mess3=zu intensiv?
+
+' options
+$options.game=Spiel
+$options.display=anzeigen
+$options.audio=audio
+$options.controls=Kontrollen
+
+' game options
+$options.difficulty=Kontrollen
+$options.easy=einfach
+$options.normal=normal
+$options.hard=schwierig
+$options.hell=die Hölle
+$options.language=Sprache
+$options.showfps=show fps
+$options.hidefps=ausblenden fps
+$options.erasesaves=löschen Sie alle spart
+$options.allsavesdel=alle saves gelöscht
+
+' video options
+$options.device=Gerät
+$options.windowed=Fenstermodus
+$options.fullscreen=fullscreen
+
+' audio options
+$options.disablesound=deaktivieren von sound
+$options.enablesound=sound aktivieren
+$options.volume=Volumen
+$options.mastervol=master
+$options.musicvol=Musik
+
+' keys options
+$options.editkeys=Bearbeiten von keys
+
+' save game
+$save.entername=Dateiname eingeben
+$save.newsave=neu speichern
+$save.overwritesave=überschreiben speichern?
+$save.deletesave=löschen speichern?
+$save.nosaves=keine gespeicherten Spiele
+
+' gameplay
+$game.use=verwenden
+$game.reload=neu laden
+
+$loading.loading=laden
+$loading.tip=Tipp
+$loading.tip1=Sie können anpassen die Tasten im Menü "Optionen".
+$loading.tip2=Munition sparen. Sie wollen nicht zu kurz kommen.
+$loading.tip3=vermeiden Sie unnötige bekämpfen, indem Sie einen stealth-Ansatz.
+$loading.tip4=Sie können anpassen die Tasten im Menü "Optionen".
+$loading.tip5=Sie können anpassen die Tasten im Menü "Optionen".
+$loading.tip6=Munition sparen. Sie wollen nicht zu kurz kommen.
+$loading.tip7=vermeiden Sie unnötige bekämpfen, indem Sie einen stealth-Ansatz.
+$loading.tip8=Sie können anpassen die Tasten im Menü "Optionen".
+$loading.tip9=Sie können anpassen die Tasten im Menü "Optionen".
+$loading.tip0=Munition sparen. Sie wollen nicht zu kurz kommen.
+
+' general
+$general.cantundo=diese überhöhung rückgängig gemacht werden
+$general.success=Erfolg
+$general.anykey=drücken Sie eine beliebige Taste
