@@ -3,6 +3,7 @@
 using System;
 using System.Drawing;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Quiver.states;
 
@@ -74,6 +75,8 @@ namespace Quiver.system
                 type == LogMessageType.Warning ? ConsoleColor.Yellow :
                 type == LogMessageType.Good ? ConsoleColor.Green : ConsoleColor.White;
             Console.WriteLine(DateTime.Now.ToString("[HH:mm:ss] ") + line);
+
+            Console.ResetColor();
         }
     }
 }

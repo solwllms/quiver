@@ -4,6 +4,7 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Runtime.InteropServices;
 using Quiver.Audio;
 using Quiver.display;
 using Quiver.game;
@@ -15,6 +16,9 @@ namespace Quiver
 {
     public class engine
     {
+        [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
+        static extern bool FreeConsole();
+
         public const uint DEF_WINDOW_WIDTH = 1280;
         public const uint DEF_WINDOW_HEIGHT = 720;
 
@@ -122,6 +126,8 @@ namespace Quiver
             {
                 log.ThrowFatal("Launching in debug mode without console not supported!");
             }
+#else
+            FreeConsole();
 #endif
             s_Window.SetTitle(_title);
         }
