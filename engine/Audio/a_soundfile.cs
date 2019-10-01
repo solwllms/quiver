@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using Quiver.system;
 using OpenTK.Audio.OpenAL;
+using System;
 
 namespace Quiver.Audio
 {
@@ -83,8 +84,8 @@ namespace Quiver.Audio
                         //log.WriteLine("loaded audio file ("+file+") @ "+data.Length+" bytes");
 
                     }
-                    catch {
-                        log.WriteLine("audio file '" + file + "' failed to load.", log.LogMessageType.Error);
+                    catch (Exception e){
+                        log.WriteLine("audio file '" + file + "' failed to load. ("+e.Message+")", log.LogMessageType.Error);
                     }
                 }
             }

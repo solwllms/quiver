@@ -93,10 +93,10 @@ namespace Quiver
             return defaultVal == "1";
         }
 
-        public void Set(string value)
+        public void Set(string value, bool doCallback = true)
         {
             _value = value;
-            callback?.Invoke(_value);
+            if(doCallback) callback?.Invoke(_value);
             if (isPersistent) cmd.SaveConfig();
         }
 

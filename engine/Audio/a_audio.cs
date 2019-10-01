@@ -15,10 +15,12 @@ namespace Quiver.Audio
         });
         public static cvar cvarVolume = new cvar("volume", "100", true, callback: delegate
         {
+            cvarVolume.Set(cvarVolume.Valuef().Clamp(0, 100).ToString(), false);
             SetVolume(cvarVolume.Valuef());
         });
         public static cvar cvarMusVolume = new cvar("musicvol", "20", true, callback: delegate
         {
+            cvarMusVolume.Set(cvarMusVolume.Valuef().Clamp(0, 100).ToString(), false);
             musicPlayer.SetVolume(cvarMusVolume.Valuef());
         });
 
@@ -30,7 +32,6 @@ namespace Quiver.Audio
         {
             log.WriteLine("initializing audio...");
             context = new AudioContext();
-            musicPlayer = new AudioPlayer();
             nowPlaying = new List<AudioPlayer>();
 
 
@@ -48,11 +49,7 @@ namespace Quiver.Audio
 
         private static void PollPlayer(AudioPlayer player)
         {
-            int state;
-            AL.GetSource(player.source, ALGetSourcei.SourceState, out state);
-
-            if ((ALSourceState)state != ALSourceState.Playing)
-                player.Stop();
+            if (!player.IsPlaying()) player.Stop();
         }
 
         internal static void Unload()
@@ -81,6 +78,8 @@ namespace Quiver.Audio
             SoundFile sound = cache.GetSound(file, false);
             if (sound == null || !sound.Ready()) return;
 
+            musicPlayer = new AudioPlayer();
+            if (musicPlayer.IsPlaying()) musicPlayer.Stop();
             musicPlayer.Load(sound);
 
             musicPlayer.SetVolume(volume);
@@ -92,12 +91,12 @@ namespace Quiver.Audio
 
         public static void StopTrack()
         {
-            musicPlayer.Stop();
+            musicPlayer?.Stop();
         }
 
         public static string GetTrack()
         {
-            return musicPlayer.filename;
+            return musicPlayer?.filename;
         }
 
         /*
@@ -206,6 +205,13 @@ namespace Quiver.Audio
             AL.Source(source, ALSource3f.Velocity, velocity.x, 0, velocity.y);
         }
 
+        public bool IsPlaying()
+        {
+            int state;
+            AL.GetSource(source, ALGetSourcei.SourceState, out state);
+            return  (ALSourceState)state == ALSourceState.Playing;
+        }
+
         public void Play()
         {
             AL.SourcePlay(source);
@@ -216,7 +222,9 @@ namespace Quiver.Audio
         }
         public void Stop()
         {
+            SetVolume(0);
             AL.SourceStop(source);
+            AL.Source(source, ALSourcei.Buffer, 0);
             AL.DeleteSource(source);
             AL.DeleteBuffer(buffer);
         }
