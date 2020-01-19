@@ -474,6 +474,9 @@ namespace Quiver.display
             }
         }
 
+        /*
+         * legacy lighting
+         * 
         private static void DrawDiminishLighting(uint x)
         {
             for (uint y = 0; y < screen.height; y++)
@@ -496,7 +499,28 @@ namespace Quiver.display
                 }
             }
         }
-        
+        */
+
+        private static void DrawDiminishLighting(uint x)
+        {
+            for (uint y = 0; y < screen.height; y++)
+            {
+                var zl = ((_zBuffer[x, y] + 2) / 2.2).Clamp(0, 200);
+                var xx = (x - screen.width / 2.0) / screen.width;
+
+                Color col = screen.GetPixel(x, y);
+                var db = (uint)(zl * 3 * (xx * xx + 8) + 4);
+                db = (((db + (((x * y * 2) - (x + y)) & 3) * 2) >> 3) << 3).Clamp((uint)0, (uint)255);
+
+                if (_fbcache.ContainsKey(new vector(x, y))) db *= 6;
+
+                int r = (int)((col.R * db) / 255);
+                int g = (int)((col.G * db) / 255);
+                int b = (int)((col.B * db) / 255);
+                screen.SetPixel(x, y, Color.FromArgb(r, g, b));
+            }
+        }
+
         private static void DrawRain(uint x)
         {
             if (x > BORDER && x < screen.width - BORDER)
