@@ -23,6 +23,7 @@ namespace Quiver.game
 
         private float _move;
         private float _turn;
+        private float _strafe;
 
         public player(vector pos) : base(pos)
         {
@@ -51,7 +52,31 @@ namespace Quiver.game
                 world.Player?.Move(0);
                 return true;
             }, record: true));
-            cmd.Bind(Key.Up, "+forward");
+            cmd.Bind(Key.W, "+forward");
+
+            cmd.Register("+strafeleft", new command(delegate
+            {
+                world.Player?.Strafe(cvarMovespeed.Valuef());
+                return true;
+            }, record: true));
+            cmd.Register("-strafeleft", new command(delegate
+            {
+                world.Player?.Strafe(0);
+                return true;
+            }, record: true));
+            cmd.Bind(Key.Q, "+strafeleft");
+
+            cmd.Register("+straferight", new command(delegate
+            {
+                world.Player?.Strafe(-cvarMovespeed.Valuef());
+                return true;
+            }, record: true));
+            cmd.Register("-straferight", new command(delegate
+            {
+                world.Player?.Strafe(0);
+                return true;
+            }, record: true));
+            cmd.Bind(Key.E, "+straferight");
 
             cmd.Register("+back", new command(delegate
             {
@@ -63,7 +88,7 @@ namespace Quiver.game
                 world.Player?.Move(0);
                 return true;
             }, record: true));
-            cmd.Bind(Key.Down, "+back");
+            cmd.Bind(Key.S, "+back");
 
             cmd.Register("+left", new command(delegate
             {
@@ -75,7 +100,7 @@ namespace Quiver.game
                 world.Player?.Turn(0);
                 return true;
             }, record: true));
-            cmd.Bind(Key.Left, "+left");
+            cmd.Bind(Key.A, "+left");
 
             cmd.Register("+right", new command(delegate
             {
@@ -87,14 +112,14 @@ namespace Quiver.game
                 world.Player?.Turn(0);
                 return true;
             }, record: true));
-            cmd.Bind(Key.Right, "+right");
+            cmd.Bind(Key.D, "+right");
 
             cmd.Register("use", new command(delegate
             {
                 world.Player?.Use();
                 return true;
             }, record: true));
-            cmd.Bind(Key.E, "use");
+            cmd.Bind(Key.F, "use");
 
             cmd.Register("fire", new command(delegate
             {
@@ -130,8 +155,8 @@ namespace Quiver.game
             weapon.Tick();
 
             velocity.SetTo(0, 0);
-            Movetick();
             Turntick();
+            Movetick();
 
             if (_move != 0 && engine.frame % 20 == 0)
                 audio.PlaySound("sound/player/step" + engine.random.Next(1, 4));
@@ -154,6 +179,13 @@ namespace Quiver.game
                 pos.x += renderer.camDir.x * _move;
             if (!world.map[(int) pos.x, (int) (pos.y + renderer.camDir.y * _move)].solid)
                 pos.y += renderer.camDir.y * _move;
+
+            vector strafeDir = new vector(-renderer.camDir.y, renderer.camDir.x);
+            Console.WriteLine(renderer.camDir + " > " + strafeDir);
+            if (!world.map[(int)(pos.x + strafeDir.x * _strafe), (int)pos.y].solid)
+                pos.x += strafeDir.x * _strafe;
+            if (!world.map[(int)pos.x, (int)(pos.y + strafeDir.y * _strafe)].solid)
+                pos.y += strafeDir.y * _strafe;
         }
 
         public override void DoDamage(byte damage)
@@ -167,10 +199,13 @@ namespace Quiver.game
         {
             _turn = speed;
         }
-
         public void Move(float speed)
         {
             _move = speed;
+        }
+        public void Strafe(float speed)
+        {
+            _strafe = speed;
         }
 
         public void Use()
