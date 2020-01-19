@@ -181,7 +181,6 @@ namespace Quiver.game
                 pos.y += renderer.camDir.y * _move;
 
             vector strafeDir = new vector(-renderer.camDir.y, renderer.camDir.x);
-            Console.WriteLine(renderer.camDir + " > " + strafeDir);
             if (!world.map[(int)(pos.x + strafeDir.x * _strafe), (int)pos.y].solid)
                 pos.x += strafeDir.x * _strafe;
             if (!world.map[(int)pos.x, (int)(pos.y + strafeDir.y * _strafe)].solid)
