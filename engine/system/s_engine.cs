@@ -60,6 +60,10 @@ namespace Quiver
 
         private static void Init()
         {
+            /* initialise filesystem and register default directories */
+            filesystem.AddDirectory(Directory.GetCurrentDirectory() + "/" + cmd.GetValue("dir") + "/");
+            filesystem.AddDirectory(Directory.GetCurrentDirectory());
+
             log.Init();
             cmd.Init();
 
@@ -73,11 +77,7 @@ namespace Quiver
             try
             {
                 cmd.ParseArgs(args);
-            } catch { }
-
-            /* initialise filesystem and register default directories */
-            filesystem.AddDirectory(Directory.GetCurrentDirectory() + "/" + cmd.GetValue("dir") + "/");
-            filesystem.AddDirectory(Directory.GetCurrentDirectory());
+            } catch { }            
 
             foreach (var zip in filesystem.GetAllFiles("*.pak"))
                 filesystem.AddArchive(zip);

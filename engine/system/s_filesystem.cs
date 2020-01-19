@@ -118,6 +118,7 @@ namespace Quiver
             if (create)
             {
                 log.WriteLine("trying to create..");
+                filename = Directories[0] + filename;
 
                 var p = Path.GetDirectoryName(filename);
                 if (!string.IsNullOrEmpty(p) && !Directory.Exists(p))

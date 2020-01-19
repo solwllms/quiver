@@ -11,7 +11,7 @@ namespace Quiver.system
 {
     public partial class input
     {
-        public static cvar cvarMouselock = new cvar("mouselock", "0", true, true);
+        public static cvar cvarMouselock = new cvar("input_mouselock", "0", true, true);
 
         private static List<Key> _keysDown;
         private static List<Key> _wasDown;

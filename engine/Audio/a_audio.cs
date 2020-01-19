@@ -8,17 +8,17 @@ namespace Quiver.Audio
 {
     public class audio
     {
-        public static cvar cvarAudio = new cvar("audio", "1", true, true, callback: delegate
+        public static cvar cvarAudio = new cvar("audio_enable", "1", true, true, callback: delegate
         {
             if (cvarAudio.Valueb()) Init();
             else Unload();
         });
-        public static cvar cvarVolume = new cvar("volume", "100", true, callback: delegate
+        public static cvar cvarVolume = new cvar("audio_mastervol", "100", true, callback: delegate
         {
             cvarVolume.Set(cvarVolume.Valuef().Clamp(0, 100).ToString(), false);
             SetVolume(cvarVolume.Valuef());
         });
-        public static cvar cvarMusVolume = new cvar("musicvol", "20", true, callback: delegate
+        public static cvar cvarMusVolume = new cvar("audio_musicvol", "20", true, callback: delegate
         {
             cvarMusVolume.Set(cvarMusVolume.Valuef().Clamp(0, 100).ToString(), false);
             musicPlayer.SetVolume(cvarMusVolume.Valuef());

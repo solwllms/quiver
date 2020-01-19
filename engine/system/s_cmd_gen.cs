@@ -16,7 +16,7 @@ namespace Quiver
         public static cvar cvarCheats = new cvar("cheats", "0", false, true);
         public static cvar cvarDebug = new cvar("debug", "0", false, true, cheat: true);
         public static cvar cvarDir = new cvar("dir", "quiver", readOnly: true);
-        public static cvar cvarDifficulty = new cvar("difficulty", "normal", true);
+        public static cvar cvarDifficulty = new cvar("game_difficulty", "normal", true);
 
         internal static void SetupCMDs()
         {
@@ -37,7 +37,7 @@ namespace Quiver
 
             Register("ls", new command(filesystem.PrintPaks, "ls <search>"));
 
-            new cvar("language", "english", true,
+            new cvar("game_lang", "english", true,
                 callback: delegate { lang.LoadLang(lang.langfiles[Array.IndexOf(lang.langs, GetValue("language"))]); });
             Register("map", new command(delegate(string[] p)
             {
@@ -50,7 +50,7 @@ namespace Quiver
                 level.Load(f, true);
                 return true;
             }, "map [name]"));
-            new cvar("nointro", "0", true, true);
+            new cvar("game_nointro", "0", true, true);
             Register("toggleconsole", new command(delegate
             {
                 if (statemanager.GetCurrentType() != typeof(console))

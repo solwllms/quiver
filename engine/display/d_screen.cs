@@ -17,8 +17,8 @@ namespace Quiver.display
         public static uint width;
         public static uint height;
         
-        public static cvar cvarFps = new cvar("showfps", "0", true, true);
-        public static cvar cvarFullscreen = new cvar("fullscreen", "0", true, true, callback: delegate
+        public static cvar cvarFps = new cvar("display_showfps", "0", true, true);
+        public static cvar cvarFullscreen = new cvar("display_fullscreen", "0", true, true, callback: delegate
         {
             engine.SetFullscreen(cvarFullscreen.Valueb());
         });

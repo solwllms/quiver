@@ -27,7 +27,7 @@ namespace Quiver.system
         public static richPresence current;
         private static eventHandlers handlers;
 
-        public static cvar cvarRpc = new cvar("rpc", "1", true, true, callback: delegate
+        public static cvar cvarRpc = new cvar("discordrpc_enable", "0", true, true, callback: delegate
         {
             if (cvarRpc.Valueb()) Init();
             else Shutdown();
@@ -42,7 +42,7 @@ namespace Quiver.system
             _appid = dAppid;
             _steamappid = sAppid;
 
-            if (cmd.GetValueb("rpc"))
+            if (cvarRpc.Valueb())
                 Init();
         }
         

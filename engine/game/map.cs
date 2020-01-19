@@ -17,9 +17,9 @@ namespace Quiver.game
 {
     public class level
     {
-        public static cvar cvarLightmapScale = new cvar("lmp.scale", "1", true, cheat: true);
-        public static cvar cvarLightmapDebug = new cvar("lmp.save", "0", true, cheat: true);
-        public static cvar cvarLightmapPrefix = new cvar("lmp.prefix", "lmp_", true);
+        public static cvar cvarLightmapScale = new cvar("light_scale", "1", true, cheat: true);
+        public static cvar cvarLightmapDebug = new cvar("light_save", "0", true, cheat: true);
+        public static cvar cvarLightmapPrefix = new cvar("light_prefix", "lmp_", true);
 
         public static bool doneLoading = false;
         

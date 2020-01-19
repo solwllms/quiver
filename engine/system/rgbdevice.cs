@@ -20,7 +20,7 @@ namespace Quiver.system
         private static RGBSurface _surface;
         private static Dictionary<LedId, Color> _rules;
 
-        public static cvar cvarRgb = new cvar("rgb", "1", true, true, callback: delegate
+        public static cvar cvarRgb = new cvar("rgb_enable", "1", true, true, callback: delegate
         {
             if (cvarRgb.Valueb()) Init();
             else Shutdown();

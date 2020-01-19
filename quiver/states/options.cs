@@ -119,17 +119,17 @@ namespace game.states
                 {
                     lang.Get("$options.easy"), lang.Get("$options.normal"), lang.Get("$options.hard"),
                     lang.Get("$options.hell")
-                }, "difficulty"));
-            _listings.Add(new optionMulti(lang.Get("$options.language"), lang.langs, "language",
+                }, "game_difficulty"));
+            _listings.Add(new optionMulti(lang.Get("$options.language"), lang.langs, "game_lang",
                 delegate { PopulateGame(); }));
             _listings.Add(new optionGap());
             _listings.Add(new optionButton(lang.Get("$menu.credits"),
                 delegate { statemanager.SetState(new credits()); }));
             _listings.Add(new optionGap());
             _listings.Add(new optionButton(
-                cmd.GetValueb("showfps") ? lang.Get("$options.hidefps") : lang.Get("$options.showfps"), delegate
+                screen.cvarFps.Valueb() ? lang.Get("$options.hidefps") : lang.Get("$options.showfps"), delegate
                 {
-                    cmd.Toggle("showfps");
+                    screen.cvarFps.Toggle();
                     UpdateMenu();
                 }));
             _listings.Add(new optionButton(lang.Get("$options.erasesaves"), delegate
@@ -162,15 +162,15 @@ namespace game.states
         {
             _listings.Clear();
             _listings.Add(new optionButton(
-                cmd.GetValueb("audio") ? lang.Get("$options.disablesound") : lang.Get("$options.enablesound"), delegate
+                audio.cvarAudio.Valueb() ? lang.Get("$options.disablesound") : lang.Get("$options.enablesound"), delegate
                 {
-                    cmd.Toggle("audio");
+                    audio.cvarAudio.Toggle();
                     UpdateMenu();
                 }));
             _listings.Add(new optionGap());
             _listings.Add(new optionHeader(lang.Get("$options.volume")));
-            _listings.Add(new optionSlider(lang.Get("$options.mastervol"), "volume"));
-            _listings.Add(new optionSlider(lang.Get("$options.musicvol"), "musicvol"));
+            _listings.Add(new optionSlider(lang.Get("$options.mastervol"), "audio_mastervol"));
+            _listings.Add(new optionSlider(lang.Get("$options.musicvol"), "audio_musicvol"));
         }
 
         private void PopulateControls()
