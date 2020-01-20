@@ -4,11 +4,15 @@ on: [push]
 
 jobs:
   build:
-    runs-on: windows-2019
+    runs-on: windows-latest
     steps:
       - name: checkout
         uses: actions/checkout@v1
       - name: NuGet Restore
+        uses: nuget/setup-nuget@v1
+        with:
+          nuget-api-key: ${{ secrets.NuGetAPIKey }}
+          nuget-version: '5.x'
       - run: nuget restore MyProject.sln
       - name: Build DotNET35
         run: |
