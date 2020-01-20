@@ -1,4 +1,4 @@
-name: CI
+name: Build all (games.sln, Windows)
 
 on: [push]
 
