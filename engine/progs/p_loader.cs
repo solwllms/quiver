@@ -14,7 +14,7 @@ namespace Quiver
 {
     public class progs
     {
-        public const string DEF_GAME_TITLE = "QUIVER";
+        public const string DEF_GAME_TITLE = "Quiver";
 
         private static Dictionary<string, mapEvent> _regMapEvents;
         private static List<Type> _regWeapon;

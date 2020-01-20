@@ -19,7 +19,7 @@ namespace game
     {
         private gmbase _gmode;
 
-        public GameDLL() : base("QUIVER", "Sol Williams", "v0.1", "vanilla quiver")
+        public GameDLL() : base("Quiver", "Sol Williams", "v0.1", "vanilla quiver")
         {
             discordrpc.Init("433659106147172354", null);
         }
@@ -39,7 +39,7 @@ namespace game
             });
             progs.RegisterMapEvent("glassshot", delegate (mapcell cell)
             {
-                audio.PlaySound3D("sound/glass/glass" + engine.random.Next(1, 4), cell.pos, 70);
+                audio.PlaySound3D("sound/glass/glass" + Quiver.engine.random.Next(1, 4), cell.pos, 70);
             });
             progs.RegisterMapEvent("useconsole1", delegate { statemanager.SetState(new consoleGame()); });
 

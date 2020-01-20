@@ -64,7 +64,6 @@ namespace Quiver
             filesystem.AddDirectory(Directory.GetCurrentDirectory() + "/" + cmd.GetValue("dir") + "/");
             filesystem.AddDirectory(Directory.GetCurrentDirectory());
 
-            log.Init();
             cmd.Init();
 
             /* initialise video */
@@ -77,7 +76,9 @@ namespace Quiver
             try
             {
                 cmd.ParseArgs(args);
-            } catch { }            
+            } catch { }
+
+            log.Init();
 
             foreach (var zip in filesystem.GetAllFiles("*.pak"))
                 filesystem.AddArchive(zip);
@@ -117,10 +118,10 @@ namespace Quiver
         {
             _title = title;
 #if DEBUG
-            _title += " - DEVELOPMENT BUILD";
+            _title += " [debug]";
             try
             {
-                Console.Title = title + " - CONSOLE LOG";
+                Console.Title = title + " [console]";
             }
             catch
             {

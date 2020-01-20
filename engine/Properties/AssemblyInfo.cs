@@ -8,12 +8,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("QUIVER")]
+[assembly: AssemblyTitle("Quiver")]
 [assembly: AssemblyDescription("Quiver Engine binaries")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Sol Williams")]
 [assembly: AssemblyProduct("")]
-[assembly: AssemblyCopyright("© Copyright Sol Williams 2018")]
+[assembly: AssemblyCopyright("© Sol Williams 2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -36,7 +36,7 @@ namespace game.states
 
         void IState.Update()
         {
-            if (input.AnyKey() || cmd.GetValueb("nointro")) End();
+            if (input.AnyKey() || cmd.GetValueb("game_nointro")) End();
 
             _t++;
             if (_t == 300)
