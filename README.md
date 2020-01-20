@@ -1,8 +1,6 @@
-# ![alt text](/art/icon_32.png) Quiver
+# Quiver
 
 An extensible pseudo-3d game engine complete scripting modularity as well as full lighting, rgb perhiperal lighting and much more. Originally written for my a-level Computer Science coursework.
-
----
 
 ![Quiver Level 2 gameplay](/screenshots/1.png)
 
@@ -19,7 +17,7 @@ A legacy build of Quiver is available for download [here](https://github.com/sol
 
 ---
 
-### Features!
+### Features
 
   - Decoupled game and engine! (a single engine build can be used on many different games)
   - Fully coloured lightmapped envionments
