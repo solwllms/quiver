@@ -11,9 +11,8 @@ An extensible pseudo-3d game engine complete scripting modularity as well as ful
 |---------|-------------|----------|
 |![](https://github.com/solwllms/quiver/workflows/build/badge.svg)| None |  |
 
-``
+
 A legacy build of Quiver is available for download [here](https://github.com/solwllms/quiver/releases/tag/v1.0). To play the latest build, please compile from source.
-``
 
 ---
 
