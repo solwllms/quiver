@@ -17,3 +17,6 @@ log.txt
 *.deb
 *.xml
 */obj/*
+*.cfg
+*.docx
+*.pdf
