@@ -108,7 +108,7 @@ namespace game.states
                     statemanager.SetState(new prompt("quit?",
                         "are you sure?",
                         () => {
-                            engine.Exit();
+                            Quiver.engine.Exit();
                         }));
                 }
             }

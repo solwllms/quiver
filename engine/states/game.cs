@@ -14,6 +14,8 @@ namespace Quiver.states
     {
         public static game current;
 
+        public static cvar cvarPlayername = new cvar("game_playername", "player", true);
+
         private static string _chapterMsgDraw = "";
         private static string _chapterMsg = "";
         private static int _chapterI;

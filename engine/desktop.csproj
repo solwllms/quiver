@@ -70,6 +70,8 @@
     <Compile Include="Game\map.cs" />
     <Compile Include="Game\types\monster.cs" />
     <Compile Include="Game\types\dirsprite.cs" />
+    <Compile Include="Network\n_client.cs" />
+    <Compile Include="Network\n_server.cs" />
     <Compile Include="Progs\securityPrompt.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
@@ -78,6 +80,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="States\loading.cs" />
+    <Compile Include="States\nettest.cs" />
     <Compile Include="States\options\OptionButton.cs" />
     <Compile Include="States\options\OptionGap.cs" />
     <Compile Include="States\options\OptionHeader.cs" />
@@ -129,6 +132,9 @@
     <Compile Include="System\WinConsole.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="LiteNetLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\LiteNetLib.0.8.3.1\lib\net35\LiteNetLib.dll</HintPath>
+    </Reference>
     <Reference Include="OpenTK, Version=3.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <HintPath>..\packages\OpenTK.3.1.0\lib\net20\OpenTK.dll</HintPath>
     </Reference>

@@ -4,8 +4,7 @@
     <StartWorkingDirectory>..\bin\</StartWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <StartArguments>
-    </StartArguments>
+    <StartArguments>+net</StartArguments>
     <StartWorkingDirectory>
     </StartWorkingDirectory>
   </PropertyGroup>

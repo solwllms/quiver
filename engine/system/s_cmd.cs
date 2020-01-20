@@ -207,6 +207,11 @@ namespace Quiver
 
         public static bool GetValueb(string cvar)
         {
+            if (!_cvars.ContainsKey(cvar))
+            {
+                log.WriteLine("cvar doesn't exist: " + cvar);
+                return false;
+            }
             return _cvars[cvar].Valueb();
         }
 

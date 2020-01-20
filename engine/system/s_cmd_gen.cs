@@ -37,6 +37,12 @@ namespace Quiver
 
             Register("ls", new command(filesystem.PrintPaks, "ls <search>"));
 
+            Register("net", new command(delegate
+            {
+                statemanager.SetState(new nettest());
+                return true;
+            }));
+
             new cvar("game_lang", "english", true,
                 callback: delegate { lang.LoadLang(lang.langfiles[Array.IndexOf(lang.langs, GetValue("language"))]); });
             Register("map", new command(delegate(string[] p)
