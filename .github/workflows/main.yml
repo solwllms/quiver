@@ -1,4 +1,4 @@
-name: Build all (games.sln, Windows)
+name: build
 
 on: [push]
 
