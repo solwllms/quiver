@@ -138,27 +138,26 @@
     <Reference Include="OpenTK, Version=3.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <HintPath>..\packages\OpenTK.3.1.0\lib\net20\OpenTK.dll</HintPath>
     </Reference>
-    <Reference Include="RGB.NET.Core">
-      <HintPath>..\lib\RGB.NET.Core.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="RGB.NET.Core, Version=0.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\RGB.NET.Core.0.0.1.78\lib\net45\RGB.NET.Core.dll</HintPath>
     </Reference>
-    <Reference Include="RGB.NET.Devices.CoolerMaster">
-      <HintPath>..\lib\RGB.NET.Devices.CoolerMaster.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="RGB.NET.Devices.CoolerMaster, Version=0.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\RGB.NET.Devices.CoolerMaster.0.0.1.78\lib\net45\RGB.NET.Devices.CoolerMaster.dll</HintPath>
     </Reference>
-    <Reference Include="RGB.NET.Devices.Corsair">
-      <HintPath>..\lib\RGB.NET.Devices.Corsair.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="RGB.NET.Devices.Corsair, Version=0.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\RGB.NET.Devices.Corsair.0.0.1.39\lib\net45\RGB.NET.Devices.Corsair.dll</HintPath>
     </Reference>
-    <Reference Include="RGB.NET.Devices.Razer">
-      <HintPath>..\lib\RGB.NET.Devices.Razer.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="RGB.NET.Devices.Razer, Version=0.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\RGB.NET.Devices.Razer.0.0.1.39\lib\net45\RGB.NET.Devices.Razer.dll</HintPath>
     </Reference>
     <Reference Include="System">
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Compression" />
+    <Reference Include="System.ValueTuple, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.4.0\lib\net461\System.ValueTuple.dll</HintPath>
+    </Reference>
     <Reference Include="System.Windows.Forms">
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
@@ -199,33 +198,21 @@
     </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\packages\RGB.NET.Resources.Asus.0.1.0\build\RGB.NET.Resources.Asus.targets" Condition="Exists('..\packages\RGB.NET.Resources.Asus.0.1.0\build\RGB.NET.Resources.Asus.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\RGB.NET.Resources.Asus.0.1.0\build\RGB.NET.Resources.Asus.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\RGB.NET.Resources.Asus.0.1.0\build\RGB.NET.Resources.Asus.targets'))" />
-    <Error Condition="!Exists('..\packages\RGB.NET.Resources.CoolerMaster.0.1.0\build\RGB.NET.Resources.CoolerMaster.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\RGB.NET.Resources.CoolerMaster.0.1.0\build\RGB.NET.Resources.CoolerMaster.targets'))" />
-    <Error Condition="!Exists('..\packages\RGB.NET.Resources.Corsair.0.1.0\build\RGB.NET.Resources.Corsair.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\RGB.NET.Resources.Corsair.0.1.0\build\RGB.NET.Resources.Corsair.targets'))" />
-    <Error Condition="!Exists('..\packages\RGB.NET.Resources.Logitech.0.1.0\build\RGB.NET.Resources.Logitech.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\RGB.NET.Resources.Logitech.0.1.0\build\RGB.NET.Resources.Logitech.targets'))" />
-    <Error Condition="!Exists('..\packages\RGB.NET.Resources.Novation.0.1.0\build\RGB.NET.Resources.Novation.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\RGB.NET.Resources.Novation.0.1.0\build\RGB.NET.Resources.Novation.targets'))" />
-    <Error Condition="!Exists('..\packages\RGB.NET.Resources.Razer.0.1.0\build\RGB.NET.Resources.Razer.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\RGB.NET.Resources.Razer.0.1.0\build\RGB.NET.Resources.Razer.targets'))" />
-    <Error Condition="!Exists('..\packages\RGB.NET.Devices.Asus.0.0.1.39\build\net45\RGB.NET.Devices.Asus.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\RGB.NET.Devices.Asus.0.0.1.39\build\net45\RGB.NET.Devices.Asus.targets'))" />
-    <Error Condition="!Exists('..\packages\RGB.NET.Devices.CoolerMaster.0.0.1.39\build\net45\RGB.NET.Devices.CoolerMaster.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\RGB.NET.Devices.CoolerMaster.0.0.1.39\build\net45\RGB.NET.Devices.CoolerMaster.targets'))" />
-    <Error Condition="!Exists('..\packages\RGB.NET.Devices.Corsair.0.0.1.39\build\net45\RGB.NET.Devices.Corsair.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\RGB.NET.Devices.Corsair.0.0.1.39\build\net45\RGB.NET.Devices.Corsair.targets'))" />
-    <Error Condition="!Exists('..\packages\RGB.NET.Devices.Razer.0.0.1.39\build\net45\RGB.NET.Devices.Razer.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\RGB.NET.Devices.Razer.0.0.1.39\build\net45\RGB.NET.Devices.Razer.targets'))" />
-  </Target>
-  <Import Project="..\packages\RGB.NET.Resources.CoolerMaster.0.1.0\build\RGB.NET.Resources.CoolerMaster.targets" Condition="Exists('..\packages\RGB.NET.Resources.CoolerMaster.0.1.0\build\RGB.NET.Resources.CoolerMaster.targets')" />
-  <Import Project="..\packages\RGB.NET.Resources.Corsair.0.1.0\build\RGB.NET.Resources.Corsair.targets" Condition="Exists('..\packages\RGB.NET.Resources.Corsair.0.1.0\build\RGB.NET.Resources.Corsair.targets')" />
-  <Import Project="..\packages\RGB.NET.Resources.Logitech.0.1.0\build\RGB.NET.Resources.Logitech.targets" Condition="Exists('..\packages\RGB.NET.Resources.Logitech.0.1.0\build\RGB.NET.Resources.Logitech.targets')" />
-  <Import Project="..\packages\RGB.NET.Resources.Novation.0.1.0\build\RGB.NET.Resources.Novation.targets" Condition="Exists('..\packages\RGB.NET.Resources.Novation.0.1.0\build\RGB.NET.Resources.Novation.targets')" />
-  <Import Project="..\packages\RGB.NET.Resources.Razer.0.1.0\build\RGB.NET.Resources.Razer.targets" Condition="Exists('..\packages\RGB.NET.Resources.Razer.0.1.0\build\RGB.NET.Resources.Razer.targets')" />
-  <Import Project="..\packages\RGB.NET.Devices.Asus.0.0.1.39\build\net45\RGB.NET.Devices.Asus.targets" Condition="Exists('..\packages\RGB.NET.Devices.Asus.0.0.1.39\build\net45\RGB.NET.Devices.Asus.targets')" />
-  <Import Project="..\packages\RGB.NET.Devices.CoolerMaster.0.0.1.39\build\net45\RGB.NET.Devices.CoolerMaster.targets" Condition="Exists('..\packages\RGB.NET.Devices.CoolerMaster.0.0.1.39\build\net45\RGB.NET.Devices.CoolerMaster.targets')" />
-  <Import Project="..\packages\RGB.NET.Devices.Corsair.0.0.1.39\build\net45\RGB.NET.Devices.Corsair.targets" Condition="Exists('..\packages\RGB.NET.Devices.Corsair.0.0.1.39\build\net45\RGB.NET.Devices.Corsair.targets')" />
-  <Import Project="..\packages\RGB.NET.Devices.Razer.0.0.1.39\build\net45\RGB.NET.Devices.Razer.targets" Condition="Exists('..\packages\RGB.NET.Devices.Razer.0.0.1.39\build\net45\RGB.NET.Devices.Razer.targets')" />
   <PropertyGroup>
     <PostBuildEvent>RD /S /Q $(OutDir)Images\
 RD /S /Q $(OutDir)Layouts\</PostBuildEvent>
   </PropertyGroup>
+  <Import Project="..\packages\RGB.NET.Resources.Corsair.0.2.0\build\RGB.NET.Resources.Corsair.targets" Condition="Exists('..\packages\RGB.NET.Resources.Corsair.0.2.0\build\RGB.NET.Resources.Corsair.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\RGB.NET.Resources.Corsair.0.2.0\build\RGB.NET.Resources.Corsair.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\RGB.NET.Resources.Corsair.0.2.0\build\RGB.NET.Resources.Corsair.targets'))" />
+    <Error Condition="!Exists('..\packages\RGB.NET.Resources.Razer.0.1.0\build\RGB.NET.Resources.Razer.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\RGB.NET.Resources.Razer.0.1.0\build\RGB.NET.Resources.Razer.targets'))" />
+    <Error Condition="!Exists('..\packages\RGB.NET.Devices.Razer.0.0.1.39\build\net45\RGB.NET.Devices.Razer.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\RGB.NET.Devices.Razer.0.0.1.39\build\net45\RGB.NET.Devices.Razer.targets'))" />
+    <Error Condition="!Exists('..\packages\RGB.NET.Devices.Corsair.0.0.1.39\build\net45\RGB.NET.Devices.Corsair.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\RGB.NET.Devices.Corsair.0.0.1.39\build\net45\RGB.NET.Devices.Corsair.targets'))" />
+  </Target>
+  <Import Project="..\packages\RGB.NET.Resources.Razer.0.1.0\build\RGB.NET.Resources.Razer.targets" Condition="Exists('..\packages\RGB.NET.Resources.Razer.0.1.0\build\RGB.NET.Resources.Razer.targets')" />
+  <Import Project="..\packages\RGB.NET.Devices.Razer.0.0.1.39\build\net45\RGB.NET.Devices.Razer.targets" Condition="Exists('..\packages\RGB.NET.Devices.Razer.0.0.1.39\build\net45\RGB.NET.Devices.Razer.targets')" />
+  <Import Project="..\packages\RGB.NET.Devices.Corsair.0.0.1.39\build\net45\RGB.NET.Devices.Corsair.targets" Condition="Exists('..\packages\RGB.NET.Devices.Corsair.0.0.1.39\build\net45\RGB.NET.Devices.Corsair.targets')" />
 </Project>
