@@ -32,7 +32,7 @@ namespace Quiver
         public static void AddArchive(string path)
         {
             ArchivePaths.Add(path);
-            Archives.Add(new ZipArchive(File.Open(path, FileMode.Open)));
+            Archives.Add(new ZipArchive(File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read)));
         }
 
         /// <summary>
