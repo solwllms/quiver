@@ -512,12 +512,17 @@ namespace Quiver.display
                 var db = (uint)(zl * 3 * (xx * xx + 8) + 4);
                 db = (((db + (((x * y * 2) - (x + y)) & 3) * 2) >> 3) << 3).Clamp((uint)0, (uint)255);
 
-                if (_fbcache.ContainsKey(new vector(x, y))) db *= 6;
+                //if (_fbcache.ContainsKey(new vector(x, y))) db *= 6;
 
                 int r = (int)((col.R * db) / 255);
                 int g = (int)((col.G * db) / 255);
                 int b = (int)((col.B * db) / 255);
                 screen.SetPixel(x, y, Color.FromArgb(r, g, b));
+
+                if (_fbcache.ContainsKey(new vector(x, y)))
+                {
+                    screen.SetPixel(x, y, level.LightmapBlend(screen.GetPixel(x, y), _fbcache[new vector(x, y)], 0.4f));
+                }
             }
         }
 

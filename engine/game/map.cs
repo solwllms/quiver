@@ -17,7 +17,7 @@ namespace Quiver.game
 {
     public class level
     {
-        public static cvar cvarLightmapScale = new cvar("light_scale", "1", true, cheat: true);
+        public static cvar cvarLightmapScale = new cvar("light_scale", "4", true, cheat: true);
         public static cvar cvarLightmapDebug = new cvar("light_save", "0", true, cheat: true);
         public static cvar cvarLightmapPrefix = new cvar("light_prefix", "lmp_", true);
 
@@ -129,9 +129,6 @@ namespace Quiver.game
                         new lmapinf {c = cell.emission, set = vis.GetLitSet(cell.pos * renderer.TEXSIZE)});
 
             LightRefresh();
-
-            // save a pretty lightmap png for debugging
-            if(cvarLightmapDebug.Valueb()) WriteLightmap();
         }
 
         private static void WriteLightmap()
@@ -154,7 +151,7 @@ namespace Quiver.game
             for (var x = 0; x < LightmapSize; x += scale)
             for (var y = 0; y < LightmapSize; y += scale)
             {
-                //lightmap[x, y] = Color.Black;
+                lightmap[x, y] = Color.Black;
 
                 var wc = new vector(x / renderer.TEXSIZE, y / renderer.TEXSIZE);
 
@@ -163,17 +160,31 @@ namespace Quiver.game
                     var inf = _lights.ElementAt(l).Value;
                     var pos = new vector(x, y);
 
+                        /*
                     if (world.map[(int) wc.x, (int) wc.y].wall || !inf.set.Contains(pos)) continue;
 
                     var lvec = _lights.ElementAt(l).Key * renderer.TEXSIZE + new vector(ctr, ctr);
-                    var p = pos.DistanceTo(lvec) * 255 * 2;
+                    var p = (int)pos.DistanceTo(lvec) * 255 * 2;
                     var i = (255 - (p / 255).Clamp(0, 255)) / 255;
 
                     for (int xs = 0; xs < scale; xs++)
                     for (int ys = 0; ys < scale; ys++)
-                        lightmap[x + xs, y + ys] = LightmapBlend(lightmap[x, y], inf.c, i);
+                        lightmap[x + xs, y + ys] = LightmapBlend(lightmap[x, y], inf.c, i);*/
+
+                    if (world.map[(int)wc.x, (int)wc.y].wall || !inf.set.Contains(pos)) continue;
+
+                    var lvec = (_lights.ElementAt(l).Key + new vector(0.5f, 0.5f)) * renderer.TEXSIZE;
+
+                    int dist = (int)pos.DistanceTo(lvec) / (scale * 2);
+                    int i = (255 / ((dist).Clamp(0, 255) + 1));
+
+                    for (int xs = 0; xs < scale; xs++)
+                        for (int ys = 0; ys < scale; ys++)
+                            lightmap[x + xs, y + ys] = LightmapBlend(lightmap[x, y], inf.c, (float)i / 255);
                 }
             }
+
+            if(cvarLightmapDebug.Valueb()) WriteLightmap();
         }
 
         public static Color LightmapBlend(Color o, Color n, float i)

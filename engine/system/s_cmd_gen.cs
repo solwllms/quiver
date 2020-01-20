@@ -50,6 +50,11 @@ namespace Quiver
                 level.Load(f, true);
                 return true;
             }, "map [name]"));
+            Register("relight", new command(delegate
+            {
+                level.LightRefresh();
+                return true;
+            }));
             new cvar("game_nointro", "0", true, true);
             Register("toggleconsole", new command(delegate
             {
