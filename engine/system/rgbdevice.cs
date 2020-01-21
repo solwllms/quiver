@@ -32,7 +32,7 @@ namespace Quiver.system
         {
             if (!cvarRgb.Valueb()) return;
 
-            log.WriteLine("initialising RGB api..");
+            log.WriteLine("rgb: initialising api..");
             _surface = RGBSurface.Instance;
             _surface.Exception += args => Console.WriteLine(args.Exception.Message);
 
@@ -52,9 +52,9 @@ namespace Quiver.system
             _surface.AlignDevices();
 
             foreach (var v in RGBSurface.Instance.Devices)
-                log.WriteLine("RGB device connected " + v.DeviceInfo.Manufacturer + " " + v.DeviceInfo.Model + " (" +
+                log.WriteLine("rgb: device connected " + v.DeviceInfo.Manufacturer + " " + v.DeviceInfo.Model + " (" +
                               v.DeviceInfo.DeviceType + ")");
-            log.WriteLine("RGB Ready! ("+ RGBSurface.Instance.Devices.Count() + " devices loaded)", log.LogMessageType.Good);
+            log.WriteLine("rgb: ready ("+ RGBSurface.Instance.Devices.Count() + " devices)", log.LogMessageType.Good);
 
             _rules = new Dictionary<LedId, Color>();
             _surface.Updating += args => Update();

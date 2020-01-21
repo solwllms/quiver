@@ -93,7 +93,7 @@ namespace Quiver
         public static void RegisterMapEvent(string alias, mapEvent e)
         {
             _regMapEvents.Add(alias, e);
-            log.WriteLine("map event \"" + alias + "\" registered.");
+            log.WriteLine("dll: registered event: " + alias);
         }
 
         /// <summary>
@@ -153,7 +153,7 @@ namespace Quiver
         public static void RegisterEnt(Type e)
         {
             _regEnt.Add(e);
-            log.WriteLine("entity \"" + e.Name + "\" registered.");
+            log.WriteLine("dll: registered entity: " + e.Name);
         }
 
         /// <summary>
@@ -172,7 +172,7 @@ namespace Quiver
         public static void RegisterWeapon(Type w)
         {
             _regWeapon.Add(w);
-            log.WriteLine("weapon \"" + w.Name + "\" registered.");
+            log.WriteLine("dll: registered weapon: " + w.Name);
         }
 
         /// <summary>
