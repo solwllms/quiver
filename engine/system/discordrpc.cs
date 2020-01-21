@@ -55,28 +55,28 @@ namespace Quiver.system
             handlers.errorCallback += _ErrorCallback;
             try
             {
-                log.WriteLine("initializing discord rich presence..");
+                log.WriteLine("discord: initializing");
                 Initialize(_appid, ref handlers, true, _steamappid);
             }
             catch
             {
-                log.WriteLine("failed to init discord rich presence. is " + DLL + " missing?", log.LogMessageType.Error);
+                log.WriteLine("discord: failed to init is " + DLL + " missing?", log.LogMessageType.Error);
             }
         }
 
         private static void _ReadyCallback()
         {
-            log.WriteLine("discord rich presence (drp) ready!", log.LogMessageType.Good);
+            log.WriteLine("discord: ready", log.LogMessageType.Good);
         }
 
         private static void _DisconnectedCallback(int errorCode, string message)
         {
-            log.WriteLine("drp disconnected. (" + string.Format("Disconnect {0}: {1}", errorCode, message) + ")");
+            log.WriteLine("discord: disconnected. (" + string.Format("Disconnect {0}: {1}", errorCode, message) + ")");
         }
 
         private static void _ErrorCallback(int errorCode, string message)
         {
-            log.WriteLine("drp error. (" + string.Format("Disconnect {0}: {1}", errorCode, message) + ")",
+            log.WriteLine("discord: error. (" + string.Format("Disconnect {0}: {1}", errorCode, message) + ")",
                 log.LogMessageType.Error);
         }
 
@@ -85,6 +85,7 @@ namespace Quiver.system
 
         public static void Update(string details, string state)
         {
+            if (!cvarRpc.Valueb()) return;
             try
             {
                 var rpc = new richPresence();
@@ -95,12 +96,12 @@ namespace Quiver.system
                 rpc.smallImageKey = "icon_s";
                 rpc.smallImageText = "";
                 UpdatePresence(ref rpc);
-                log.WriteLine("updating drp (" + details + ", " + state + ")");
+                log.WriteLine("discord: updating status (" + details + ", " + state + ")");
                 current = rpc;
             }
             catch
             {
-                log.WriteLine("failed to update drp!", log.LogMessageType.Error);
+                log.WriteLine("discord: failed to update", log.LogMessageType.Error);
             }
         }
 
@@ -125,6 +126,7 @@ namespace Quiver.system
         {
             try
             {
+                log.WriteLine("discord: shutting down");
                 rpcShutdown();
             }
             catch

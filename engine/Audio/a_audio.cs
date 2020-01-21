@@ -30,7 +30,7 @@ namespace Quiver.Audio
 
         internal static void Init()
         {
-            log.WriteLine("initializing audio...");
+            log.WriteLine("audio: initializing");
             context = new AudioContext();
             nowPlaying = new List<AudioPlayer>();
 
@@ -38,7 +38,7 @@ namespace Quiver.Audio
             var version = AL.Get(ALGetString.Version);
             var vendor = AL.Get(ALGetString.Vendor);
             var renderer = AL.Get(ALGetString.Renderer);
-            log.WriteLine("loaded audio successfully. (" + GetDevice() + ": "+ version + ", " + vendor + ", " + renderer +")", log.LogMessageType.Good);
+            log.WriteLine("audio: ready (" + GetDevice() + ": "+ version + ", " + vendor + ", " + renderer +")", log.LogMessageType.Good);
         }
 
         internal static void Tick()
@@ -54,7 +54,7 @@ namespace Quiver.Audio
 
         internal static void Unload()
         {
-            log.WriteLine("unloading audio...");
+            log.WriteLine("audio: unloading");
             ClearSounds();
             context.Dispose();
         }

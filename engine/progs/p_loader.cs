@@ -47,7 +47,7 @@ namespace Quiver
             }
 
             Assembly tempDll = Assembly.Load(data);
-            log.WriteLine("loading " + name + "..");
+            log.WriteLine("dll: loading " + name);
             
             dll = (dll)tempDll.CreateInstance("game.GameDLL");
             if (dll.title != DEF_GAME_TITLE)
@@ -69,11 +69,11 @@ namespace Quiver
             }
             catch
             {
-                log.ThrowFatal("An error occured when initializing the game dll. (" + dll.title + ", " + dll.version + " - " + dll.dev + ")");
+                log.ThrowFatal("An error occured when initializing the game dll. (" + dll.title + ", " + dll.version + ", " + dll.dev + ")");
                 return;
             }
 
-            log.WriteLine(dll.title + " loaded successfully", log.LogMessageType.Good);
+            log.WriteLine("dll: loaded successfully (" + dll.title + ", " + dll.version + ", " + dll.dev + ")", log.LogMessageType.Good);
 
             engine.SetTitle(dll.title);
             engine.SetIcon("icon_1024.ico");
@@ -93,7 +93,7 @@ namespace Quiver
         public static void RegisterMapEvent(string alias, mapEvent e)
         {
             _regMapEvents.Add(alias, e);
-            log.WriteLine("dll: registered event: " + alias);
+            log.WriteLine("registered event: " + alias);
         }
 
         /// <summary>
@@ -105,7 +105,7 @@ namespace Quiver
         {
             if (!_regMapEvents.ContainsKey(name))
             {
-                log.WriteLine("failed to find map event \"" + name + "\"");
+                log.WriteLine("failed to find map event: " + name);
                 return null;
             }
 
@@ -153,7 +153,7 @@ namespace Quiver
         public static void RegisterEnt(Type e)
         {
             _regEnt.Add(e);
-            log.WriteLine("dll: registered entity: " + e.Name);
+            log.WriteLine("registered entity: " + e.Name);
         }
 
         /// <summary>
@@ -172,7 +172,7 @@ namespace Quiver
         public static void RegisterWeapon(Type w)
         {
             _regWeapon.Add(w);
-            log.WriteLine("dll: registered weapon: " + w.Name);
+            log.WriteLine("registered weapon: " + w.Name);
         }
 
         /// <summary>

@@ -312,7 +312,7 @@ namespace Quiver
                     {
                         if (_cvars[command].readOnly && !force)
                         {
-                            if (!silent) log.WriteLine("cvar \"" + command + "\" is readonly");
+                            if (!silent) log.WriteLine("\"" + command + "\" is readonly");
                             return;
                         }
 
@@ -323,7 +323,7 @@ namespace Quiver
                         }
 
                         _cvars[command].Toggle();
-                        if(!silent) log.WriteLine("cvar \"" + command + "\" set to \"" + _cvars[command].Value() + "\"");
+                        if(!silent) log.WriteLine("\"" + command + "\" set to \"" + _cvars[command].Value() + "\"");
 
                         if (_cvars[command].isPersistent && console) SaveConfig();
                         return;
@@ -333,7 +333,7 @@ namespace Quiver
                     {
                         if (_cvars[command].readOnly && !force)
                         {
-                            if (!silent) log.WriteLine("cvar '" + command + "' is readonly");
+                            if (!silent) log.WriteLine("'" + command + "' is readonly");
                             return;
                         }
 
@@ -344,7 +344,7 @@ namespace Quiver
                         }
 
                         _cvars[command].Set(param[0]);
-                        if (!silent) log.WriteLine("cvar '" + command + "' set to '" + _cvars[command].Value() + "'");
+                        if (!silent) log.WriteLine("'" + command + "' set to '" + _cvars[command].Value() + "'");
 
                         if (_cvars[command].isPersistent && console) SaveConfig();
                         return;
@@ -354,7 +354,7 @@ namespace Quiver
                     return;
                 }
 
-                log.WriteLine("command '" + command + "' not found.");
+                log.WriteLine("command not found: " + command);
                 return;
             }
 
@@ -387,8 +387,8 @@ namespace Quiver
                     {
                         string line = read.ReadLine();
                         if (line.StartsWith("//")) line = line.Substring(0, line.IndexOf("//"));
-                        
-                        Exec(read.ReadLine(), false, silent: true);
+
+                        if (line != "") Exec(line, false, silent: true);
                     }
                 }
             }

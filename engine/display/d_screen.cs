@@ -31,7 +31,7 @@ namespace Quiver.display
 
         public static void Init(uint width, uint height)
         {
-            log.WriteLine("initializing video..");
+            log.WriteLine("display: initializing");
             try
             {
                 screen.width = width;
@@ -46,7 +46,7 @@ namespace Quiver.display
                 log.ThrowFatal("Failed to initialize video. System out of memory or OpenGL not supported. " +
                     "If your system meets the target requirements, try again or update your drivers.", e);
             }
-            log.WriteLine("loaded video successfully. ("+gpuVendor + " " + gpuModel+")", log.LogMessageType.Good);
+            log.WriteLine("display: ready (" + gpuVendor + " " + gpuModel+")", log.LogMessageType.Good);
         }
 
         public static void Render()
@@ -77,7 +77,7 @@ namespace Quiver.display
 
         public static void WriteScreenshot()
         {
-            log.WriteLine("writing screenshot..");
+            log.WriteLine("display: writing screenshot");
             try
             {
                 Bitmap i = new Bitmap((int)width, (int)height);
@@ -87,15 +87,15 @@ namespace Quiver.display
                     Color c = GetPixel((uint)x, (uint)y);
                     i.SetPixel(x, y, c);
                 }
-                i.Save(filesystem.Open("screenshots/" +
-                    DateTime.Now.ToString(saveload.DATETIME_FORMAT).Replace("/", "").Replace(':', '-') + ".png", true), ImageFormat.Png);                
+                string fname = DateTime.Now.ToString(saveload.DATETIME_FORMAT).Replace("/", "").Replace(':', '-');
+                i.Save(filesystem.Open("screenshots/" + fname + ".png", true), ImageFormat.Png);
+                log.WriteLine("display: screenshot saved ("+fname+")", log.LogMessageType.Good);
             }
             catch
             {
-                log.WriteLine("an error occured while trying to write screenshot.", log.LogMessageType.Error);
+                log.WriteLine("display: an error occured while trying to write screenshot.", log.LogMessageType.Error);
                 return;
             }
-            log.WriteLine("screenshot saved successfully.", log.LogMessageType.Good);
         }
 
         public static void WriteScreenshotScaled(string path, float scale = 0.2f)
