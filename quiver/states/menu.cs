@@ -119,9 +119,9 @@ namespace game.states
                 {
                     if (_isgame)
                         statemanager.SetState(new prompt(lang.Get("$menu.newgame"), lang.Get("$menu.unsavedprog"),
-                            delegate() { level.Load("maps/E1M1.lvl", true); }));
+                            delegate() { Quiver.game.game.HostNewGame("maps/E1M1.lvl"); }));
                     else
-                        level.Load("maps/E1M1.lvl", true);
+                        Quiver.game.game.HostNewGame("maps/E1M1.lvl");
                 }
                 else if (_cursor == 1)
                 {

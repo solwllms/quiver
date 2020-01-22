@@ -66,12 +66,15 @@
     <Compile Include="Audio\a_soundfile.cs" />
     <Compile Include="Display\d_transitions.cs" />
     <Compile Include="Display\w_animation.cs" />
+    <Compile Include="Game\game.cs" />
     <Compile Include="Game\gmbase.cs" />
     <Compile Include="Game\map.cs" />
     <Compile Include="Game\types\monster.cs" />
     <Compile Include="Game\types\dirsprite.cs" />
     <Compile Include="Network\n_client.cs" />
+    <Compile Include="Network\n_common.cs" />
     <Compile Include="Network\n_server.cs" />
+    <Compile Include="Network\n_state.cs" />
     <Compile Include="Progs\securityPrompt.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
@@ -91,7 +94,7 @@
     <Compile Include="System\DiscordRPC.cs" />
     <Compile Include="Progs\p_dll.cs" />
     <Compile Include="Game\types\weapon.cs" />
-    <Compile Include="States\game.cs" />
+    <Compile Include="States\game_state.cs" />
     <Compile Include="Game\types\mapcell.cs" />
     <Compile Include="Game\types\projectile.cs" />
     <Compile Include="Game\types\sprite.cs" />

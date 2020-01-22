@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using Quiver.Audio;
 using Quiver.display;
 using Quiver.game;
+using Quiver.Network;
 using Quiver.system;
 
 #endregion
@@ -52,6 +53,8 @@ namespace Quiver
 
         public static void Exit()
         {
+            n_state.Close();
+
             audio.Unload();
             log.WriteLine("shutting down..");
             s_Window.CloseWindow();

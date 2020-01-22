@@ -29,7 +29,7 @@ namespace game
             gui.lighter = Color.DarkOrange;
 
             // register all map events
-            progs.RegisterMapEvent("nextlevel", delegate { level.Load("maps/" + level.next + ".lvl", false); });
+            progs.RegisterMapEvent("nextlevel", delegate { level.ChangeLevel("maps/" + level.next + ".lvl", false); });
 
             // register all entities
 

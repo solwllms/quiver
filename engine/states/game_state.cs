@@ -5,23 +5,22 @@ using Quiver.display;
 using Quiver.game;
 using Quiver.system;
 using OpenTK.Input;
+using Quiver.Network;
 
 #endregion
 
 namespace Quiver.states
 {
-    public class game : IState
+    public class game_state : IState
     {
-        public static game current;
-
-        public static cvar cvarPlayername = new cvar("game_playername", "player", true);
+        public static game_state current;
 
         private static string _chapterMsgDraw = "";
         private static string _chapterMsg = "";
         private static int _chapterI;
         private static int _chapterA;
 
-        public game(bool respawn)
+        public game_state(bool respawn)
         {
             //cache.ClearSounds();
             if (!respawn)
@@ -90,8 +89,7 @@ namespace Quiver.states
         {
             if (!statemanager.IsTransitionFairlyDone()) return;
 
-            world.Tick();
-            cmd.Checkbinds();
+            game.game.Tick();
 
             if (input.IsKeyPressed(Key.Escape))
                 statemanager.SetState(progs.dll.GetMenuState());

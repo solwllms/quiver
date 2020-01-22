@@ -83,7 +83,7 @@ namespace Quiver.system
             log.WriteLine("loading save \"" + path + "\"..");
             try
             {
-                statemanager.SetState(new states.game(false), true);
+                statemanager.SetState(new states.game_state(false), true);
                 BinaryReader r;
                 using (r = new BinaryReader(filesystem.Open(path)))
                 {
@@ -120,7 +120,7 @@ namespace Quiver.system
                                 log.LogMessageType.Error);
                     }
 
-                    level.Load(map, true, false, false);
+                    level.ChangeLevel(map, true, false, false);
                 }
             }
             catch

@@ -1,4 +1,4 @@
-﻿using engine.Network;
+﻿using Quiver.Network;
 using OpenTK.Input;
 using Quiver.Audio;
 using Quiver.display;
@@ -62,12 +62,14 @@ namespace Quiver.system
             {
                 if (input.IsKeyPressed(Key.Q))
                 {
-                    n_server.Start();
+                    game.game.HostNewGame("maps/E1M1.lvl");
+                    //n_server.Start();
                     state = 0;
                 }
                 else if (input.IsKeyPressed(Key.W))
                 {
-                    n_client.Connect();
+                    game.game.ConnectToGame("localhost");
+                    //n_client.Connect();
                     state = 1;
                 }
             }

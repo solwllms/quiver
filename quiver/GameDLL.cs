@@ -29,11 +29,11 @@ namespace game
             // register all map events
             progs.RegisterMapEvent("nextlevel", delegate (mapcell cell) {
                 if (world.GetTextureAlias(cell.walltex) != "textures/exit") return;
-                level.Load("maps/" + level.next + ".lvl", false);
+                level.ChangeLevel("maps/" + level.next + ".lvl", false);
             });
             progs.RegisterMapEvent("prevlevel", delegate
             {
-                level.Load("maps/" + level.prev + ".lvl", false);
+                level.ChangeLevel("maps/" + level.prev + ".lvl", false);
                 var c = level.data.CoordinatesOf(-2);
                 world.Player.pos = new vector(c.Item1, c.Item2);
             });

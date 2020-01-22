@@ -36,17 +36,8 @@ namespace Quiver.game
         {
             get
             {
-                try
-                {
-                    if (entities != null)
-                        return (player) entities[0];
-                }
-                catch
-                {
-                    return null;
-                }
-
-                return null;
+                if (entities != null) return game.GetLocalPlayer();
+                else return null;
             }
         }
 
@@ -142,8 +133,9 @@ namespace Quiver.game
 
         public static void CreatePlayer(vector pos)
         {
-            entities.Add((ent) progs.CreateEnt(0, pos));
-            WarmPlayer();
+            log.WriteLine("depreciated call to CreatePlayer!", log.LogMessageType.Error);
+            //entities.Add((ent) progs.CreateEnt(0, pos));
+            //WarmPlayer();
         }
 
         public static void WarmPlayer()

@@ -15,9 +15,9 @@ namespace Quiver.system
 
         private static transition transition;
 
-        public static bool Wasgame => history.Peek()?.GetType() == typeof(states.game);
+        public static bool Wasgame => history.Peek()?.GetType() == typeof(states.game_state);
 
-        public static bool Isgame => history.Peek()?.GetType() == typeof(states.game);
+        public static bool Isgame => history.Peek()?.GetType() == typeof(states.game_state);
 
         /*
             State logic

@@ -14,6 +14,7 @@ namespace Quiver.game.types
         private string _texname;
         public bool fetchignore = false;
 
+        public bool visible = true;
         public bool solid;
 
         public uint sprheight = 16;

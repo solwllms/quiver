@@ -12,7 +12,7 @@ using OpenTK.Input;
 
 namespace Quiver.game
 {
-    public class player : ent
+    public class player : dirsprite
     {
         public static cvar cvarFov = new cvar("fov", "66", false, cheat: true);
         public static cvar cvarMovespeed = new cvar("movspeed", "0.05", false, cheat: true);
@@ -20,15 +20,33 @@ namespace Quiver.game
         //public static cvar cvarNofollow = new cvar("nofollow", "0", false, cheat: true, toggle: true);
 
         public weapon weapon;
+        public vector dir = new vector(-1, 0);
+
+        private bool _localPlayer;
+        public bool isLocalPlayer
+        {
+            get
+            {
+                return _localPlayer;
+            }
+            set
+            {
+                _localPlayer = value;
+                visible = !_localPlayer;
+            }
+        }
 
         private float _move;
         private float _turn;
         private float _strafe;
 
-        public player(vector pos) : base(pos)
+        public player(vector pos) : base("sprites/robo_rot", pos, false)
         {
             health = 100;
             collisionerror = 0;
+            isLocalPlayer = true;
+
+            sprwidth = 8;
 
             try
             {
@@ -42,106 +60,106 @@ namespace Quiver.game
 
         public static void Initcmds()
         {
-            cmd.Register("+forward", new command(delegate
+            cmd.Register(new command("+forward", delegate (int id, string[] param)
             {
-                world.Player?.Move(cvarMovespeed.Valuef());
+                game.GetPlayerEnt(id)?.Move(cvarMovespeed.Valuef());
                 return true;
-            }, record: true));
-            cmd.Register("-forward", new command(delegate
+            }, record: true, sendToServer: true));
+            cmd.Register(new command("-forward", delegate (int id, string[] param)
             {
-                world.Player?.Move(0);
+                game.GetPlayerEnt(id)?.Move(0);
                 return true;
-            }, record: true));
+            }, record: true, sendToServer: true));
             cmd.Bind(Key.W, "+forward");
 
-            cmd.Register("+strafeleft", new command(delegate
+            cmd.Register(new command("+strafeleft", delegate (int id, string[] param)
             {
-                world.Player?.Strafe(cvarMovespeed.Valuef());
+                game.GetPlayerEnt(id)?.Strafe(cvarMovespeed.Valuef());
                 return true;
-            }, record: true));
-            cmd.Register("-strafeleft", new command(delegate
+            }, record: true, sendToServer: true));
+            cmd.Register(new command("-strafeleft", delegate (int id, string[] param)
             {
-                world.Player?.Strafe(0);
+                game.GetPlayerEnt(id)?.Strafe(0);
                 return true;
-            }, record: true));
+            }, record: true, sendToServer: true));
             cmd.Bind(Key.Q, "+strafeleft");
 
-            cmd.Register("+straferight", new command(delegate
+            cmd.Register(new command("+straferight", delegate (int id, string[] param)
             {
-                world.Player?.Strafe(-cvarMovespeed.Valuef());
+                game.GetPlayerEnt(id)?.Strafe(-cvarMovespeed.Valuef());
                 return true;
-            }, record: true));
-            cmd.Register("-straferight", new command(delegate
+            }, record: true, sendToServer: true));
+            cmd.Register(new command("-straferight", delegate (int id, string[] param)
             {
-                world.Player?.Strafe(0);
+                game.GetPlayerEnt(id)?.Strafe(0);
                 return true;
-            }, record: true));
+            }, record: true, sendToServer: true));
             cmd.Bind(Key.E, "+straferight");
 
-            cmd.Register("+back", new command(delegate
+            cmd.Register(new command("+back", delegate (int id, string[] param)
             {
-                world.Player?.Move(-cvarMovespeed.Valuef());
+                game.GetPlayerEnt(id)?.Move(-cvarMovespeed.Valuef());
                 return true;
-            }, record: true));
-            cmd.Register("-back", new command(delegate
+            }, record: true, sendToServer: true));
+            cmd.Register(new command("-back", delegate (int id, string[] param)
             {
-                world.Player?.Move(0);
+                game.GetPlayerEnt(id)?.Move(0);
                 return true;
-            }, record: true));
+            }, record: true, sendToServer: true));
             cmd.Bind(Key.S, "+back");
 
-            cmd.Register("+left", new command(delegate
+            cmd.Register(new command("+left", delegate (int id, string[] param)
             {
-                world.Player?.Turn(cvarRotspeed.Valuef());
+                game.GetPlayerEnt(id)?.Turn(cvarRotspeed.Valuef());
                 return true;
-            }, record: true));
-            cmd.Register("-left", new command(delegate
+            }, record: true, sendToServer: true));
+            cmd.Register(new command("-left", delegate (int id, string[] param)
             {
-                world.Player?.Turn(0);
+                game.GetPlayerEnt(id)?.Turn(0);
                 return true;
-            }, record: true));
+            }, record: true, sendToServer: true));
             cmd.Bind(Key.A, "+left");
 
-            cmd.Register("+right", new command(delegate
+            cmd.Register(new command("+right", delegate (int id, string[] param)
             {
-                world.Player?.Turn(-cvarRotspeed.Valuef());
+                game.GetPlayerEnt(id)?.Turn(-cvarRotspeed.Valuef());
                 return true;
-            }, record: true));
-            cmd.Register("-right", new command(delegate
+            }, record: true, sendToServer: true));
+            cmd.Register(new command("-right", delegate (int id, string[] param)
             {
-                world.Player?.Turn(0);
+                game.GetPlayerEnt(id)?.Turn(0);
                 return true;
-            }, record: true));
+            }, record: true, sendToServer: true));
             cmd.Bind(Key.D, "+right");
 
-            cmd.Register("use", new command(delegate
+            cmd.Register(new command("use", delegate (int id, string[] param)
             {
-                world.Player?.Use();
+                game.GetPlayerEnt(id)?.Use();
                 return true;
-            }, record: true));
+            }, record: true, sendToServer: true));
             cmd.Bind(Key.F, "use");
 
-            cmd.Register("fire", new command(delegate
+            cmd.Register(new command("fire", delegate (int id, string[] param)
             {
-                world.Player?.Fire();
+                game.GetPlayerEnt(id)?.Fire();
                 return true;
             }, record: true));
             cmd.Bind(Key.Space, "fire");
 
-            cmd.Register("reload", new command(delegate
+            cmd.Register(new command("reload", delegate (int id, string[] param)
             {
-                world.Player?.Reload();
+                game.GetPlayerEnt(id)?.Reload();
                 return true;
             }, record: true));
             cmd.Bind(Key.R, "reload");
 
-            cmd.Register("kill", new command(delegate
+            cmd.Register(new command("kill", delegate (int id, string[] param)
             {
-                world.Player.health = 0;
+                game.GetPlayerEnt(id).health = 0;
                 return true;
             }, record: true));
 
-            cmd.Register("refresh", new command(delegate
+            cmd.Register(new command("refresh", delegate (int id, string[] param)
             {
                 cache.ClearAll();
                 return true;
@@ -165,22 +183,25 @@ namespace Quiver.game
         public void Turntick()
         {
             angle += _turn;
-            renderer.camDir.x = (float) Math.Cos(angle);
-            renderer.camDir.y = (float) Math.Sin(angle);
+            dir.x = (float) Math.Cos(angle);
+            dir.y = (float) Math.Sin(angle);
 
-            float fov = cvarFov.Valuef() / 100;
-            renderer.camPlane.x = renderer.camDir.y * (fov * 1.33f);
-            renderer.camPlane.y = -renderer.camDir.x * (fov * 1.33f);
+            if (isLocalPlayer)
+            {
+                float fov = cvarFov.Valuef() / 100;
+                renderer.camPlane.x = dir.y * (fov * 1.33f);
+                renderer.camPlane.y = -dir.x * (fov * 1.33f);
+            }
         }
 
         public void Movetick()
         {
-            if (!world.map[(int) (pos.x + renderer.camDir.x * _move), (int) pos.y].solid)
-                pos.x += renderer.camDir.x * _move;
-            if (!world.map[(int) pos.x, (int) (pos.y + renderer.camDir.y * _move)].solid)
-                pos.y += renderer.camDir.y * _move;
+            if (!world.map[(int) (pos.x + dir.x * _move), (int) pos.y].solid)
+                pos.x += dir.x * _move;
+            if (!world.map[(int) pos.x, (int) (pos.y + dir.y * _move)].solid)
+                pos.y += dir.y * _move;
 
-            vector strafeDir = new vector(-renderer.camDir.y, renderer.camDir.x);
+            vector strafeDir = new vector(-dir.y, dir.x);
             if (!world.map[(int)(pos.x + strafeDir.x * _strafe), (int)pos.y].solid)
                 pos.x += strafeDir.x * _strafe;
             if (!world.map[(int)pos.x, (int)(pos.y + strafeDir.y * _strafe)].solid)

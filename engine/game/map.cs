@@ -15,6 +15,8 @@ using Quiver.Audio;
 
 namespace Quiver.game
 {
+    public delegate void onLevelLoaded();
+
     public class level
     {
         public static cvar cvarLightmapScale = new cvar("light_scale", "4", true, cheat: true);
@@ -32,13 +34,13 @@ namespace Quiver.game
         public static string prev = "";
         public static string next = "";
 
-        private static vector _playerSpawn;
+        public static vector playerSpawn;
 
         private static Dictionary<vector, lmapinf> _lights;
 
         public static int LightmapSize => world.mapsize * renderer.TEXSIZE;
 
-        public static void Load(string file, bool fresh, bool genents = true, bool clearents = true)
+        public static void ChangeLevel(string file, bool fresh, bool genents = true, bool clearents = true, onLevelLoaded callback = null)
         {
             statemanager.SetState(new loading(false), fresh);
 
@@ -46,10 +48,10 @@ namespace Quiver.game
             audio.ClearSounds();
 
             world.ResetData(file, fresh, genents);
-            GenerateMap(file, fresh, genents);
+            GenerateMap(file, fresh, genents, callback);
         }
 
-        private static void GenerateMap(string map, bool fresh, bool genents)
+        private static void GenerateMap(string map, bool fresh, bool genents, onLevelLoaded callback)
         {
             doneLoading = false;
             name = map;
@@ -66,6 +68,9 @@ namespace Quiver.game
 
                 PostLoad(fresh, genents);
                 GenerateLightmap();
+
+                callback?.Invoke();
+                world.Tick();
 
                 progs.dll.GetGamemode().Start();
                 discordrpc.Update("playing " + name, "");
@@ -84,7 +89,7 @@ namespace Quiver.game
             for (var y = 0; y < world.mapsize; y++)
             {
                 var cell = new mapcell(new vector(x, y), "textures/floor", "textures/floor", "textures/floor");
-                if (data[x, y] == -1) _playerSpawn = new vector(x + 0.5f, y + 0.5f);
+                if (data[x, y] == -1) playerSpawn = new vector(x + 0.5f, y + 0.5f);
 
                 lvl.GetCell(ref cell, data[x, y].ToString());
                 world.map[x, y] = cell;
@@ -108,11 +113,10 @@ namespace Quiver.game
 
         private static void PostLoad(bool fresh, bool genents = false)
         {
-            if (fresh) world.CreatePlayer(_playerSpawn);
-            else world.Player.SetPos(_playerSpawn);
+            if (fresh) world.CreatePlayer(playerSpawn);
+            else world.Player.SetPos(playerSpawn);
 
             Genents(genents);
-            world.Tick();
         }
 
         private static void GenerateLightmap()

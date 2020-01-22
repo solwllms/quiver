@@ -5,28 +5,40 @@ using System.Collections.Generic;
 using System.IO;
 using Quiver.system;
 using OpenTK.Input;
+using Quiver.game.types;
+using Quiver.Network;
 
 #endregion
 
 namespace Quiver
 {
-    public delegate bool cmdhandler(string[] param);
+    public delegate bool cmdhandler(int client, string[] param);
 
     public delegate void cvarcallback(string value);
 
     public class command
     {
+        public string alias;
         public cmdhandler action;
         public string help;
         public bool record;
         public bool save;
+        public bool sendToServer;
 
-        public command(cmdhandler action, string help = "", bool save = false, bool record = false)
+        public command(string command, cmdhandler action, string help = "", bool save = false, bool record = false, bool sendToServer = false)
         {
+            this.alias = command;
             this.action = action;
             this.help = help;
             this.save = save;
             this.record = record;
+            this.sendToServer = sendToServer;
+        }
+        public void Invoke(int client, string[] param, bool isClient)
+        {
+            action.Invoke(client, param ?? new string[0]);
+
+            if (isClient && sendToServer && n_state.isClient) n_client.SendCommand(alias, param);
         }
     }
 
@@ -110,7 +122,7 @@ namespace Quiver
     {
         public static Dictionary<string, Key> binds = new Dictionary<string, Key>();
 
-        private static Dictionary<string, command> _cmds = new Dictionary<string, command>();
+        private static List<command> _cmds = new List<command>();
         private static Dictionary<string, cvar> _cvars = new Dictionary<string, cvar>();
 
         public static string cfgpath = "cfg/config.cfg";        
@@ -120,10 +132,32 @@ namespace Quiver
             SetupCMDs();
         }
 
-        public static void Register(string alias, command cmd)
+        public static void Register(command cmd)
         {
-            if (!_cmds.ContainsKey(alias))
-                _cmds.Add(alias, cmd);
+            if (!_cmds.Contains(cmd))
+                _cmds.Add(cmd);
+        }
+
+        public static bool DoesCommandExist(string alias)
+        {
+            foreach (command cmd in _cmds)
+            {
+                if (cmd.alias == alias) return true;
+            }
+            return false;
+        }
+        public static bool DoesCommandExist(string alias, out command c)
+        {
+            foreach (command cmd in _cmds)
+            {
+                if (cmd.alias == alias)
+                {
+                    c = cmd;
+                    return true;
+                }
+            }
+            c = null;
+            return false;
         }
 
         public static void Register(string alias, cvar var)
@@ -134,13 +168,12 @@ namespace Quiver
 
         private static bool Help(string[] param)
         {
-            foreach (var c in _cmds.Keys)
+            foreach (command cmd in _cmds)
             {
-                if (param.Length > 0 && !c.StartsWith(param[0]))
+                if (param.Length > 0 && !cmd.alias.StartsWith(param[0]))
                     continue;
 
-                var cmd = _cmds[c];
-                log.WriteLine(c + (string.IsNullOrWhiteSpace(cmd.help) ? "" : " : " + cmd.help));
+                log.WriteLine(cmd.alias + (string.IsNullOrWhiteSpace(cmd.help) ? "" : " : " + cmd.help));
             }
 
             return true;
@@ -292,19 +325,20 @@ namespace Quiver
             s.Close();
         }
 
-        public static void Exec(string command, bool console = true, bool force = false, bool silent = false)
+        public static void Exec(string command, bool console = true, bool force = false, bool silent = false, int networkSender = -1)
         {
             var split = command.ToLower().Split(' ');
             var l = new List<string>(split);
             l.Remove(split[0]);
-            ExecParam(split[0], console, force, l.ToArray(), silent);
+            ExecParam(split[0], console, force, l.ToArray(), silent, networkSender);
         }
 
-        private static void ExecParam(string command, bool console = true, bool force = false, string[] param = null, bool silent = false)
+        public static void ExecParam(string command, bool console = true, bool force = false, string[] param = null, bool silent = false, int networkSender = -1)
         {
             command = command.ToLower();
 
-            if (!_cmds.ContainsKey(command))
+            command cmd;
+            if (!DoesCommandExist(command, out cmd))
             {
                 if (_cvars.ContainsKey(command))
                 {
@@ -360,15 +394,15 @@ namespace Quiver
 
             if (GetValueb("debug"))
             {
-                _cmds[command].action.Invoke(param ?? new string[0]);
-                if (_cmds[command].save && console) SaveConfig();
+                cmd.Invoke(networkSender, param, networkSender == -1);
+                if (cmd.save && console) SaveConfig();
             }
             else
             {
                 try
                 {
-                    _cmds[command].action.Invoke(param ?? new string[0]);
-                    if (_cmds[command].save && console) SaveConfig();
+                    cmd.Invoke(networkSender, param, networkSender == -1);
+                    if (cmd.save && console) SaveConfig();
                 }
                 catch (Exception e)
                 {

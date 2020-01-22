@@ -64,7 +64,7 @@ namespace Quiver.display
         private static float _sbAngle;
 
         // camera
-        internal static vector camDir = new vector(-1, 0);
+        internal static vector camDir;
         internal static vector camPlane = new vector(0, 0);
 
         // world interaction
@@ -108,6 +108,8 @@ namespace Quiver.display
         {
             screen.Clear();
             _fbcache.Clear();
+
+            camDir = game.game.GetLocalPlayer().dir;
 
             sb = cache.GetTexture(world.skybox);
             centersprite = new screensprite {dist = -1};
@@ -407,6 +409,8 @@ namespace Quiver.display
                 if (transform.x == 0) continue;
 
                 var s = world.sprites[spriteorder[i].index];
+                if (!s.visible) return;
+                
                 var screenx = (int) (w / 2 * (1 + transform.x / transform.y));
 
                 var scaleWidth = Math.Abs((int) (h / transform.y / (16 / s.sprwidth)));

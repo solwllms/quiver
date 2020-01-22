@@ -48,7 +48,7 @@ namespace Quiver.system
                                 n.Attributes["volume"] == null ? 100 : int.Parse(n.Attributes["volume"].Value), true);
                         if (n.Name == "prev") level.prev = n.InnerText;
                         if (n.Name == "next") level.next = n.InnerText;
-                        if (n.Name == "message") states.game.SetChapterMsg(n.InnerText);
+                        if (n.Name == "message") states.game_state.SetChapterMsg(n.InnerText);
                     }
                     catch (Exception e){
                         log.WriteLine("parsing error: " + e.Message);
