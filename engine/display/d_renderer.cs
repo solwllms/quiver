@@ -110,11 +110,15 @@ namespace Quiver.display
             _fbcache.Clear();
 
             camDir = game.game.GetLocalPlayer().dir;
+            float fov = player.cvarFov.Valuef() / 100;
+            camPlane.x = camDir.y * (fov * 1.33f);
+            camPlane.y = -camDir.x * (fov * 1.33f);
 
             sb = cache.GetTexture(world.skybox);
             centersprite = new screensprite {dist = -1};
 
             DrawWorld((int) DispHeight);
+            world.RefreshSprites();
             DrawSprites((int) engine.SCREEN_HEIGHT);
             PostProcess();
 

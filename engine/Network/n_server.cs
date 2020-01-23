@@ -31,6 +31,7 @@ namespace Quiver.Network
             catch(SocketException e)
             {
                 log.WriteLine("starting server failed ("+e.SocketErrorCode+")");
+                n_state.SetState(NETWORK_STATE.none);
             }
 
             listener.ConnectionRequestEvent += request =>
@@ -44,9 +45,8 @@ namespace Quiver.Network
             listener.PeerConnectedEvent += peer =>
             {
                 log.WriteLine("client connected connection: "+ peer.EndPoint);
-                NetDataWriter writer = new NetDataWriter();
-                SendClientWelcome(peer.Id, writer);
-                peer.Send(writer, DeliveryMethod.ReliableOrdered);
+                SendClientWelcome(peer);
+                SendRefreshPlayerInfo(peer);
             };
             listener.PeerDisconnectedEvent += (peer, info) =>
             {
@@ -66,7 +66,13 @@ namespace Quiver.Network
                         cmd.ExecParam(reader.GetString(100), param: reader.GetStringArray(), networkSender: peer.Id);
                         break;
                     case (int)NetworkedEvent.PlayerConnect:
+                        SendChangeLevel(peer);
                         ForwardPlayerConnect(peer, reader);
+                        break;
+                    case (int)NetworkedEvent.PlayerLoaded:
+                        SendPlayerLoadedConfirm(peer);
+                        SendRefreshPlayerInfo(peer);
+                        ForwardPlayerLoaded(peer.Id, peer);
                         break;
                     default:                        
                         break;
@@ -89,6 +95,40 @@ namespace Quiver.Network
             }
         }
 
+        public static void ForwardPlayerLoaded(int playerId, NetPeer origin)
+        {
+            NetDataWriter w = new NetDataWriter();
+            w.Put((int)NetworkedEvent.PlayerLoaded);
+            w.Put(playerId);
+            foreach (NetPeer peer in server.GetPeers(ConnectionState.Connected))
+            {
+                if (peer != origin) peer.Send(w, DeliveryMethod.ReliableOrdered);
+            }
+        }
+
+        public static void SendChangeLevel(NetPeer peer)
+        {
+            NetDataWriter writer = new NetDataWriter();
+            writer.Put((int)NetworkedEvent.ChangeLevel);
+            writer.Put(world.mapfile);
+            peer.Send(writer, DeliveryMethod.ReliableOrdered);
+            log.DebugLine("sending change level");
+        }
+        public static void SendChangeLevel()
+        {
+            NetDataWriter writer = new NetDataWriter();
+            writer.Put((int)NetworkedEvent.ChangeLevel);
+            writer.Put(world.mapfile);
+            server.SendToAll(writer, DeliveryMethod.ReliableOrdered);
+        }
+
+        public static void SendPlayerLoadedConfirm(NetPeer peer)
+        {
+            NetDataWriter writer = new NetDataWriter();
+            writer.Put((int)NetworkedEvent.PlayerLoadedConfirm);
+            peer.Send(writer, DeliveryMethod.ReliableOrdered);
+        }
+
         public static void SendPlayerSync(int id)
         {
             NetDataWriter writer = new NetDataWriter();
@@ -100,22 +140,23 @@ namespace Quiver.Network
 
             foreach (NetPeer peer in server.GetPeers(ConnectionState.Connected))
             {
-                peer.Send(writer, DeliveryMethod.ReliableOrdered);
+                if(game.game.isPlayerSetup(peer.Id) && game.game.playerInfo[peer.Id].state == PLAYER_STATE.Loaded)
+                    peer.Send(writer, DeliveryMethod.ReliableOrdered);
             }
         }
 
-        public static void SendClientWelcome(int id, NetDataWriter writer)
+        public static void SendRefreshPlayerInfo(NetPeer peer)
         {
-            writer.Put((int)NetworkedEvent.ClientWelcome);
-            writer.Put(id);
-            writer.Put(world.mapfile);
+            NetDataWriter writer = new NetDataWriter();
+            writer.Put((int)NetworkedEvent.RefreshPlayerInfo);
             writer.Put(server.PeersCount - (isDedicated ? 1 : 0));
             for (int i = 0; i < server.PeersCount; i++)
             {
                 int proxyid = server.ConnectedPeerList[i].Id;
-                if (proxyid == id) continue;
+                if (proxyid == peer.Id) continue;
                 writer.Put(proxyid);
                 writer.Put(game.game.playerInfo[proxyid].playerName);
+                writer.Put((int)game.game.playerInfo[proxyid].state);
             }
 
             // write server player
@@ -123,7 +164,17 @@ namespace Quiver.Network
             {
                 writer.Put(-1);
                 writer.Put(game.game.playerInfo[-1].playerName);
+                writer.Put((int)game.game.playerInfo[-1].state);
             }
+            peer.Send(writer, DeliveryMethod.ReliableOrdered);
+        }
+
+        public static void SendClientWelcome(NetPeer peer)
+        {
+            NetDataWriter writer = new NetDataWriter();
+            writer.Put((int)NetworkedEvent.ClientWelcome);
+            writer.Put(peer.Id);            
+            peer.Send(writer, DeliveryMethod.ReliableOrdered);
         }
 
         public static void Poll()
@@ -152,6 +203,8 @@ namespace Quiver.Network
 
             log.WriteLine("server: stopping");
             server.Stop();
+
+            n_state.SetState(NETWORK_STATE.none);
 
             // wait till finished
             while (server.IsRunning) { }

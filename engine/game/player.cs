@@ -185,13 +185,6 @@ namespace Quiver.game
             angle += _turn;
             dir.x = (float) Math.Cos(angle);
             dir.y = (float) Math.Sin(angle);
-
-            if (isLocalPlayer)
-            {
-                float fov = cvarFov.Valuef() / 100;
-                renderer.camPlane.x = dir.y * (fov * 1.33f);
-                renderer.camPlane.y = -dir.x * (fov * 1.33f);
-            }
         }
 
         public void Movetick()

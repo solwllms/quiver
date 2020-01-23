@@ -99,9 +99,9 @@ namespace game.states
                 {
                     if (_isgame)
                         statemanager.SetState(new prompt(lang.Get("$menu.newgame"), lang.Get("$menu.unsavedprog"),
-                            delegate() { level.ChangeLevel("maps/dust.lvl", true); }));
+                            delegate() { Quiver.game.game.LoadLevel("maps/dust.lvl"); }));
                     else
-                        level.ChangeLevel("maps/dust.lvl", true);
+                        Quiver.game.game.LoadLevel("maps/dust.lvl");
                 }
                 else if (_cursor == 1)
                 {

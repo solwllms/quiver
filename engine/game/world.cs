@@ -94,7 +94,7 @@ namespace Quiver.game
             Player.Tick();
             audio.UpdateListener(Player.pos, Player.angle);
 
-            RefreshSprites();
+            //RefreshSprites();
             foreach (var spr in sprites.ToArray()) spr.Tick();
         }
 

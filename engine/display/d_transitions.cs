@@ -73,11 +73,10 @@ namespace Quiver.display
     {
         private readonly bool[,] _fade;
         private readonly uint[,] _prebuff;
-        private uint _n;
+        private int _n;
 
         public fizzle()
         {
-            _n = screen.width * screen.height;
             _fade = new bool[screen.width, screen.height];
             _prebuff = new uint[screen.width, screen.height];
             for (uint x = 0; x < screen.width; x++)
@@ -96,6 +95,7 @@ namespace Quiver.display
                 if (x * y % 15 == engine.random.Next(0, 15))
                 {
                     _fade[x, y] = true;
+                    _n++;
                 }
                 else
                 {
@@ -106,17 +106,22 @@ namespace Quiver.display
 
         public override void Tick()
         {
-            _n--;
+            _n = (_n - 1).Clamp(0, int.MaxValue);
+
+            if(_n < 300)
+            {
+                int i = 56;
+            }
         }
 
         public override bool IsDone()
         {
-            return _n < 3;
+            return _n > 800;
         }
 
         public override bool IsFairlyDone()
         {
-            return _n < 200;
+            return _n > 200;
         }
     }
 }

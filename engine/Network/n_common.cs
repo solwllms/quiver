@@ -13,7 +13,10 @@ namespace engine.Network
         ClientWelcome,
         RemoteCommand,
         PlayerSync,
-        ChangeLevel
+        ChangeLevel,
+        PlayerLoaded,
+        PlayerLoadedConfirm,
+        RefreshPlayerInfo
     }
 
     class n_common

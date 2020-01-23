@@ -53,7 +53,7 @@ namespace Quiver
                     log.WriteLine("failed to find level '"+f+"'", log.LogMessageType.Error);
                     return false;
                 }
-                level.ChangeLevel(f, true);
+                game.game.LoadLevel(f);
                 return true;
             }, "map [name]"));
             Register(new command("connect", delegate (int id, string[] p)

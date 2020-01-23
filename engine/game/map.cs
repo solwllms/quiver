@@ -40,7 +40,7 @@ namespace Quiver.game
 
         public static int LightmapSize => world.mapsize * renderer.TEXSIZE;
 
-        public static void ChangeLevel(string file, bool fresh, bool genents = true, bool clearents = true, onLevelLoaded callback = null)
+        internal static void ChangeLevel(string file, bool fresh, bool genents = true, bool clearents = true, onLevelLoaded callback = null)
         {
             statemanager.SetState(new loading(false), fresh);
 
@@ -70,7 +70,7 @@ namespace Quiver.game
                 GenerateLightmap();
 
                 callback?.Invoke();
-                world.Tick();
+                //world.Tick();
 
                 progs.dll.GetGamemode().Start();
                 discordrpc.Update("playing " + name, "");

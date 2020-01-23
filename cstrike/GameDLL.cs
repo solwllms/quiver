@@ -29,7 +29,7 @@ namespace game
             gui.lighter = Color.DarkOrange;
 
             // register all map events
-            progs.RegisterMapEvent("nextlevel", delegate { level.ChangeLevel("maps/" + level.next + ".lvl", false); });
+            progs.RegisterMapEvent("nextlevel", delegate { Quiver.game.game.LoadLevel("maps/" + level.next + ".lvl"); });
 
             // register all entities
 

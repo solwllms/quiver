@@ -52,11 +52,12 @@ namespace Quiver.system
         void IState.Update()
         {
             if (engine.frame % 30 == 0) _dots = (_dots + 1) % 3;
+            /*
             if (engine.frame % 15 == 0)
             {
                 if (state == 0) n_server.Poll();
                 else if (state == 1) n_client.Poll();
-            }
+            }*/
 
             if (state == -1)
             {

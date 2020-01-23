@@ -169,6 +169,7 @@ namespace Quiver
             discordrpc.Runcallbacks();
 
             audio.Tick();
+            n_state.Tick();
             statemanager.CurrentUpdate();
             input.Update();
         }

@@ -49,8 +49,6 @@ namespace Quiver.States
         void IState.Update()
         {
             if (engine.frame % 30 == 0) _dots = (_dots + 1) % 3;
-
-            if(level.doneLoading) statemanager.SetState(new states.game_state(_fresh));
         }
 
         void IDisposable.Dispose()

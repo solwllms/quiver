@@ -14,13 +14,21 @@ using engine.Network;
 
 namespace Quiver.game
 {
+    public enum PLAYER_STATE
+    {
+        Loading,
+        Loaded
+    }
+
     public class game
     {
         public static cvar cvarPlayername = new cvar("game_playername", "player", true);
 
         public struct PlayerInfo
         {
+            public int id;
             public string playerName;
+            public PLAYER_STATE state;
         }
 
         public static Dictionary<int, PlayerInfo> playerInfo;
@@ -31,25 +39,35 @@ namespace Quiver.game
             if (n_state.isServer) return GetPlayerEnt(-1);
             return GetPlayerEnt(n_client.clientId);
         }
-
+        public static bool isPlayerSetup(int id)
+        {
+            return playerInfo.ContainsKey(id);
+        }
         public static player GetPlayerEnt(int id)
         {
             return playerEnts[id];
+        }
+        public static void GeneratePlayerEnt(PlayerInfo info, bool isLocal = false)
+        {
+            player netPlayer = (player)progs.CreateEnt(0, level.playerSpawn);
+            netPlayer.isLocalPlayer = isLocal;
+            playerEnts.Add(info.id, netPlayer);
+
+            if(!isLocal) world.entities.Add(netPlayer);
+            else world.entities.Insert(0, netPlayer);
         }
 
         static void RecievePlayerConnect(int id, NetPacketReader reader)
         {
             PlayerInfo inf = new PlayerInfo
             {
+                id = id,
                 playerName = reader.GetString(100)
             };
             playerInfo.Add(id, inf);
             log.WriteLine("player '" + inf.playerName + "' connected ("+id+")");
 
-            player netPlayer = (player)progs.CreateEnt(0, level.playerSpawn);
-            netPlayer.isLocalPlayer = false;
-            playerEnts.Add(id, netPlayer);
-            world.entities.Add(netPlayer);
+            //GeneratePlayerEnt(inf);
         }
         public static void RecievePlayerDisconnect(int id)
         {
@@ -65,6 +83,14 @@ namespace Quiver.game
             }
         }
 
+        public static void ReceivePlayerLoaded(int id)
+        {
+            PlayerInfo inf = playerInfo[id];
+            inf.state = PLAYER_STATE.Loaded;
+            playerInfo[id] = inf;
+            if(!playerEnts.ContainsKey(id)) GeneratePlayerEnt(inf, n_state.isClient && inf.id == n_client.clientId);
+        }
+
         public static void HandleCommonEvents(int type, NetPeer peer, NetPacketReader reader, DeliveryMethod deliveryMethod)
         {
             switch (type)
@@ -75,8 +101,41 @@ namespace Quiver.game
                 case (int)NetworkedEvent.PlayerDisconnect:
                     RecievePlayerDisconnect(reader.GetInt());
                     break;
+                case (int)NetworkedEvent.PlayerLoaded:
+                    ReceivePlayerLoaded(reader.GetInt());
+                    break;
                 default:
                     break;
+            }
+        }
+
+        public static void LoadLevel(string lvl)
+        {
+            if (!n_state.isNetworked) HostNewGame(lvl);
+            else
+            {
+                if (n_state.isServer)
+                {
+                    playerEnts.Clear();
+                    level.ChangeLevel(lvl, true, callback: delegate
+                    {
+                        if (!n_server.isDedicated)
+                        {
+                            n_client.loadState = LOAD_STATE.FINISHED;
+                            PlayerInfo i = playerInfo[-1];
+                            i.state = PLAYER_STATE.Loaded;
+                            playerInfo[-1] = i;
+                            n_server.ForwardPlayerLoaded(-1, null);
+                            ReceivePlayerLoaded(-1);
+
+                            n_client.isServerLoaded = true;
+                            n_client.ReceivePlayerLoadedConfirm();
+                        }
+                    });
+
+                    if(!n_server.isDedicated) n_client.loadState = LOAD_STATE.STARTED;
+                    n_server.SendChangeLevel();
+                }
             }
         }
 
@@ -91,23 +150,19 @@ namespace Quiver.game
             Setup();
             n_state.SetState(NETWORK_STATE.server);
             n_server.Start();
-            level.ChangeLevel(levelName, true, callback: delegate
-            {
-                if (!n_server.isDedicated)
-                {
-                    PlayerInfo inf = new PlayerInfo
-                    {
-                        playerName = cvarPlayername.Value()
-                    };
-                    playerInfo.Add(-1, inf);
-                    log.WriteLine("player '" + inf.playerName + "' connected (" + -1 + ")");
 
-                    player netPlayer = (player)progs.CreateEnt(0, level.playerSpawn);
-                    netPlayer.isLocalPlayer = true;
-                    playerEnts.Add(-1, netPlayer);
-                    world.entities.Insert(0, netPlayer);
-                }
-            });
+            if (!n_server.isDedicated)
+            {
+                PlayerInfo inf = new PlayerInfo
+                {
+                    id = -1,
+                    playerName = cvarPlayername.Value()
+                };
+                playerInfo.Add(-1, inf);
+                log.WriteLine("player '" + inf.playerName + "' connected (" + -1 + ")");
+            }
+
+            LoadLevel(levelName);
         }
         public static void ConnectToGame(string address, int port = 9050)
         {
@@ -118,14 +173,6 @@ namespace Quiver.game
 
         public static void Tick()
         {
-            if (n_state.isServer)
-            {
-                n_server.Poll();
-            }
-            else
-            {
-                n_client.Poll();
-            }
             world.Tick();
             cmd.Checkbinds();
         }
