@@ -1,7 +1,7 @@
 .vs/
 bin/*.*
 config.cfg
-log.txt
+log*.txt
 bin/screenshots/
 bin_tools/
 bin_release/screenshots/
