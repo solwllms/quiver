@@ -23,7 +23,7 @@ namespace Quiver.system
         }
 
         public static cvar cvarEnabled = new cvar("log_enabled", "1", true, true, callback: delegate { InitLogfile(); });
-        public static cvar cvarFilename = new cvar("log_filename", "log", true);
+        public static cvar cvarFilename = new cvar("log_filename", "log.txt", true);
 
         private static string _logFile;
 
@@ -36,7 +36,7 @@ namespace Quiver.system
         {
             if (cvarEnabled.Valueb())
             {
-                _logFile = filesystem.GetPath(cvarFilename.Value() + ".txt", true);
+                _logFile = filesystem.GetPath(cvarFilename.Value(), true);
                 WriteLine("logging enabled (using log file " + _logFile+")");
             }
             else WriteLine("logging disabled.");

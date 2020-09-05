@@ -15,8 +15,8 @@ namespace Quiver.game
     public class player : dirsprite
     {
         public static cvar cvarFov = new cvar("fov", "66", false, cheat: true);
-        public static cvar cvarMovespeed = new cvar("movspeed", "0.05", false, cheat: true);
-        public static cvar cvarRotspeed = new cvar("rotspeed", "0.05", false, cheat: true);
+        public static cvar cvarMovespeed = new cvar("movspeed", "0.025", false, cheat: true);
+        public static cvar cvarRotspeed = new cvar("rotspeed", "0.025", false, cheat: true);
         //public static cvar cvarNofollow = new cvar("nofollow", "0", false, cheat: true, toggle: true);
 
         public weapon weapon;

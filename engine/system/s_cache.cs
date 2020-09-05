@@ -28,9 +28,24 @@ namespace Quiver.system
          */
         private static readonly Dictionary<string, SoundFile> Soundcache = new Dictionary<string, SoundFile>();
 
+        public static bool HasTexture(string name)
+        {
+            return Texturecache.ContainsKey(name);
+        }
+        public static void UpdateTexture(string name)
+        {
+            name = name.Replace("\\", "/");
+
+            if (!HasTexture(name))
+            {
+                return;
+            }
+
+            Texturecache[name].Load(name);
+        }
         public static texture GetTexture(string name, bool cache = true)
         {
-            if (Texturecache.ContainsKey(name) && cache) return Texturecache[name];
+            if (HasTexture(name) && cache) return Texturecache[name];
 
             var tex = new texture(name);
             if (cache) Texturecache.Add(name, tex);

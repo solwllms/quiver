@@ -17,12 +17,63 @@ namespace Quiver
         private static readonly List<ZipArchive> Archives = new List<ZipArchive>();
         private static readonly List<string> ArchivePaths = new List<string>();
 
+        private static readonly List<FileSystemWatcher> watchers = new List<FileSystemWatcher>();
+        private static readonly List<FileSystemEventArgs> changeBuffer = new List<FileSystemEventArgs>();
+
+        public static void PollChanges()
+        {
+            foreach (FileSystemEventArgs file in changeBuffer.ToArray())
+            {
+                log.WriteLine("file changed: " + file.Name);
+
+                /*
+                if (Directory.Exists(file.Name))
+                {
+                    log.WriteLine("new directory!");
+                    AddDirectory(file.Name);
+                }*/
+
+                cache.UpdateTexture(file.Name.Replace(".png", ""));
+            }
+            changeBuffer.Clear();
+        }
+
+        public static void Dispose()
+        {
+            foreach (FileSystemWatcher watcher in watchers)
+            {
+                watcher.Dispose();
+            }
+        }
+
         /// <summary>
         /// Adds an archive to the cache by path.
         /// </summary>
         public static void AddDirectory(string path)
         {
             Directories.Add(path);
+
+            FileSystemWatcher watcher = new FileSystemWatcher();
+            watcher.Path = path;
+            watcher.NotifyFilter = NotifyFilters.Attributes |
+                                    NotifyFilters.CreationTime |
+                                    NotifyFilters.FileName |
+                                    NotifyFilters.LastAccess |
+                                    NotifyFilters.LastWrite |
+                                    NotifyFilters.Size |
+                                    NotifyFilters.Security;
+            watcher.Changed += HandleDirectoryChanges;
+
+            // only search for textures now!
+            watcher.Filter = "*.png";
+            watcher.EnableRaisingEvents = true;
+            watcher.IncludeSubdirectories = true;
+            watchers.Add(watcher);
+        }
+
+        static void HandleDirectoryChanges(object sender, FileSystemEventArgs e)
+        {
+            changeBuffer.Add(e);
         }
 
         /// <summary>
@@ -205,8 +256,7 @@ namespace Quiver
             }
             else if (create)
             {
-                return File.Open(GetPath(filename, true, overwrite), FileMode.OpenOrCreate, FileAccess.ReadWrite,
-                    FileShare.ReadWrite);
+                return File.Open(GetPath(filename, true, overwrite), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
             }
 
             // return defaults

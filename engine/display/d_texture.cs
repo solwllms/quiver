@@ -2,6 +2,7 @@
 
 using Quiver.system;
 using System.Drawing;
+using System.IO;
 
 #endregion
 
@@ -16,20 +17,27 @@ namespace Quiver.display
 
         public texture(string name)
         {
-            Bitmap myBitmap = new Bitmap(filesystem.Open(name + ".png", tex: true));
-            _data = new Color[myBitmap.Width, myBitmap.Height];
-
-            for (int x = 0; x < myBitmap.Width; x++)
-            {
-                for (int y = 0; y < myBitmap.Height; y++)
-                {
-                    _data[x, y] = myBitmap.GetPixel(x, y);
-                }
-            }
+            Load(name);
         }
         public texture(uint width, uint height)
         {
             _data = new Color[width, height];
+        }
+        public void Load(string name)
+        {
+            using (Stream stream = filesystem.Open(name + ".png", tex: true))
+            {
+                Bitmap myBitmap = new Bitmap(stream);
+                _data = new Color[myBitmap.Width, myBitmap.Height];
+
+                for (int x = 0; x < myBitmap.Width; x++)
+                {
+                    for (int y = 0; y < myBitmap.Height; y++)
+                    {
+                        _data[x, y] = myBitmap.GetPixel(x, y);
+                    }
+                }
+            }
         }
 
         public Color GetPixel(uint x, uint y)

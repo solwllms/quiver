@@ -57,6 +57,7 @@ namespace Quiver
 
             audio.Unload();
             log.WriteLine("shutting down..");
+            filesystem.Dispose();
             s_Window.CloseWindow();
             winconsole.Shutdown();
         }
@@ -167,6 +168,8 @@ namespace Quiver
 
             winconsole.Tick();
             discordrpc.Runcallbacks();
+
+            filesystem.PollChanges();
 
             audio.Tick();
             n_state.Tick();
